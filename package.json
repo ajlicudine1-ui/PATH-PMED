@@ -1,0 +1,16 @@
+{
+  "name": "path-pmed",
+  "version": "1.0.0",
+  "description": "PATH - PMED Assignment and Team Hub",
+  "type": "module",
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.116.0"
+  },
+  "devDependencies": {
+    "vercel": "^59.23.2"
+  }
+}

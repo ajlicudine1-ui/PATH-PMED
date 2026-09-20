@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>PATH | PMED Assignment and Team Hub</title>
+
+    <link
+        rel="stylesheet"
+        href="/css/global.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/css/dashboard.css"
+    >
+</head>
+
+<body class="admin-page">
+
+    <div class="app-layout">
+
+        <!-- SIDEBAR -->
+        <div id="sidebarContainer"></div>
+
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+
+            <!-- TOP BAR -->
+            <header class="topbar">
+
+                <div>
+                    <h2>PATH</h2>
+
+                    <p>
+                        PMED Assignment and Team Hub
+                    </p>
+                </div>
+
+
+                <button
+                    type="button"
+                    class="logout-button"
+                    id="logoutBtn"
+                >
+                    Logout
+                </button>
+
+            </header>
+
+
+            <!-- PAGE CONTENT -->
+            <section class="page-content">
+
+                <!-- PAGE HEADING -->
+                <div class="page-heading dashboard-heading">
+
+                    <div>
+
+                        <h1>
+                            Dashboard
+                        </h1>
+
+                        <p>
+                            Monitor PMED personnel assignments,
+                            responsibilities, and team activities.
+                        </p>
+
+                    </div>
+
+
+                    <div class="dashboard-actions">
+
+                        <button
+                            type="button"
+                            class="manage-section-button"
+                            id="manageSectionsBtn"
+                        >
+                            Manage Sections
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="add-section-button"
+                            id="addSectionBtn"
+                        >
+                            + Add Section
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- DASHBOARD CARDS -->
+                <div class="stats-grid">
+
+                    <div class="stat-card">
+
+                        <span>
+                            Total Personnel
+                        </span>
+
+                        <strong id="totalPersonnel">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <span>
+                            PMED Teams
+                        </span>
+
+                        <strong id="totalTeams">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <span>
+                            Total Assignments
+                        </span>
+
+                        <strong id="totalAssignments">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =========================================
+                     RECENT ASSIGNMENTS VIEW
+                ========================================== -->
+                <div
+                    class="content-card"
+                    id="recentAssignmentsView"
+                >
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <h2>
+                                Recent Assignments
+                            </h2>
+
+                            <p>
+                                Recent personnel functions and responsibilities.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="table-wrapper">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>
+                                        Responsible Person
+                                    </th>
+
+                                    <th>
+                                        Designation
+                                    </th>
+
+                                    <th>
+                                        Functions / Activities
+                                    </th>
+
+                                    <th>
+                                        Team
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody id="dashboardTableBody">
+
+                                <tr>
+
+                                    <td
+                                        colspan="4"
+                                        class="empty-state"
+                                    >
+                                        No assignments found.
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =========================================
+                     MANAGE SECTIONS VIEW
+                ========================================== -->
+                <div
+                    class="content-card hidden"
+                    id="manageSectionsView"
+                >
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <h2>
+                                Manage Sections
+                            </h2>
+
+                            <p>
+                                Edit or remove PMED sections.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="table-wrapper">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>
+                                        Section Code
+                                    </th>
+
+                                    <th>
+                                        Section Name
+                                    </th>
+
+                                    <th class="actions-column">
+                                        Actions
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody id="sectionsTableBody">
+
+                                <tr>
+
+                                    <td
+                                        colspan="3"
+                                        class="empty-state"
+                                    >
+                                        Loading sections...
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <!-- =========================================
+         ADD / EDIT SECTION MODAL
+    ========================================== -->
+    <div
+        class="modal-overlay"
+        id="sectionModal"
+    >
+
+        <div class="modal-card">
+
+            <div class="modal-header">
+
+                <div>
+
+                    <h2 id="sectionModalTitle">
+                        Add Section
+                    </h2>
+
+                    <p id="sectionModalDescription">
+                        Add a new PMED section or division.
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="modal-close"
+                    id="closeSectionModal"
+                    aria-label="Close"
+                >
+                    &times;
+                </button>
+
+            </div>
+
+
+            <form id="sectionForm">
+
+                <div class="form-group">
+
+                    <label for="sectionCode">
+                        Section Code
+                    </label>
+
+                    <input
+                        type="text"
+                        id="sectionCode"
+                        placeholder="Example: RAED"
+                        maxlength="20"
+                        autocomplete="off"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="sectionName">
+                        Section Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="sectionName"
+                        placeholder="Enter complete section name"
+                        maxlength="200"
+                        autocomplete="off"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="modal-actions">
+
+                    <button
+                        type="button"
+                        class="cancel-button"
+                        id="cancelSection"
+                    >
+                        Cancel
+                    </button>
+
+
+                    <button
+                        type="submit"
+                        class="save-button"
+                        id="saveSection"
+                    >
+                        Save Section
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- SUPABASE BROWSER LIBRARY -->
+    <script
+        src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+    ></script>
+
+    <!-- ADMIN SESSION GUARD -->
+    <script src="/js/auth.js"></script>
+
+    <!-- APP SCRIPTS -->
+    <script src="/js/sidebar.js"></script>
+    <script src="/js/dashboard.js"></script>
+
+</body>
+
+</html>

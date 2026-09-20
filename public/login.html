@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>PATH | Admin Login</title>
+
+    <link
+        rel="stylesheet"
+        href="/css/global.css"
+    >
+
+    <style>
+        body {
+            min-height: 100vh;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: #f5f7f6;
+
+            padding: 20px;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+
+            background: white;
+
+            border-radius: 16px;
+
+            padding: 32px;
+
+            box-shadow:
+                0 10px 30px rgba(30, 41, 59, 0.08);
+        }
+
+        .login-brand {
+            margin-bottom: 28px;
+        }
+
+        .login-brand h1 {
+            color: var(--green-dark);
+
+            margin-bottom: 6px;
+        }
+
+        .login-brand p {
+            color: var(--text-muted);
+
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+
+            margin-bottom: 7px;
+
+            font-size: 14px;
+
+            font-weight: 600;
+
+            color: #344054;
+        }
+
+        .form-group input {
+            width: 100%;
+
+            padding: 12px 14px;
+
+            border: 1px solid #d0d5dd;
+
+            border-radius: 8px;
+
+            font-size: 14px;
+
+            outline: none;
+
+            transition: 0.2s ease;
+        }
+
+        .form-group input:focus {
+            border-color: var(--green);
+
+            box-shadow:
+                0 0 0 3px rgba(47, 125, 63, 0.08);
+        }
+
+        .login-button {
+            width: 100%;
+
+            border: none;
+
+            background: var(--green);
+
+            color: white;
+
+            padding: 12px;
+
+            border-radius: 8px;
+
+            font-size: 14px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+
+            transition: 0.2s ease;
+        }
+
+        .login-button:hover {
+            background: var(--green-dark);
+        }
+
+        .login-button:disabled {
+            opacity: 0.6;
+
+            cursor: not-allowed;
+        }
+
+        .login-message {
+            margin-top: 14px;
+
+            font-size: 13px;
+
+            color: #dc2626;
+
+            min-height: 18px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="login-card">
+
+        <div class="login-brand">
+
+            <h1>
+                PATH
+            </h1>
+
+            <p>
+                PMED Assignment and Team Hub
+            </p>
+
+        </div>
+
+
+        <form id="loginForm">
+
+            <div class="form-group">
+
+                <label for="email">
+                    Email
+                </label>
+
+                <input
+                    type="email"
+                    id="email"
+                    autocomplete="email"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="password">
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    id="password"
+                    autocomplete="current-password"
+                    required
+                >
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="login-button"
+                id="loginButton"
+            >
+                Sign In
+            </button>
+
+
+            <div
+                class="login-message"
+                id="loginMessage"
+            ></div>
+
+        </form>
+
+    </div>
+
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+    ></script>
+
+    <script src="/js/login.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,332 @@
+import {
+    supabase,
+    supabaseAdmin
+} from "../../lib/supabase.js";
+
+import {
+    requireAuth
+} from "../../lib/requireAuth.js";
+
+
+export default async function handler(req, res) {
+
+    const {
+        id
+    } = req.query;
+
+
+    if (!id) {
+
+        return res
+            .status(400)
+            .json({
+                error:
+                    "Assignment ID is required."
+            });
+    }
+
+
+    // ==========================================
+    // GET ONE ASSIGNMENT - PUBLIC
+    // ==========================================
+
+    if (req.method === "GET") {
+
+        try {
+
+            const {
+                data,
+                error
+            } = await supabase
+                .from("assignments")
+                .select(`
+                    id,
+                    personnel_id,
+                    team_id,
+                    functions_activities,
+                    personnel (
+                        id,
+                        full_name,
+                        designation
+                    ),
+                    teams (
+                        id,
+                        code,
+                        name
+                    )
+                `)
+                .eq(
+                    "id",
+                    id
+                )
+                .single();
+
+
+            if (error) {
+                throw error;
+            }
+
+
+            return res
+                .status(200)
+                .json(data);
+
+
+        } catch (error) {
+
+            console.error(
+                "GET assignment error:",
+                error
+            );
+
+
+            return res
+                .status(500)
+                .json({
+                    error:
+                        error.message
+                });
+        }
+    }
+
+
+    // ==========================================
+    // UPDATE ASSIGNMENT - ADMIN ONLY
+    // ==========================================
+
+    if (req.method === "PUT") {
+
+        try {
+
+            const auth =
+                await requireAuth(req);
+
+
+            if (auth.error) {
+
+                return res
+                    .status(401)
+                    .json({
+                        error:
+                            auth.error
+                    });
+            }
+
+
+            const {
+                responsiblePerson,
+                designation,
+                functionsActivities
+            } = req.body;
+
+
+            if (
+                !responsiblePerson ||
+                !designation ||
+                !functionsActivities
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        error:
+                            "All fields are required."
+                    });
+            }
+
+
+            const {
+                data: currentAssignment,
+                error: currentError
+            } = await supabaseAdmin
+                .from("assignments")
+                .select(
+                    "id, personnel_id"
+                )
+                .eq(
+                    "id",
+                    id
+                )
+                .single();
+
+
+            if (currentError) {
+                throw currentError;
+            }
+
+
+            // UPDATE PERSONNEL
+
+            const {
+                error: personnelError
+            } = await supabaseAdmin
+                .from("personnel")
+                .update({
+                    full_name:
+                        responsiblePerson.trim(),
+
+                    designation:
+                        designation.trim(),
+
+                    updated_at:
+                        new Date()
+                            .toISOString()
+                })
+                .eq(
+                    "id",
+                    currentAssignment
+                        .personnel_id
+                );
+
+
+            if (personnelError) {
+                throw personnelError;
+            }
+
+
+            // UPDATE ASSIGNMENT
+
+            const {
+                data: updatedAssignment,
+                error: assignmentError
+            } = await supabaseAdmin
+                .from("assignments")
+                .update({
+                    functions_activities:
+                        functionsActivities.trim(),
+
+                    updated_at:
+                        new Date()
+                            .toISOString()
+                })
+                .eq(
+                    "id",
+                    id
+                )
+                .select(`
+                    id,
+                    personnel_id,
+                    team_id,
+                    functions_activities,
+                    updated_at
+                `)
+                .single();
+
+
+            if (assignmentError) {
+                throw assignmentError;
+            }
+
+
+            return res
+                .status(200)
+                .json({
+                    message:
+                        "Assignment updated successfully.",
+
+                    assignment:
+                        updatedAssignment
+                });
+
+
+        } catch (error) {
+
+            console.error(
+                "PUT assignment error:",
+                error
+            );
+
+
+            return res
+                .status(500)
+                .json({
+                    error:
+                        error.message
+                });
+        }
+    }
+
+
+    // ==========================================
+    // DELETE ASSIGNMENT - ADMIN ONLY
+    // ==========================================
+
+    if (req.method === "DELETE") {
+
+        try {
+
+            const auth =
+                await requireAuth(req);
+
+
+            if (auth.error) {
+
+                return res
+                    .status(401)
+                    .json({
+                        error:
+                            auth.error
+                    });
+            }
+
+
+            const {
+                data: deletedAssignment,
+                error: deleteError
+            } = await supabaseAdmin
+                .from("assignments")
+                .delete()
+                .eq(
+                    "id",
+                    id
+                )
+                .select(`
+                    id,
+                    personnel_id,
+                    team_id,
+                    functions_activities
+                `)
+                .single();
+
+
+            if (deleteError) {
+                throw deleteError;
+            }
+
+
+            return res
+                .status(200)
+                .json({
+                    message:
+                        "Assignment deleted successfully.",
+
+                    assignment:
+                        deletedAssignment
+                });
+
+
+        } catch (error) {
+
+            console.error(
+                "DELETE assignment error:",
+                error
+            );
+
+
+            return res
+                .status(500)
+                .json({
+                    error:
+                        error.message
+                });
+        }
+    }
+
+
+    return res
+        .status(405)
+        .json({
+            error:
+                "Method not allowed."
+        });
+}

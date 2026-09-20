@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>PATH | Team</title>
+
+    <link
+        rel="stylesheet"
+        href="/css/global.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/css/team.css"
+    >
+</head>
+
+<body class="admin-page">
+
+    <div class="app-layout">
+
+        <!-- SIDEBAR COMPONENT -->
+        <div id="sidebarContainer"></div>
+
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+
+            <!-- TOP BAR -->
+            <header class="topbar">
+
+                <div>
+
+                    <h2>
+                        PATH
+                    </h2>
+
+                    <p>
+                        PMED Assignment and Team Hub
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="logout-button"
+                    id="logoutBtn"
+                >
+                    Logout
+                </button>
+
+            </header>
+
+
+            <!-- PAGE CONTENT -->
+            <section class="page-content">
+
+                <!-- TEAM HEADER -->
+                <div class="team-page-header">
+
+                    <div>
+
+                        <h1 id="teamCode">
+                            Team
+                        </h1>
+
+                        <p id="teamName">
+                            Loading team information...
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        class="add-button"
+                        id="addAssignmentBtn"
+                        type="button"
+                    >
+                        + Add Assignment
+                    </button>
+
+                </div>
+
+
+                <!-- TEAM CARD -->
+                <div class="team-card">
+
+                    <!-- TOOLBAR -->
+                    <div class="team-toolbar">
+
+                        <div>
+
+                            <h2>
+                                Personnel Assignments
+                            </h2>
+
+                            <p>
+                                Personnel functions and responsibilities
+                                assigned to this team.
+                            </p>
+
+                        </div>
+
+
+                        <input
+                            type="search"
+                            id="searchInput"
+                            placeholder="Search personnel..."
+                            autocomplete="off"
+                        >
+
+                    </div>
+
+
+                    <!-- TABLE -->
+                    <div class="table-wrapper">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>
+                                        Responsible Person
+                                    </th>
+
+                                    <th>
+                                        Designation
+                                    </th>
+
+                                    <th>
+                                        Functions / Activities
+                                    </th>
+
+                                    <th>
+                                        Actions
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody id="teamTableBody">
+
+                                <tr>
+
+                                    <td
+                                        colspan="4"
+                                        class="empty-state"
+                                    >
+                                        Loading assignments...
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <!-- =========================================
+         ASSIGNMENT MODAL
+    ========================================== -->
+    <div
+        class="modal-overlay"
+        id="assignmentModal"
+    >
+
+        <div class="modal-card">
+
+            <!-- MODAL HEADER -->
+            <div class="modal-header">
+
+                <div>
+
+                    <h2>
+                        Add Assignment
+                    </h2>
+
+                    <p>
+                        Add a new personnel assignment
+                        for the selected team.
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="modal-close"
+                    id="closeAssignmentModal"
+                    aria-label="Close"
+                >
+                    &times;
+                </button>
+
+            </div>
+
+
+            <!-- FORM -->
+            <form id="assignmentForm">
+
+                <!-- RESPONSIBLE PERSON -->
+                <div class="form-group">
+
+                    <label for="responsiblePerson">
+                        Responsible Person
+                    </label>
+
+                    <input
+                        type="text"
+                        id="responsiblePerson"
+                        name="responsiblePerson"
+                        placeholder="Enter full name"
+                        autocomplete="off"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- DESIGNATION -->
+                <div class="form-group">
+
+                    <label for="designation">
+                        Designation
+                    </label>
+
+                    <input
+                        type="text"
+                        id="designation"
+                        name="designation"
+                        placeholder="Enter designation"
+                        autocomplete="off"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- FUNCTIONS / ACTIVITIES -->
+                <div class="form-group">
+
+                    <label for="functionsActivities">
+                        Functions / Activities
+                    </label>
+
+                    <textarea
+                        id="functionsActivities"
+                        name="functionsActivities"
+                        rows="5"
+                        placeholder="Enter functions or activities"
+                        required
+                    ></textarea>
+
+                </div>
+
+
+                <!-- BUTTONS -->
+                <div class="modal-actions">
+
+                    <button
+                        type="button"
+                        class="cancel-button"
+                        id="cancelAssignment"
+                    >
+                        Cancel
+                    </button>
+
+
+                    <button
+                        type="submit"
+                        class="save-button"
+                        id="saveAssignment"
+                    >
+                        Save Assignment
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- SUPABASE -->
+    <script
+        src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+    ></script>
+
+    <!-- ADMIN AUTH GUARD -->
+    <script src="/js/auth.js"></script>
+
+    <!-- SIDEBAR COMPONENT -->
+    <script src="/js/sidebar.js"></script>
+
+    <!-- TEAM PAGE SCRIPT -->
+    <script src="/js/team.js"></script>
+
+</body>
+
+</html>

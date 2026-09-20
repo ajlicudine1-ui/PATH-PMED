@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>PATH | Team Assignments</title>
+
+    <link
+        rel="stylesheet"
+        href="/css/global.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/css/viewer-team.css"
+    >
+</head>
+
+<body>
+
+    <div class="app-layout">
+
+        <!-- SIDEBAR -->
+        <div id="sidebarContainer"></div>
+
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+
+            <!-- TOP BAR -->
+            <header class="topbar">
+
+                <div>
+
+                    <h2>
+                        PATH
+                    </h2>
+
+                    <p>
+                        PMED Assignment and Team Hub
+                    </p>
+
+                </div>
+
+            </header>
+
+
+            <!-- PAGE CONTENT -->
+            <section class="page-content">
+
+                <!-- TEAM HEADER -->
+                <div class="viewer-team-header">
+
+                    <div>
+
+                        <h1 id="teamCode">
+                            Team
+                        </h1>
+
+                        <p id="teamName">
+                            Loading section...
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ASSIGNMENTS CARD -->
+                <div class="viewer-team-card">
+
+                    <!-- TOOLBAR -->
+                    <div class="viewer-team-toolbar">
+
+                        <div class="viewer-team-toolbar-text">
+
+                            <h2>
+                                Personnel Assignments
+                            </h2>
+
+                            <p>
+                                View personnel functions and activities
+                                assigned to this section.
+                            </p>
+
+                        </div>
+
+
+                        <!-- SEARCH -->
+                        <input
+                            type="search"
+                            id="searchInput"
+                            class="viewer-search"
+                            placeholder="Search personnel, designation, or activity..."
+                            autocomplete="off"
+                        >
+
+                    </div>
+
+
+                    <!-- TABLE -->
+                    <div class="viewer-table-wrapper">
+
+                        <table class="viewer-table">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>
+                                        Responsible Person
+                                    </th>
+
+                                    <th>
+                                        Designation
+                                    </th>
+
+                                    <th>
+                                        Functions / Activities
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody id="assignmentsTableBody">
+
+                                <tr>
+
+                                    <td
+                                        colspan="3"
+                                        class="empty-state"
+                                    >
+                                        Loading assignments...
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <!-- VIEWER SIDEBAR -->
+    <script src="/js/viewer-sidebar.js"></script>
+
+    <!-- VIEWER TEAM PAGE -->
+    <script src="/js/viewer-team.js"></script>
+
+</body>
+
+</html>
