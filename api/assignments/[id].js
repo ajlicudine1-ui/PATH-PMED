@@ -37,29 +37,30 @@ export default async function handler(req, res) {
             const {
                 data,
                 error
-            } = await supabase
-                .from("assignments")
-                .select(`
-                    id,
-                    personnel_id,
-                    team_id,
-                    functions_activities,
-                    personnel (
+            } =
+                await supabase
+                    .from("assignments")
+                    .select(`
                         id,
-                        full_name,
-                        designation
-                    ),
-                    teams (
-                        id,
-                        code,
-                        name
+                        personnel_id,
+                        team_id,
+                        functions_activities,
+                        personnel (
+                            id,
+                            full_name,
+                            designation
+                        ),
+                        teams (
+                            id,
+                            code,
+                            name
+                        )
+                    `)
+                    .eq(
+                        "id",
+                        id
                     )
-                `)
-                .eq(
-                    "id",
-                    id
-                )
-                .single();
+                    .single();
 
 
             if (error) {
@@ -135,19 +136,24 @@ export default async function handler(req, res) {
             }
 
 
+            // ==========================================
+            // GET CURRENT ASSIGNMENT
+            // ==========================================
+
             const {
                 data: currentAssignment,
                 error: currentError
-            } = await supabaseAdmin
-                .from("assignments")
-                .select(
-                    "id, personnel_id"
-                )
-                .eq(
-                    "id",
-                    id
-                )
-                .single();
+            } =
+                await supabaseAdmin
+                    .from("assignments")
+                    .select(
+                        "id, personnel_id"
+                    )
+                    .eq(
+                        "id",
+                        id
+                    )
+                    .single();
 
 
             if (currentError) {
@@ -155,28 +161,42 @@ export default async function handler(req, res) {
             }
 
 
+            if (!currentAssignment) {
+
+                return res
+                    .status(404)
+                    .json({
+                        error:
+                            "Assignment not found."
+                    });
+            }
+
+
+            // ==========================================
             // UPDATE PERSONNEL
+            // ==========================================
 
             const {
                 error: personnelError
-            } = await supabaseAdmin
-                .from("personnel")
-                .update({
-                    full_name:
-                        responsiblePerson.trim(),
+            } =
+                await supabaseAdmin
+                    .from("personnel")
+                    .update({
+                        full_name:
+                            responsiblePerson.trim(),
 
-                    designation:
-                        designation.trim(),
+                        designation:
+                            designation.trim(),
 
-                    updated_at:
-                        new Date()
-                            .toISOString()
-                })
-                .eq(
-                    "id",
-                    currentAssignment
-                        .personnel_id
-                );
+                        updated_at:
+                            new Date()
+                                .toISOString()
+                    })
+                    .eq(
+                        "id",
+                        currentAssignment
+                            .personnel_id
+                    );
 
 
             if (personnelError) {
@@ -184,33 +204,36 @@ export default async function handler(req, res) {
             }
 
 
+            // ==========================================
             // UPDATE ASSIGNMENT
+            // ==========================================
 
             const {
                 data: updatedAssignment,
                 error: assignmentError
-            } = await supabaseAdmin
-                .from("assignments")
-                .update({
-                    functions_activities:
-                        functionsActivities.trim(),
+            } =
+                await supabaseAdmin
+                    .from("assignments")
+                    .update({
+                        functions_activities:
+                            functionsActivities.trim(),
 
-                    updated_at:
-                        new Date()
-                            .toISOString()
-                })
-                .eq(
-                    "id",
-                    id
-                )
-                .select(`
-                    id,
-                    personnel_id,
-                    team_id,
-                    functions_activities,
-                    updated_at
-                `)
-                .single();
+                        updated_at:
+                            new Date()
+                                .toISOString()
+                    })
+                    .eq(
+                        "id",
+                        id
+                    )
+                    .select(`
+                        id,
+                        personnel_id,
+                        team_id,
+                        functions_activities,
+                        updated_at
+                    `)
+                    .single();
 
 
             if (assignmentError) {
@@ -270,27 +293,139 @@ export default async function handler(req, res) {
             }
 
 
+            // ==========================================
+            // GET ASSIGNMENT BEFORE DELETE
+            // ==========================================
+
+            const {
+                data: currentAssignment,
+                error: currentError
+            } =
+                await supabaseAdmin
+                    .from("assignments")
+                    .select(`
+                        id,
+                        personnel_id,
+                        team_id,
+                        functions_activities
+                    `)
+                    .eq(
+                        "id",
+                        id
+                    )
+                    .single();
+
+
+            if (currentError) {
+                throw currentError;
+            }
+
+
+            if (!currentAssignment) {
+
+                return res
+                    .status(404)
+                    .json({
+                        error:
+                            "Assignment not found."
+                    });
+            }
+
+
+            const personnelId =
+                currentAssignment
+                    .personnel_id;
+
+
+            // ==========================================
+            // DELETE ASSIGNMENT
+            // ==========================================
+
             const {
                 data: deletedAssignment,
-                error: deleteError
-            } = await supabaseAdmin
-                .from("assignments")
-                .delete()
-                .eq(
-                    "id",
-                    id
-                )
-                .select(`
-                    id,
-                    personnel_id,
-                    team_id,
-                    functions_activities
-                `)
-                .single();
+                error: deleteAssignmentError
+            } =
+                await supabaseAdmin
+                    .from("assignments")
+                    .delete()
+                    .eq(
+                        "id",
+                        id
+                    )
+                    .select(`
+                        id,
+                        personnel_id,
+                        team_id,
+                        functions_activities
+                    `)
+                    .single();
 
 
-            if (deleteError) {
-                throw deleteError;
+            if (deleteAssignmentError) {
+                throw deleteAssignmentError;
+            }
+
+
+            // ==========================================
+            // CHECK FOR OTHER ASSIGNMENTS
+            // ==========================================
+
+            let personnelDeleted =
+                false;
+
+
+            if (personnelId) {
+
+                const {
+                    count,
+                    error: countError
+                } =
+                    await supabaseAdmin
+                        .from("assignments")
+                        .select(
+                            "id",
+                            {
+                                count: "exact",
+                                head: true
+                            }
+                        )
+                        .eq(
+                            "personnel_id",
+                            personnelId
+                        );
+
+
+                if (countError) {
+                    throw countError;
+                }
+
+
+                // ==========================================
+                // DELETE PERSONNEL ONLY IF UNUSED
+                // ==========================================
+
+                if (count === 0) {
+
+                    const {
+                        error: deletePersonnelError
+                    } =
+                        await supabaseAdmin
+                            .from("personnel")
+                            .delete()
+                            .eq(
+                                "id",
+                                personnelId
+                            );
+
+
+                    if (deletePersonnelError) {
+                        throw deletePersonnelError;
+                    }
+
+
+                    personnelDeleted =
+                        true;
+                }
             }
 
 
@@ -298,10 +433,14 @@ export default async function handler(req, res) {
                 .status(200)
                 .json({
                     message:
-                        "Assignment deleted successfully.",
+                        personnelDeleted
+                            ? "Assignment and personnel deleted successfully."
+                            : "Assignment deleted successfully.",
 
                     assignment:
-                        deletedAssignment
+                        deletedAssignment,
+
+                    personnelDeleted
                 });
 
 
@@ -322,6 +461,10 @@ export default async function handler(req, res) {
         }
     }
 
+
+    // ==========================================
+    // METHOD NOT ALLOWED
+    // ==========================================
 
     return res
         .status(405)
