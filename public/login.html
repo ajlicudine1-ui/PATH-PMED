@@ -12,10 +12,15 @@
     <title>PATH | Admin Login</title>
 
     <link
-    rel="icon"
-    type="image/png"
-    href="/images/PMED-LOGO.png"
->
+        rel="icon"
+        type="image/png"
+        href="/images/PMED-LOGO.png?v=2"
+    >
+
+    <link
+        rel="apple-touch-icon"
+        href="/images/PMED-LOGO.png?v=2"
+    >
 
     <link
         rel="stylesheet"
@@ -1074,36 +1079,46 @@
 
     <!-- PASSWORD TOGGLE -->
     <script>
-        const togglePassword =
-            document.getElementById(
-                "togglePassword"
-            );
-
-        const passwordInput =
-            document.getElementById(
-                "password"
-            );
-
-
-        togglePassword?.addEventListener(
-            "click",
+        document.addEventListener(
+            "DOMContentLoaded",
             () => {
 
-                const isPassword =
-                    passwordInput.type ===
-                    "password";
+                const togglePassword =
+                    document.getElementById(
+                        "togglePassword"
+                    );
 
+                const passwordInput =
+                    document.getElementById(
+                        "password"
+                    );
 
-                passwordInput.type =
-                    isPassword
-                        ? "text"
-                        : "password";
+                if (
+                    !togglePassword ||
+                    !passwordInput
+                ) {
+                    return;
+                }
 
+                togglePassword.addEventListener(
+                    "click",
+                    () => {
 
-                togglePassword.textContent =
-                    isPassword
-                        ? "Hide"
-                        : "Show";
+                        const isHidden =
+                            passwordInput.type ===
+                            "password";
+
+                        passwordInput.type =
+                            isHidden
+                                ? "text"
+                                : "password";
+
+                        togglePassword.textContent =
+                            isHidden
+                                ? "Hide"
+                                : "Show";
+                    }
+                );
             }
         );
     </script>
