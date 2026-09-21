@@ -17,199 +17,460 @@
     >
 
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             min-height: 100vh;
-
+            margin: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-
-            background: #f5f7f6;
-
-            padding: 20px;
+            background:
+                linear-gradient(
+                    135deg,
+                    #f5f8f5 0%,
+                    #eef4ef 100%
+                );
+            padding: 24px;
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
         }
 
-        .login-card {
+        .login-shell {
             width: 100%;
-            max-width: 420px;
-
-            background: white;
-
-            border-radius: 16px;
-
-            padding: 32px;
-
+            max-width: 960px;
+            min-height: 560px;
+            display: grid;
+            grid-template-columns:
+                minmax(300px, 0.9fr)
+                minmax(420px, 1.1fr);
+            background: #ffffff;
+            border-radius: 24px;
+            overflow: hidden;
             box-shadow:
-                0 10px 30px rgba(30, 41, 59, 0.08);
+                0 20px 60px rgba(31, 41, 55, 0.12);
         }
 
-        .login-brand {
+        .login-brand-panel {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 48px;
+            background:
+                linear-gradient(
+                    160deg,
+                    #0f5c32 0%,
+                    #1f7a45 100%
+                );
+            color: #ffffff;
+        }
+
+        .login-brand-panel::after {
+            content: "";
+            position: absolute;
+            width: 240px;
+            height: 240px;
+            border-radius: 50%;
+            right: -80px;
+            bottom: -90px;
+            background:
+                rgba(255, 215, 64, 0.12);
+        }
+
+        .brand-mark {
+            width: 64px;
+            height: 64px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+            color: #166534;
+            font-size: 28px;
+            font-weight: 800;
+            box-shadow:
+                0 10px 24px rgba(0, 0, 0, 0.12);
             margin-bottom: 28px;
         }
 
-        .login-brand h1 {
-            color: var(--green-dark);
-
-            margin-bottom: 6px;
+        .brand-copy {
+            position: relative;
+            z-index: 1;
         }
 
-        .login-brand p {
-            color: var(--text-muted);
+        .brand-copy h1 {
+            margin: 0 0 12px;
+            font-size: 42px;
+            line-height: 1;
+            letter-spacing: -1px;
+        }
 
+        .brand-copy h2 {
+            margin: 0 0 14px;
+            font-size: 20px;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .brand-copy p {
+            margin: 0;
+            max-width: 320px;
+            color: rgba(255, 255, 255, 0.82);
             font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .brand-footer {
+            position: relative;
+            z-index: 1;
+            margin-top: 40px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.68);
+        }
+
+        .login-form-panel {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 52px;
+        }
+
+        .login-form-wrap {
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .login-heading {
+            margin-bottom: 30px;
+        }
+
+        .login-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 14px;
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: #edf7ef;
+            color: #1f7a45;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .login-heading h2 {
+            margin: 0 0 8px;
+            color: #172033;
+            font-size: 30px;
+            line-height: 1.2;
+        }
+
+        .login-heading p {
+            margin: 0;
+            color: #667085;
+            font-size: 14px;
+            line-height: 1.6;
         }
 
         .form-group {
-            margin-bottom: 18px;
+            margin-bottom: 20px;
         }
 
         .form-group label {
             display: block;
-
-            margin-bottom: 7px;
-
-            font-size: 14px;
-
-            font-weight: 600;
-
+            margin-bottom: 8px;
             color: #344054;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .input-wrap {
+            position: relative;
         }
 
         .form-group input {
             width: 100%;
-
-            padding: 12px 14px;
-
-            border: 1px solid #d0d5dd;
-
-            border-radius: 8px;
-
+            height: 52px;
+            padding: 0 15px;
+            border: 1px solid #d8dee8;
+            border-radius: 12px;
+            background: #ffffff;
+            color: #172033;
             font-size: 14px;
-
             outline: none;
-
-            transition: 0.2s ease;
+            transition:
+                border-color 0.2s ease,
+                box-shadow 0.2s ease,
+                background 0.2s ease;
         }
 
         .form-group input:focus {
-            border-color: var(--green);
-
+            border-color: #2f8a4a;
             box-shadow:
-                0 0 0 3px rgba(47, 125, 63, 0.08);
+                0 0 0 4px rgba(47, 138, 74, 0.10);
+        }
+
+        .password-input {
+            padding-right: 92px !important;
+        }
+
+        .password-toggle {
+            position: absolute;
+            top: 50%;
+            right: 12px;
+            transform: translateY(-50%);
+            border: none;
+            background: transparent;
+            color: #2f7d3f;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            padding: 6px 8px;
         }
 
         .login-button {
             width: 100%;
-
+            height: 52px;
+            margin-top: 6px;
             border: none;
-
-            background: var(--green);
-
-            color: white;
-
-            padding: 12px;
-
-            border-radius: 8px;
-
-            font-size: 14px;
-
+            border-radius: 12px;
+            background:
+                linear-gradient(
+                    90deg,
+                    #1f7a45,
+                    #2f8a4a
+                );
+            color: #ffffff;
+            font-size: 15px;
             font-weight: 700;
-
             cursor: pointer;
-
-            transition: 0.2s ease;
+            box-shadow:
+                0 8px 20px rgba(31, 122, 69, 0.18);
+            transition:
+                transform 0.2s ease,
+                box-shadow 0.2s ease,
+                opacity 0.2s ease;
         }
 
         .login-button:hover {
-            background: var(--green-dark);
+            transform: translateY(-1px);
+            box-shadow:
+                0 12px 24px rgba(31, 122, 69, 0.22);
         }
 
         .login-button:disabled {
             opacity: 0.6;
-
             cursor: not-allowed;
+            transform: none;
         }
 
         .login-message {
+            min-height: 20px;
             margin-top: 14px;
-
-            font-size: 13px;
-
             color: #dc2626;
+            font-size: 13px;
+            text-align: center;
+        }
 
-            min-height: 18px;
+        .login-note {
+            margin-top: 26px;
+            padding-top: 20px;
+            border-top: 1px solid #edf0f3;
+            color: #98a2b3;
+            font-size: 12px;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        @media (max-width: 820px) {
+            .login-shell {
+                grid-template-columns: 1fr;
+                max-width: 520px;
+            }
+
+            .login-brand-panel {
+                padding: 34px;
+            }
+
+            .brand-footer {
+                display: none;
+            }
+
+            .login-form-panel {
+                padding: 36px;
+            }
+        }
+
+        @media (max-width: 520px) {
+            body {
+                padding: 14px;
+            }
+
+            .login-shell {
+                border-radius: 18px;
+            }
+
+            .login-brand-panel {
+                padding: 28px;
+            }
+
+            .login-form-panel {
+                padding: 28px;
+            }
+
+            .brand-copy h1 {
+                font-size: 34px;
+            }
+
+            .login-heading h2 {
+                font-size: 26px;
+            }
         }
     </style>
 </head>
 
 <body>
 
-    <div class="login-card">
+    <main class="login-shell">
 
-        <div class="login-brand">
+        <section class="login-brand-panel">
 
-            <h1>
-                PATH
-            </h1>
+            <div class="brand-copy">
 
-            <p>
-                PMED Assignment and Team Hub
-            </p>
+                <div class="brand-mark">
+                    P
+                </div>
 
-        </div>
+                <h1>
+                    PATH
+                </h1>
 
+                <h2>
+                    PMED Assignment and Team Hub
+                </h2>
 
-        <form id="loginForm">
-
-            <div class="form-group">
-
-                <label for="email">
-                    Email
-                </label>
-
-                <input
-                    type="email"
-                    id="email"
-                    autocomplete="email"
-                    required
-                >
+                <p>
+                    A centralized workspace for managing
+                    personnel assignments, responsibilities,
+                    and PMED section activities.
+                </p>
 
             </div>
 
+            <div class="brand-footer">
+                Planning, Monitoring and Evaluation Division
+            </div>
 
-            <div class="form-group">
+        </section>
 
-                <label for="password">
-                    Password
-                </label>
 
-                <input
-                    type="password"
-                    id="password"
-                    autocomplete="current-password"
-                    required
-                >
+        <section class="login-form-panel">
+
+            <div class="login-form-wrap">
+
+                <div class="login-heading">
+
+                    <div class="login-badge">
+                        Admin Access
+                    </div>
+
+                    <h2>
+                        Welcome back
+                    </h2>
+
+                    <p>
+                        Sign in to access the PATH
+                        administration dashboard.
+                    </p>
+
+                </div>
+
+
+                <form id="loginForm">
+
+                    <div class="form-group">
+
+                        <label for="email">
+                            Email Address
+                        </label>
+
+                        <div class="input-wrap">
+
+                            <input
+                                type="email"
+                                id="email"
+                                autocomplete="email"
+                                placeholder="Enter your email"
+                                required
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="password">
+                            Password
+                        </label>
+
+                        <div class="input-wrap">
+
+                            <input
+                                type="password"
+                                id="password"
+                                class="password-input"
+                                autocomplete="current-password"
+                                placeholder="Enter your password"
+                                required
+                            >
+
+                            <button
+                                type="button"
+                                class="password-toggle"
+                                id="passwordToggle"
+                            >
+                                Show
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        class="login-button"
+                        id="loginButton"
+                    >
+                        Sign In
+                    </button>
+
+
+                    <div
+                        class="login-message"
+                        id="loginMessage"
+                    ></div>
+
+                </form>
+
+
+                <div class="login-note">
+                    Authorized personnel only.
+                    Please use your administrator account
+                    to continue.
+                </div>
 
             </div>
 
+        </section>
 
-            <button
-                type="submit"
-                class="login-button"
-                id="loginButton"
-            >
-                Sign In
-            </button>
-
-
-            <div
-                class="login-message"
-                id="loginMessage"
-            ></div>
-
-        </form>
-
-    </div>
+    </main>
 
 
     <script
@@ -217,6 +478,33 @@
     ></script>
 
     <script src="/js/login.js"></script>
+
+    <script>
+        const passwordField =
+            document.getElementById("password");
+
+        const passwordToggle =
+            document.getElementById("passwordToggle");
+
+        passwordToggle?.addEventListener(
+            "click",
+            () => {
+
+                const showing =
+                    passwordField.type === "text";
+
+                passwordField.type =
+                    showing
+                        ? "password"
+                        : "text";
+
+                passwordToggle.textContent =
+                    showing
+                        ? "Show"
+                        : "Hide";
+            }
+        );
+    </script>
 
 </body>
 
