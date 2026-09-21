@@ -36,6 +36,80 @@ const searchInput =
 
 
 // ============================================
+// SHOW TEAM INFO IMMEDIATELY FROM CACHE
+// ============================================
+
+function showCachedTeamInformation() {
+
+    if (!teamCode) {
+        return;
+    }
+
+    teamCodeElement.textContent =
+        String(teamCode).toUpperCase() === "DIVISION"
+            ? "Division"
+            : String(teamCode).toUpperCase();
+
+    teamNameElement.textContent = "";
+
+    try {
+
+        const cached =
+            localStorage.getItem(
+                "path_sidebar_teams"
+            );
+
+        if (!cached) {
+            return;
+        }
+
+        const teams =
+            JSON.parse(cached);
+
+        if (!Array.isArray(teams)) {
+            return;
+        }
+
+        const cachedTeam =
+            teams.find(
+                team =>
+                    String(team.code)
+                        .toUpperCase() ===
+                    String(teamCode)
+                        .toUpperCase()
+            );
+
+        if (!cachedTeam) {
+            return;
+        }
+
+        teamCodeElement.textContent =
+            String(cachedTeam.code)
+                .toUpperCase() === "DIVISION"
+                ? "Division"
+                : cachedTeam.code;
+
+        teamNameElement.textContent =
+            cachedTeam.name || "";
+
+        document.title =
+            `PATH | ${cachedTeam.code}`;
+
+    } catch (error) {
+
+        console.error(
+            "Cached team error:",
+            error
+        );
+    }
+}
+
+
+// Show cached section name before network requests
+showCachedTeamInformation();
+
+
+// ============================================
 // MODAL ELEMENTS
 // ============================================
 
@@ -124,7 +198,12 @@ async function loadTeam() {
     try {
 
         const response =
-            await fetch("/api/teams");
+            await fetch(
+                "/api/teams",
+                {
+                    cache: "no-store"
+                }
+            );
 
         const teams =
             await response.json();
@@ -137,11 +216,20 @@ async function loadTeam() {
             );
         }
 
+        if (!Array.isArray(teams)) {
+
+            throw new Error(
+                "Invalid teams response."
+            );
+        }
+
         const currentTeam =
             teams.find(
                 team =>
-                    team.code ===
-                    teamCode.toUpperCase()
+                    String(team.code)
+                        .toUpperCase() ===
+                    String(teamCode)
+                        .toUpperCase()
             );
 
         if (!currentTeam) {
@@ -155,8 +243,14 @@ async function loadTeam() {
             return;
         }
 
+        localStorage.setItem(
+            "path_sidebar_teams",
+            JSON.stringify(teams)
+        );
+
         teamCodeElement.textContent =
-            currentTeam.code === "DIVISION"
+            String(currentTeam.code)
+                .toUpperCase() === "DIVISION"
                 ? "Division"
                 : currentTeam.code;
 
@@ -174,9 +268,6 @@ async function loadTeam() {
             "Load team error:",
             error
         );
-
-        teamNameElement.textContent =
-            "Unable to load team information.";
 
         tableBody.innerHTML = `
             <tr>
