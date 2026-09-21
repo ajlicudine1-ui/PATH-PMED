@@ -7,6 +7,40 @@ const VIEWER_TEAM_CACHE =
 
 
 // ============================================
+// TEAM ICON IMAGES
+// ============================================
+
+const viewerTeamIcons = {
+    PPS: "/images/PPS.png",
+    MES: "/images/MES.png",
+    IMS: "/images/IMS.png",
+    AMIA: "/images/AMIA.png",
+    RSBSA: "/images/RSBSA.png",
+    F2C2: "/images/F2C2.png",
+    RAFC: "/images/RAFC.png",
+    DIVISION: "/images/Division.png"
+};
+
+
+// ============================================
+// GET TEAM ICON PATH
+// ============================================
+
+function getViewerTeamIconPath(code) {
+
+    const normalizedCode =
+        String(code || "")
+            .trim()
+            .toUpperCase();
+
+    return (
+        viewerTeamIcons[normalizedCode] ||
+        "/images/Division.png"
+    );
+}
+
+
+// ============================================
 // LOAD VIEWER SIDEBAR
 // ============================================
 
@@ -28,8 +62,15 @@ async function loadViewerSidebar() {
             <div class="sidebar-brand">
 
                 <div class="brand-logo">
-                    P
+
+                    <img
+                        src="/images/PMED-LOGO.png"
+                        alt="PMED Logo"
+                        class="brand-logo-image"
+                    >
+
                 </div>
+
 
                 <div class="brand-text">
 
@@ -55,8 +96,15 @@ async function loadViewerSidebar() {
                 >
 
                     <div class="nav-icon">
-                        🏠
+
+                        <img
+                            src="/images/home.png"
+                            alt="Home"
+                            class="nav-icon-image"
+                        >
+
                     </div>
+
 
                     <div class="nav-text">
 
@@ -77,10 +125,6 @@ async function loadViewerSidebar() {
     `;
 
 
-    // ========================================
-    // SHOW CACHED TEAMS IMMEDIATELY
-    // ========================================
-
     const cachedTeams =
         getViewerCachedTeams();
 
@@ -95,10 +139,6 @@ async function loadViewerSidebar() {
 
     setViewerActiveItem();
 
-
-    // ========================================
-    // REFRESH FROM DATABASE
-    // ========================================
 
     await refreshViewerTeams();
 }
@@ -117,7 +157,6 @@ function getViewerCachedTeams() {
                 VIEWER_TEAM_CACHE
             );
 
-
         if (!cached) {
             return [];
         }
@@ -126,16 +165,14 @@ function getViewerCachedTeams() {
         const teams =
             JSON.parse(cached);
 
-
         return Array.isArray(teams)
             ? teams
             : [];
 
-
     } catch (error) {
 
         console.error(
-            "Viewer cache error:",
+            "Viewer sidebar cache error:",
             error
         );
 
@@ -145,7 +182,7 @@ function getViewerCachedTeams() {
 
 
 // ============================================
-// REFRESH TEAMS
+// REFRESH VIEWER TEAMS
 // ============================================
 
 async function refreshViewerTeams() {
@@ -160,23 +197,23 @@ async function refreshViewerTeams() {
                 }
             );
 
-
-        const teams =
+        const result =
             await response.json();
 
 
         if (!response.ok) {
 
             throw new Error(
-                teams.error ||
-                "Unable to load sections."
+                result.error ||
+                "Unable to load teams."
             );
         }
 
 
-        if (!Array.isArray(teams)) {
-            return;
-        }
+        const teams =
+            Array.isArray(result)
+                ? result
+                : [];
 
 
         localStorage.setItem(
@@ -192,7 +229,6 @@ async function refreshViewerTeams() {
 
         setViewerActiveItem();
 
-
     } catch (error) {
 
         console.error(
@@ -204,7 +240,7 @@ async function refreshViewerTeams() {
 
 
 // ============================================
-// RENDER TEAMS
+// RENDER VIEWER TEAMS
 // ============================================
 
 function renderViewerTeams(teams) {
@@ -213,7 +249,6 @@ function renderViewerTeams(teams) {
         document.getElementById(
             "viewerTeamNavItems"
         );
-
 
     if (!container) {
         return;
@@ -225,46 +260,60 @@ function renderViewerTeams(teams) {
             .map(team => {
 
                 const code =
-                    escapeViewerSidebarHTML(
-                        team.code
-                    );
+                    String(
+                        team.code || ""
+                    )
+                        .trim()
+                        .toUpperCase();
 
 
                 const name =
-                    escapeViewerSidebarHTML(
-                        team.name
+                    team.name || code;
+
+
+                const iconPath =
+                    getViewerTeamIconPath(
+                        code
                     );
+
+
+                const displayCode =
+                    code === "DIVISION"
+                        ? "Division"
+                        : code;
 
 
                 return `
                     <a
-                        href="/viewer-team.html?team=${encodeURIComponent(
-                            team.code
-                        )}"
+                        href="/viewer-team.html?team=${encodeURIComponent(code)}"
                         class="nav-item"
-                        data-viewer-team="${code}"
+                        data-viewer-team="${escapeViewerSidebarHTML(code)}"
+                        title="${escapeViewerSidebarHTML(name)}"
                     >
 
                         <div class="nav-icon">
-                            ${getViewerTeamIcon(
-                                team.code
-                            )}
+
+                            <img
+                                src="${escapeViewerSidebarHTML(iconPath)}"
+                                alt="${escapeViewerSidebarHTML(displayCode)} icon"
+                                class="nav-icon-image"
+                            >
+
                         </div>
+
 
                         <div class="nav-text">
 
                             <strong>
-                                ${
-                                    String(team.code)
-                                        .toUpperCase() ===
-                                    "DIVISION"
-                                        ? "Division"
-                                        : code
-                                }
+                                ${escapeViewerSidebarHTML(
+                                    displayCode
+                                )}
                             </strong>
 
                             <span>
-                                ${name}
+                                ${escapeViewerSidebarHTML(
+                                    name
+                                )}
                             </span>
 
                         </div>
@@ -277,7 +326,7 @@ function renderViewerTeams(teams) {
 
 
 // ============================================
-// ACTIVE SIDEBAR ITEM
+// ACTIVE VIEWER ITEM
 // ============================================
 
 function setViewerActiveItem() {
@@ -298,7 +347,7 @@ function setViewerActiveItem() {
 
     document
         .querySelectorAll(
-            ".nav-item"
+            ".sidebar .nav-item"
         )
         .forEach(item => {
 
@@ -307,10 +356,6 @@ function setViewerActiveItem() {
             );
         });
 
-
-    // ========================================
-    // HOME
-    // ========================================
 
     if (
         currentPath === "/" ||
@@ -333,60 +378,20 @@ function setViewerActiveItem() {
     }
 
 
-    // ========================================
-    // TEAM PAGE
-    // ========================================
-
     if (selectedTeam) {
 
-        const activeTeam =
-            document.querySelector(
-                `[data-viewer-team="${selectedTeam.toUpperCase()}"]`
-            );
+        const code =
+            selectedTeam
+                .toUpperCase();
 
 
-        activeTeam
+        document
+            .querySelector(
+                `[data-viewer-team="${CSS.escape(code)}"]`
+            )
             ?.classList
             .add("active");
     }
-}
-
-
-// ============================================
-// TEAM ICONS
-// ============================================
-
-function getViewerTeamIcon(code) {
-
-    const icons = {
-
-        PPS: "📋",
-
-        MES: "📊",
-
-        IMS: "💻",
-
-        AMIA: "🌾",
-
-        RSBSA: "👥",
-
-        F2C2: "🔗",
-
-        RAFC: "🏛️",
-
-        DIVISION: "🏢",
-
-        RAED: "⚙️"
-    };
-
-
-    return (
-        icons[
-            String(code)
-                .toUpperCase()
-        ] ||
-        "📁"
-    );
 }
 
 

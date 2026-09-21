@@ -12,6 +12,12 @@
     <title>PATH | Admin Login</title>
 
     <link
+    rel="icon"
+    type="image/png"
+    href="/images/PMED-LOGO.png"
+>
+
+    <link
         rel="stylesheet"
         href="/css/global.css"
     >
@@ -22,313 +28,875 @@
         }
 
         body {
-            min-height: 100vh;
             margin: 0;
+            min-height: 100vh;
+
             display: flex;
             align-items: center;
             justify-content: center;
-            background:
-                linear-gradient(
-                    135deg,
-                    #f5f8f5 0%,
-                    #eef4ef 100%
-                );
+
             padding: 24px;
+
+            background: #edf2ee;
+
             font-family:
                 Arial,
                 Helvetica,
                 sans-serif;
         }
 
+
+        /* =========================================
+           LOGIN WRAPPER
+        ========================================= */
+
         .login-shell {
             width: 100%;
-            max-width: 960px;
-            min-height: 560px;
+            max-width: 1200px;
+            min-height: 740px;
+
             display: grid;
             grid-template-columns:
-                minmax(300px, 0.9fr)
-                minmax(420px, 1.1fr);
+                1fr
+                1.08fr;
+
             background: #ffffff;
-            border-radius: 24px;
+
+            border-radius: 30px;
+
             overflow: hidden;
+
             box-shadow:
-                0 20px 60px rgba(31, 41, 55, 0.12);
+                0 18px 45px
+                rgba(0, 0, 0, 0.08);
         }
 
-        .login-brand-panel {
+
+        /* =========================================
+           LEFT PANEL
+        ========================================= */
+
+        .login-left {
             position: relative;
+
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 48px;
+
+            padding:
+                36px
+                60px
+                54px;
+
+            color: #ffffff;
+
             background:
                 linear-gradient(
-                    160deg,
-                    #0f5c32 0%,
-                    #1f7a45 100%
+                    180deg,
+                    #126832 0%,
+                    #1f7e43 100%
                 );
-            color: #ffffff;
+
+            overflow: hidden;
         }
 
-        .login-brand-panel::after {
+
+        .login-left::after {
             content: "";
+
             position: absolute;
-            width: 240px;
-            height: 240px;
-            border-radius: 50%;
-            right: -80px;
+
+            right: -90px;
             bottom: -90px;
+
+            width: 330px;
+            height: 330px;
+
+            border-radius: 50%;
+
             background:
-                rgba(255, 215, 64, 0.12);
+                rgba(
+                    224,
+                    211,
+                    157,
+                    0.30
+                );
         }
+
+
+        /* =========================================
+           BRAND AREA
+        ========================================= */
+
+        .brand-block {
+            position: relative;
+            z-index: 1;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+
+            width: 100%;
+
+            padding-top: 4px;
+
+            text-align: center;
+        }
+
+
+        /* LARGE CENTERED LOGO */
 
         .brand-mark {
-            width: 64px;
-            height: 64px;
-            border-radius: 18px;
+            width: 240px;
+            height: 240px;
+
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #ffffff;
-            color: #166534;
-            font-size: 28px;
-            font-weight: 800;
-            box-shadow:
-                0 10px 24px rgba(0, 0, 0, 0.12);
-            margin-bottom: 28px;
+
+            margin:
+                0
+                auto
+                72px;
+
+            background: transparent;
+
+            border-radius: 0;
+
+            overflow: visible;
+
+            box-shadow: none;
         }
 
-        .brand-copy {
-            position: relative;
-            z-index: 1;
+
+        .brand-mark img {
+            width: 220px;
+            height: 220px;
+
+            display: block;
+
+            object-fit: contain;
+            object-position: center;
         }
 
-        .brand-copy h1 {
-            margin: 0 0 12px;
-            font-size: 42px;
+
+        /* =========================================
+           PATH TEXT
+        ========================================= */
+
+        .brand-title {
+            margin:
+                0
+                0
+                20px;
+
+            color: #ffffff;
+
+            font-size: 54px;
             line-height: 1;
+
+            font-weight: 800;
+
             letter-spacing: -1px;
         }
 
-        .brand-copy h2 {
-            margin: 0 0 14px;
-            font-size: 20px;
-            font-weight: 600;
-            line-height: 1.4;
+
+        .brand-subtitle {
+            max-width: 440px;
+
+            margin:
+                0
+                auto
+                26px;
+
+            color: #ffffff;
+
+            font-size: 25px;
+            line-height: 1.35;
+
+            font-weight: 700;
         }
 
-        .brand-copy p {
-            margin: 0;
-            max-width: 320px;
-            color: rgba(255, 255, 255, 0.82);
-            font-size: 14px;
-            line-height: 1.7;
+
+        .brand-description {
+            max-width: 430px;
+
+            margin: 0 auto;
+
+            color:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.94
+                );
+
+            font-size: 17px;
+            line-height: 1.75;
         }
+
 
         .brand-footer {
             position: relative;
             z-index: 1;
-            margin-top: 40px;
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.68);
+
+            width: 100%;
+
+            margin-top: 35px;
+
+            color:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.88
+                );
+
+            font-size: 14px;
+
+            text-align: center;
         }
 
-        .login-form-panel {
+
+        /* =========================================
+           RIGHT PANEL
+        ========================================= */
+
+        .login-right {
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 52px;
+
+            padding:
+                60px
+                68px;
+
+            background: #ffffff;
         }
 
-        .login-form-wrap {
+
+        .login-form-wrapper {
             width: 100%;
-            max-width: 420px;
+            max-width: 525px;
         }
 
-        .login-heading {
-            margin-bottom: 30px;
-        }
 
-        .login-badge {
+        /* =========================================
+           LOGIN HEADING
+        ========================================= */
+
+        .access-badge {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            margin-bottom: 14px;
-            padding: 7px 12px;
+
+            margin-bottom: 24px;
+
+            padding:
+                9px
+                15px;
+
             border-radius: 999px;
-            background: #edf7ef;
-            color: #1f7a45;
-            font-size: 12px;
+
+            background: #eef6ec;
+
+            color: #147233;
+
+            font-size: 14px;
             font-weight: 700;
         }
 
-        .login-heading h2 {
-            margin: 0 0 8px;
-            color: #172033;
-            font-size: 30px;
-            line-height: 1.2;
+
+        .login-form-wrapper h1 {
+            margin:
+                0
+                0
+                12px;
+
+            color: #11264a;
+
+            font-size: 42px;
+            line-height: 1.1;
+
+            font-weight: 800;
         }
 
-        .login-heading p {
-            margin: 0;
-            color: #667085;
-            font-size: 14px;
+
+        .login-subtitle {
+            margin:
+                0
+                0
+                36px;
+
+            color: #617087;
+
+            font-size: 17px;
             line-height: 1.6;
         }
+
+
+        /* =========================================
+           FORM
+        ========================================= */
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+
+        .form-group label {
+            display: block;
+
+            margin-bottom: 10px;
+
+            color: #24364f;
+
+            font-size: 17px;
+            font-weight: 700;
+        }
+
+
+        .form-group input {
+            width: 100%;
+            height: 64px;
+
+            padding:
+                0
+                18px;
+
+            border:
+                1px solid
+                #d5dde7;
+
+            border-radius: 17px;
+
+            outline: none;
+
+            background: #ffffff;
+
+            color: #25364d;
+
+            font-size: 17px;
+
+            transition:
+                border-color 0.2s ease,
+                box-shadow 0.2s ease;
+        }
+
+
+        .form-group input:focus {
+            border-color: #2f7d3f;
+
+            box-shadow:
+                0
+                0
+                0
+                4px
+                rgba(
+                    47,
+                    125,
+                    63,
+                    0.10
+                );
+        }
+
+
+        /* =========================================
+           PASSWORD
+        ========================================= */
+
+        .password-wrap {
+            position: relative;
+        }
+
+
+        .password-wrap input {
+            padding-right: 90px;
+        }
+
+
+        .toggle-password {
+            position: absolute;
+
+            top: 50%;
+            right: 18px;
+
+            transform:
+                translateY(-50%);
+
+            border: none;
+
+            background: transparent;
+
+            color: #147233;
+
+            font-size: 15px;
+            font-weight: 700;
+
+            cursor: pointer;
+        }
+
+
+        /* =========================================
+           LOGIN BUTTON
+        ========================================= */
+
+        .login-button {
+            width: 100%;
+            height: 65px;
+
+            margin-top: 4px;
+
+            border: none;
+
+            border-radius: 17px;
+
+            background: #2c8b48;
+
+            color: #ffffff;
+
+            font-size: 18px;
+            font-weight: 800;
+
+            cursor: pointer;
+
+            box-shadow:
+                0
+                10px
+                24px
+                rgba(
+                    47,
+                    143,
+                    70,
+                    0.20
+                );
+
+            transition:
+                background 0.2s ease,
+                transform 0.2s ease,
+                box-shadow 0.2s ease;
+        }
+
+
+        .login-button:hover {
+            background: #24783c;
+
+            transform:
+                translateY(-1px);
+
+            box-shadow:
+                0
+                12px
+                26px
+                rgba(
+                    47,
+                    143,
+                    70,
+                    0.24
+                );
+        }
+
+
+        .login-button:disabled {
+            opacity: 0.65;
+
+            cursor: not-allowed;
+
+            transform: none;
+        }
+
+
+        /* =========================================
+           LOGIN MESSAGE
+        ========================================= */
+
+        .login-message {
+            min-height: 20px;
+
+            margin-top: 14px;
+
+            color: #dc2626;
+
+            font-size: 13px;
+            font-weight: 600;
+
+            text-align: center;
+        }
+
+
+        /* =========================================
+           NOTE
+        ========================================= */
+
+        .login-divider {
+            margin:
+                30px
+                0
+                22px;
+
+            border: none;
+            border-top:
+                1px solid #e5e7eb;
+        }
+
+
+        .login-note {
+            margin: 0;
+
+            color: #94a3b8;
+
+            font-size: 14px;
+            line-height: 1.6;
+
+            text-align: center;
+        }
+
+
+        /* =========================================
+           TABLET
+        ========================================= */
+
+        @media (max-width: 1100px) {
+
+            .login-shell {
+                grid-template-columns: 1fr;
+
+                max-width: 700px;
+
+                min-height: auto;
+            }
+
+
+            .login-left {
+                padding:
+                    38px
+                    36px
+                    44px;
+            }
+
+
+            .brand-mark {
+                width: 190px;
+                height: 190px;
+
+                margin-bottom: 55px;
+            }
+
+
+            .brand-mark img {
+                width: 175px;
+                height: 175px;
+            }
+
+
+            .brand-title {
+                font-size: 46px;
+            }
+
+
+            .brand-subtitle {
+                font-size: 22px;
+            }
+
+
+            .brand-description {
+                font-size: 16px;
+            }
+
+
+            .login-right {
+                padding:
+                    46px
+                    36px;
+            }
+        }
+
+
+        /* =========================================
+           MOBILE
+        ========================================= */
+
+        @media (max-width: 640px) {
+
+            body {
+                padding: 14px;
+            }
+
+
+            .login-shell {
+                border-radius: 22px;
+            }
+
+
+            .login-left {
+                padding:
+                    28px
+                    20px
+                    34px;
+            }
+
+
+            .brand-mark {
+                width: 150px;
+                height: 150px;
+
+                margin-bottom: 38px;
+            }
+
+
+            .brand-mark img {
+                width: 135px;
+                height: 135px;
+            }
+
+
+            .brand-title {
+                font-size: 38px;
+            }
+
+
+            .brand-subtitle {
+                font-size: 19px;
+            }
+
+
+            .brand-description {
+                font-size: 15px;
+            }
+
+
+            .brand-footer {
+                margin-top: 30px;
+
+                font-size: 12px;
+            }
+
+
+            .login-right {
+                padding:
+                    34px
+                    22px;
+            }
+
+
+            .login-form-wrapper h1 {
+                font-size: 34px;
+            }
+
+
+            .login-subtitle {
+                font-size: 15px;
+
+                margin-bottom: 30px;
+            }
+
+
+            .form-group label {
+                font-size: 15px;
+            }
+
+
+            .form-group input {
+                height: 58px;
+
+                border-radius: 14px;
+
+                font-size: 15px;
+            }
+
+
+            .login-button {
+                height: 58px;
+
+                border-radius: 14px;
+
+                font-size: 16px;
+            }
+        }
+
+        /* =========================================
+   FINAL DESKTOP SIZE
+   Makes 100% browser zoom look like
+   the previous 90% zoom layout
+========================================= */
+
+        .login-shell {
+            max-width: 1060px;
+            min-height: 655px;
+            border-radius: 26px;
+        }
+
+
+        /* LEFT PANEL */
+
+        .login-left {
+            padding:
+                26px
+                48px
+                32px;
+        }
+
+
+        /* CENTERED PMED LOGO */
+
+        .brand-mark {
+            width: 198px;
+            height: 198px;
+
+            margin:
+                0
+                auto
+                42px;
+        }
+
+        .brand-mark img {
+            width: 184px;
+            height: 184px;
+        }
+
+
+        /* PATH CONTENT */
+
+        .brand-title {
+            margin:
+                0
+                0
+                14px;
+
+            font-size: 46px;
+        }
+
+        .brand-subtitle {
+            margin:
+                0
+                auto
+                20px;
+
+            max-width: 400px;
+
+            font-size: 21px;
+        }
+
+        .brand-description {
+            max-width: 390px;
+
+            font-size: 15px;
+            line-height: 1.65;
+        }
+
+        .brand-footer {
+            margin-top: 28px;
+            font-size: 12px;
+        }
+
+
+        /* RIGHT PANEL */
+
+        .login-right {
+            padding:
+                42px
+                54px;
+        }
+
+        .login-form-wrapper {
+            max-width: 470px;
+        }
+
+
+        /* ADMIN BADGE */
+
+        .access-badge {
+            margin-bottom: 20px;
+
+            padding:
+                8px
+                14px;
+
+            font-size: 13px;
+        }
+
+
+        /* LOGIN HEADING */
+
+        .login-form-wrapper h1 {
+            margin-bottom: 10px;
+
+            font-size: 38px;
+        }
+
+        .login-subtitle {
+            margin-bottom: 30px;
+
+            font-size: 15px;
+        }
+
+
+        /* FORM */
 
         .form-group {
             margin-bottom: 20px;
         }
 
         .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #344054;
-            font-size: 14px;
-            font-weight: 700;
-        }
+            margin-bottom: 9px;
 
-        .input-wrap {
-            position: relative;
+            font-size: 15px;
         }
 
         .form-group input {
-            width: 100%;
-            height: 52px;
-            padding: 0 15px;
-            border: 1px solid #d8dee8;
-            border-radius: 12px;
-            background: #ffffff;
-            color: #172033;
+            height: 58px;
+
+            padding:
+                0
+                17px;
+
+            border-radius: 15px;
+
+            font-size: 15px;
+        }
+
+
+        /* PASSWORD SHOW BUTTON */
+
+        .toggle-password {
+            right: 17px;
+
             font-size: 14px;
-            outline: none;
-            transition:
-                border-color 0.2s ease,
-                box-shadow 0.2s ease,
-                background 0.2s ease;
         }
 
-        .form-group input:focus {
-            border-color: #2f8a4a;
-            box-shadow:
-                0 0 0 4px rgba(47, 138, 74, 0.10);
-        }
 
-        .password-input {
-            padding-right: 92px !important;
-        }
-
-        .password-toggle {
-            position: absolute;
-            top: 50%;
-            right: 12px;
-            transform: translateY(-50%);
-            border: none;
-            background: transparent;
-            color: #2f7d3f;
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-            padding: 6px 8px;
-        }
+        /* SIGN IN BUTTON */
 
         .login-button {
-            width: 100%;
-            height: 52px;
-            margin-top: 6px;
-            border: none;
-            border-radius: 12px;
-            background:
-                linear-gradient(
-                    90deg,
-                    #1f7a45,
-                    #2f8a4a
-                );
-            color: #ffffff;
-            font-size: 15px;
-            font-weight: 700;
-            cursor: pointer;
-            box-shadow:
-                0 8px 20px rgba(31, 122, 69, 0.18);
-            transition:
-                transform 0.2s ease,
-                box-shadow 0.2s ease,
-                opacity 0.2s ease;
+            height: 58px;
+
+            margin-top: 3px;
+
+            border-radius: 15px;
+
+            font-size: 16px;
         }
 
-        .login-button:hover {
-            transform: translateY(-1px);
-            box-shadow:
-                0 12px 24px rgba(31, 122, 69, 0.22);
-        }
 
-        .login-button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
+        /* MESSAGE */
 
         .login-message {
-            min-height: 20px;
-            margin-top: 14px;
-            color: #dc2626;
-            font-size: 13px;
-            text-align: center;
+            margin-top: 12px;
+
+            font-size: 12px;
+        }
+
+
+        /* BOTTOM NOTE */
+
+        .login-divider {
+            margin:
+                28px
+                0
+                20px;
         }
 
         .login-note {
-            margin-top: 26px;
-            padding-top: 20px;
-            border-top: 1px solid #edf0f3;
-            color: #98a2b3;
             font-size: 12px;
-            line-height: 1.6;
-            text-align: center;
-        }
-
-        @media (max-width: 820px) {
-            .login-shell {
-                grid-template-columns: 1fr;
-                max-width: 520px;
-            }
-
-            .login-brand-panel {
-                padding: 34px;
-            }
-
-            .brand-footer {
-                display: none;
-            }
-
-            .login-form-panel {
-                padding: 36px;
-            }
-        }
-
-        @media (max-width: 520px) {
-            body {
-                padding: 14px;
-            }
-
-            .login-shell {
-                border-radius: 18px;
-            }
-
-            .login-brand-panel {
-                padding: 28px;
-            }
-
-            .login-form-panel {
-                padding: 28px;
-            }
-
-            .brand-copy h1 {
-                font-size: 34px;
-            }
-
-            .login-heading h2 {
-                font-size: 26px;
-            }
         }
     </style>
 </head>
@@ -337,23 +905,36 @@
 
     <main class="login-shell">
 
-        <section class="login-brand-panel">
 
-            <div class="brand-copy">
+        <!-- =========================================
+             LEFT BRAND PANEL
+        ========================================== -->
+
+        <section class="login-left">
+
+            <div class="brand-block">
 
                 <div class="brand-mark">
-                    P
+
+                    <img
+                        src="/images/PMED-LOGO.png"
+                        alt="PMED Logo"
+                    >
+
                 </div>
 
-                <h1>
-                    PATH
-                </h1>
 
-                <h2>
-                    PMED Assignment and Team Hub
+                <h2 class="brand-title">
+                    PATH
                 </h2>
 
-                <p>
+
+                <p class="brand-subtitle">
+                    PMED Assignment and Team Hub
+                </p>
+
+
+                <p class="brand-description">
                     A centralized workspace for managing
                     personnel assignments, responsibilities,
                     and PMED section activities.
@@ -361,36 +942,42 @@
 
             </div>
 
-            <div class="brand-footer">
+
+            <p class="brand-footer">
                 Planning, Monitoring and Evaluation Division
-            </div>
+            </p>
 
         </section>
 
 
-        <section class="login-form-panel">
+        <!-- =========================================
+             LOGIN PANEL
+        ========================================== -->
 
-            <div class="login-form-wrap">
+        <section class="login-right">
 
-                <div class="login-heading">
+            <div class="login-form-wrapper">
 
-                    <div class="login-badge">
-                        Admin Access
-                    </div>
-
-                    <h2>
-                        Welcome back
-                    </h2>
-
-                    <p>
-                        Sign in to access the PATH
-                        administration dashboard.
-                    </p>
-
+                <div class="access-badge">
+                    Admin Access
                 </div>
 
 
+                <h1>
+                    Welcome back
+                </h1>
+
+
+                <p class="login-subtitle">
+                    Sign in to access the PATH
+                    administration dashboard.
+                </p>
+
+
                 <form id="loginForm">
+
+
+                    <!-- EMAIL -->
 
                     <div class="form-group">
 
@@ -398,20 +985,18 @@
                             Email Address
                         </label>
 
-                        <div class="input-wrap">
-
-                            <input
-                                type="email"
-                                id="email"
-                                autocomplete="email"
-                                placeholder="Enter your email"
-                                required
-                            >
-
-                        </div>
+                        <input
+                            type="email"
+                            id="email"
+                            placeholder="Enter your email"
+                            autocomplete="email"
+                            required
+                        >
 
                     </div>
 
+
+                    <!-- PASSWORD -->
 
                     <div class="form-group">
 
@@ -419,21 +1004,20 @@
                             Password
                         </label>
 
-                        <div class="input-wrap">
+                        <div class="password-wrap">
 
                             <input
                                 type="password"
                                 id="password"
-                                class="password-input"
-                                autocomplete="current-password"
                                 placeholder="Enter your password"
+                                autocomplete="current-password"
                                 required
                             >
 
                             <button
                                 type="button"
-                                class="password-toggle"
-                                id="passwordToggle"
+                                class="toggle-password"
+                                id="togglePassword"
                             >
                                 Show
                             </button>
@@ -442,6 +1026,8 @@
 
                     </div>
 
+
+                    <!-- SIGN IN -->
 
                     <button
                         type="submit"
@@ -460,11 +1046,14 @@
                 </form>
 
 
-                <div class="login-note">
+                <hr class="login-divider">
+
+
+                <p class="login-note">
                     Authorized personnel only.
-                    Please use your administrator account
-                    to continue.
-                </div>
+                    Please use your administrator
+                    account to continue.
+                </p>
 
             </div>
 
@@ -473,35 +1062,48 @@
     </main>
 
 
+    <!-- SUPABASE -->
     <script
         src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
     ></script>
 
+
+    <!-- LOGIN SCRIPT -->
     <script src="/js/login.js"></script>
 
+
+    <!-- PASSWORD TOGGLE -->
     <script>
-        const passwordField =
-            document.getElementById("password");
+        const togglePassword =
+            document.getElementById(
+                "togglePassword"
+            );
 
-        const passwordToggle =
-            document.getElementById("passwordToggle");
+        const passwordInput =
+            document.getElementById(
+                "password"
+            );
 
-        passwordToggle?.addEventListener(
+
+        togglePassword?.addEventListener(
             "click",
             () => {
 
-                const showing =
-                    passwordField.type === "text";
+                const isPassword =
+                    passwordInput.type ===
+                    "password";
 
-                passwordField.type =
-                    showing
-                        ? "password"
-                        : "text";
 
-                passwordToggle.textContent =
-                    showing
-                        ? "Show"
-                        : "Hide";
+                passwordInput.type =
+                    isPassword
+                        ? "text"
+                        : "password";
+
+
+                togglePassword.textContent =
+                    isPassword
+                        ? "Hide"
+                        : "Show";
             }
         );
     </script>

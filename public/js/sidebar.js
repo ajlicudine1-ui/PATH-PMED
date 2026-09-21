@@ -7,24 +7,41 @@ const ADMIN_TEAM_CACHE =
 
 
 // ============================================
-// TEAM ICONS
+// TEAM ICON IMAGES
 // ============================================
 
 const adminTeamIcons = {
-    PPS: "📋",
-    MES: "📊",
-    IMS: "💻",
-    AMIA: "🌾",
-    RSBSA: "👥",
-    F2C2: "🔗",
-    RAFC: "🏛️",
-    DIVISION: "🏢",
-    RAED: "⚙️"
+    PPS: "/images/PPS.png",
+    MES: "/images/MES.png",
+    IMS: "/images/IMS.png",
+    AMIA: "/images/AMIA.png",
+    RSBSA: "/images/RSBSA.png",
+    F2C2: "/images/F2C2.png",
+    RAFC: "/images/RAFC.png",
+    DIVISION: "/images/Division.png"
 };
 
 
 // ============================================
-// LOAD SIDEBAR
+// GET TEAM ICON PATH
+// ============================================
+
+function getAdminTeamIconPath(code) {
+
+    const normalizedCode =
+        String(code || "")
+            .trim()
+            .toUpperCase();
+
+    return (
+        adminTeamIcons[normalizedCode] ||
+        "/images/Division.png"
+    );
+}
+
+
+// ============================================
+// LOAD ADMIN SIDEBAR
 // ============================================
 
 async function loadAdminSidebar() {
@@ -45,8 +62,15 @@ async function loadAdminSidebar() {
             <div class="sidebar-brand">
 
                 <div class="brand-logo">
-                    P
+
+                    <img
+                        src="/images/PMED-LOGO.png"
+                        alt="PMED Logo"
+                        class="brand-logo-image"
+                    >
+
                 </div>
+
 
                 <div class="brand-text">
 
@@ -72,13 +96,22 @@ async function loadAdminSidebar() {
                 >
 
                     <div class="nav-icon">
-                        🏠
+
+                        <img
+                            src="/images/home.png"
+                            alt="Home"
+                            class="nav-icon-image"
+                        >
+
                     </div>
 
+
                     <div class="nav-text">
+
                         <strong>
                             Home
                         </strong>
+
                     </div>
 
                 </a>
@@ -92,9 +125,9 @@ async function loadAdminSidebar() {
     `;
 
 
-    // Display cached teams instantly.
     const cachedTeams =
         getAdminCachedTeams();
+
 
     if (cachedTeams.length) {
 
@@ -107,7 +140,6 @@ async function loadAdminSidebar() {
     setAdminActiveItem();
 
 
-    // Refresh from database.
     await refreshAdminTeams();
 }
 
@@ -125,7 +157,6 @@ function getAdminCachedTeams() {
                 ADMIN_TEAM_CACHE
             );
 
-
         if (!cached) {
             return [];
         }
@@ -134,11 +165,9 @@ function getAdminCachedTeams() {
         const teams =
             JSON.parse(cached);
 
-
         return Array.isArray(teams)
             ? teams
             : [];
-
 
     } catch (error) {
 
@@ -167,7 +196,6 @@ async function refreshAdminTeams() {
                     cache: "no-store"
                 }
             );
-
 
         const result =
             await response.json();
@@ -201,7 +229,6 @@ async function refreshAdminTeams() {
 
         setAdminActiveItem();
 
-
     } catch (error) {
 
         console.error(
@@ -222,7 +249,6 @@ function renderAdminTeams(teams) {
         document.getElementById(
             "adminTeamNavItems"
         );
-
 
     if (!container) {
         return;
@@ -245,9 +271,16 @@ function renderAdminTeams(teams) {
                     team.name || code;
 
 
-                const icon =
-                    adminTeamIcons[code] ||
-                    "📁";
+                const iconPath =
+                    getAdminTeamIconPath(
+                        code
+                    );
+
+
+                const displayCode =
+                    code === "DIVISION"
+                        ? "Division"
+                        : code;
 
 
                 return `
@@ -259,18 +292,29 @@ function renderAdminTeams(teams) {
                     >
 
                         <div class="nav-icon">
-                            ${icon}
+
+                            <img
+                                src="${escapeSidebarHTML(iconPath)}"
+                                alt="${escapeSidebarHTML(displayCode)} icon"
+                                class="nav-icon-image"
+                            >
+
                         </div>
+
 
                         <div class="nav-text">
 
                             <strong>
                                 ${escapeSidebarHTML(
-                                    code === "DIVISION"
-                                        ? "Division"
-                                        : code
+                                    displayCode
                                 )}
                             </strong>
+
+                            <span>
+                                ${escapeSidebarHTML(
+                                    name
+                                )}
+                            </span>
 
                         </div>
 
@@ -313,7 +357,6 @@ function setAdminActiveItem() {
         });
 
 
-    // ADMIN HOME
     if (
         currentPath === "/admin.html" ||
         currentPath.endsWith(
@@ -332,7 +375,6 @@ function setAdminActiveItem() {
     }
 
 
-    // ADMIN TEAM PAGE
     if (selectedTeam) {
 
         const code =
