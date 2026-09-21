@@ -43,6 +43,161 @@ const viewerSelectedTeam =
 
 
 // ============================================
+// CACHE KEYS
+// ============================================
+
+function getViewerAssignmentsCacheKey(code) {
+
+    return `path_viewer_assignments_${String(code).toUpperCase()}`;
+}
+
+
+// ============================================
+// SHOW TEAM INFO IMMEDIATELY
+// ============================================
+
+function showCachedViewerTeamInformation() {
+
+    if (!viewerSelectedTeam) {
+        return;
+    }
+
+
+    // Show team code immediately
+    viewerTeamCode.textContent =
+        String(viewerSelectedTeam)
+            .toUpperCase() === "DIVISION"
+            ? "Division"
+            : String(viewerSelectedTeam)
+                .toUpperCase();
+
+
+    viewerTeamName.textContent = "";
+
+
+    try {
+
+        const cached =
+            localStorage.getItem(
+                "path_sidebar_teams"
+            );
+
+
+        if (!cached) {
+            return;
+        }
+
+
+        const teams =
+            JSON.parse(cached);
+
+
+        if (!Array.isArray(teams)) {
+            return;
+        }
+
+
+        const team =
+            teams.find(
+                item =>
+                    String(item.code)
+                        .toUpperCase() ===
+                    String(viewerSelectedTeam)
+                        .toUpperCase()
+            );
+
+
+        if (!team) {
+            return;
+        }
+
+
+        viewerTeamCode.textContent =
+            String(team.code)
+                .toUpperCase() === "DIVISION"
+                ? "Division"
+                : team.code;
+
+
+        viewerTeamName.textContent =
+            team.name || "";
+
+
+        document.title =
+            `PATH | ${team.code}`;
+
+
+    } catch (error) {
+
+        console.error(
+            "Viewer team cache error:",
+            error
+        );
+    }
+}
+
+
+// ============================================
+// SHOW CACHED ASSIGNMENTS
+// ============================================
+
+function showCachedViewerAssignments() {
+
+    if (!viewerSelectedTeam) {
+        return false;
+    }
+
+
+    try {
+
+        const cached =
+            localStorage.getItem(
+                getViewerAssignmentsCacheKey(
+                    viewerSelectedTeam
+                )
+            );
+
+
+        if (!cached) {
+            return false;
+        }
+
+
+        const records =
+            JSON.parse(cached);
+
+
+        if (!Array.isArray(records)) {
+            return false;
+        }
+
+
+        viewerAssignments =
+            records;
+
+
+        renderViewerTeamAssignments(
+            viewerAssignments
+        );
+
+
+        return true;
+
+
+    } catch (error) {
+
+        console.error(
+            "Viewer assignments cache error:",
+            error
+        );
+
+
+        return false;
+    }
+}
+
+
+// ============================================
 // LOAD TEAM
 // ============================================
 
@@ -55,6 +210,30 @@ async function loadViewerTeam() {
         );
 
         return;
+    }
+
+
+    const hasCachedAssignments =
+        showCachedViewerAssignments();
+
+
+    if (
+        !hasCachedAssignments &&
+        viewerAssignmentsTableBody
+    ) {
+
+        viewerAssignmentsTableBody.innerHTML = `
+            <tr>
+
+                <td
+                    colspan="3"
+                    class="empty-state"
+                >
+                    Loading assignments...
+                </td>
+
+            </tr>
+        `;
     }
 
 
@@ -90,6 +269,17 @@ async function loadViewerTeam() {
                 : [];
 
 
+        // Cache latest assignments
+        localStorage.setItem(
+            getViewerAssignmentsCacheKey(
+                viewerSelectedTeam
+            ),
+            JSON.stringify(
+                viewerAssignments
+            )
+        );
+
+
         updateViewerTeamHeading();
 
 
@@ -106,9 +296,14 @@ async function loadViewerTeam() {
         );
 
 
-        showViewerTeamError(
-            error.message
-        );
+        // If cached data is already visible,
+        // keep it visible.
+        if (!hasCachedAssignments) {
+
+            showViewerTeamError(
+                error.message
+            );
+        }
     }
 }
 
@@ -122,7 +317,11 @@ function updateViewerTeamHeading() {
     if (!viewerAssignments.length) {
 
         viewerTeamCode.textContent =
-            viewerSelectedTeam.toUpperCase();
+            String(viewerSelectedTeam)
+                .toUpperCase() === "DIVISION"
+                ? "Division"
+                : String(viewerSelectedTeam)
+                    .toUpperCase();
 
 
         loadViewerTeamName();
@@ -137,13 +336,25 @@ function updateViewerTeamHeading() {
 
 
     viewerTeamCode.textContent =
-        team.code ||
-        viewerSelectedTeam.toUpperCase();
+        String(team.code || viewerSelectedTeam)
+            .toUpperCase() === "DIVISION"
+            ? "Division"
+            : (
+                team.code ||
+                String(viewerSelectedTeam)
+                    .toUpperCase()
+            );
 
 
     viewerTeamName.textContent =
-        team.name ||
-        "";
+        team.name || "";
+
+
+    if (team.code) {
+
+        document.title =
+            `PATH | ${team.code}`;
+    }
 }
 
 
@@ -173,6 +384,18 @@ async function loadViewerTeamName() {
         }
 
 
+        if (!Array.isArray(teams)) {
+            return;
+        }
+
+
+        // Refresh shared team cache
+        localStorage.setItem(
+            "path_sidebar_teams",
+            JSON.stringify(teams)
+        );
+
+
         const team =
             teams.find(
                 item =>
@@ -183,9 +406,25 @@ async function loadViewerTeamName() {
             );
 
 
+        if (!team) {
+            return;
+        }
+
+
+        viewerTeamCode.textContent =
+            String(team.code)
+                .toUpperCase() === "DIVISION"
+                ? "Division"
+                : team.code;
+
+
         viewerTeamName.textContent =
-            team?.name ||
+            team.name ||
             "PMED Section";
+
+
+        document.title =
+            `PATH | ${team.code}`;
 
 
     } catch (error) {
@@ -330,8 +569,16 @@ function showViewerTeamError(message) {
 
         viewerTeamCode.textContent =
             viewerSelectedTeam
-                ?.toUpperCase() ||
-            "Section";
+                ? (
+                    String(
+                        viewerSelectedTeam
+                    ).toUpperCase() === "DIVISION"
+                        ? "Division"
+                        : String(
+                            viewerSelectedTeam
+                        ).toUpperCase()
+                )
+                : "Section";
     }
 
 
@@ -390,4 +637,8 @@ function escapeViewerTeamHTML(value) {
 // START
 // ============================================
 
+// Show heading instantly
+showCachedViewerTeamInformation();
+
+// Then load/cache assignments
 loadViewerTeam();
