@@ -49,7 +49,7 @@ async function loadViewerSidebar() {
             <nav class="sidebar-nav">
 
                 <a
-                    href="/viewer.html"
+                    href="/"
                     class="nav-item"
                     id="viewerHomeLink"
                 >
@@ -308,11 +308,17 @@ function setViewerActiveItem() {
         });
 
 
+    // ========================================
     // HOME
+    // ========================================
+
     if (
         currentPath === "/" ||
         currentPath.endsWith(
-            "viewer.html"
+            "/index.html"
+        ) ||
+        currentPath.endsWith(
+            "index.html"
         )
     ) {
 
@@ -327,7 +333,10 @@ function setViewerActiveItem() {
     }
 
 
+    // ========================================
     // TEAM PAGE
+    // ========================================
+
     if (selectedTeam) {
 
         const activeTeam =
