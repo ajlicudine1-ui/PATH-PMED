@@ -168,6 +168,65 @@ let selectedAssignmentId = null;
 
 
 // ============================================
+// LAST RESPONSIBLE PERSON PER SECTION
+// ============================================
+
+function getLastPersonCacheKey() {
+
+    return `path_last_responsible_person_${String(
+        teamCode || ""
+    ).toUpperCase()}`;
+}
+
+
+function saveLastResponsiblePerson(name) {
+
+    if (
+        !teamCode ||
+        !name
+    ) {
+        return;
+    }
+
+    localStorage.setItem(
+        getLastPersonCacheKey(),
+        String(name).trim()
+    );
+}
+
+
+function getLastResponsiblePerson() {
+
+    if (!teamCode) {
+        return "";
+    }
+
+    const cached =
+        localStorage.getItem(
+            getLastPersonCacheKey()
+        );
+
+    if (cached) {
+        return cached;
+    }
+
+    if (
+        Array.isArray(assignments) &&
+        assignments.length
+    ) {
+        return (
+            assignments[0]
+                ?.personnel
+                ?.full_name ||
+            ""
+        );
+    }
+
+    return "";
+}
+
+
+// ============================================
 // LOAD TEAM
 // ============================================
 
@@ -531,9 +590,17 @@ function openAddAssignmentModal() {
 
     assignmentForm.reset();
 
-    responsiblePersonInput.disabled = false;
-    designationInput.disabled = false;
-    functionsActivitiesInput.disabled = false;
+    responsiblePersonInput.value =
+        getLastResponsiblePerson();
+
+    responsiblePersonInput.disabled =
+        false;
+
+    designationInput.disabled =
+        false;
+
+    functionsActivitiesInput.disabled =
+        false;
 
     modalTitle.textContent =
         "Add Assignment";
@@ -927,6 +994,15 @@ if (assignmentForm) {
                         "Unable to save assignment."
                     );
                 }
+
+
+                if (modalMode === "add") {
+
+                    saveLastResponsiblePerson(
+                        responsiblePerson
+                    );
+                }
+
 
                 closeModal();
 
