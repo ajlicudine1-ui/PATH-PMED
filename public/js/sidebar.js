@@ -1,109 +1,114 @@
 // ============================================
-// PATH - SIDEBAR
+// PATH - ADMIN SIDEBAR
 // ============================================
 
-const SIDEBAR_TEAMS_CACHE = "path_sidebar_teams";
+const ADMIN_TEAM_CACHE =
+    "path_sidebar_teams";
 
 
 // ============================================
-// DEFAULT TEAMS
-// Used only if there is no cache yet
+// TEAM ICONS
 // ============================================
 
-const defaultTeams = [
-    {
-        code: "PPS",
-        name: "Planning and Programming Section"
-    },
-    {
-        code: "MES",
-        name: "Monitoring and Evaluation Section"
-    },
-    {
-        code: "IMS",
-        name: "Information Management Section"
-    },
-    {
-        code: "AMIA",
-        name: "Adaptation and Mitigation Initiative in Agriculture"
-    },
-    {
-        code: "RSBSA",
-        name: "Registry System for Basic Sectors in Agriculture"
-    },
-    {
-        code: "F2C2",
-        name: "Farm and Fisheries Clustering and Consolidation"
-    },
-    {
-        code: "RAFC",
-        name: "Regional Agricultural and Fishery Council"
-    },
-    {
-        code: "DIVISION",
-        name: "Division"
-    }
-];
+const adminTeamIcons = {
+    PPS: "📋",
+    MES: "📊",
+    IMS: "💻",
+    AMIA: "🌾",
+    RSBSA: "👥",
+    F2C2: "🔗",
+    RAFC: "🏛️",
+    DIVISION: "🏢",
+    RAED: "⚙️"
+};
 
 
 // ============================================
 // LOAD SIDEBAR
 // ============================================
 
-async function loadSidebar() {
+async function loadAdminSidebar() {
 
     const sidebarContainer =
-        document.getElementById("sidebarContainer");
+        document.getElementById(
+            "sidebarContainer"
+        );
 
     if (!sidebarContainer) {
         return;
     }
 
-    try {
 
-        // Load sidebar structure
-        const sidebarResponse =
-            await fetch("/components/sidebar.html");
+    sidebarContainer.innerHTML = `
+        <aside class="sidebar">
 
-        if (!sidebarResponse.ok) {
-            throw new Error(
-                "Unable to load sidebar."
-            );
-        }
+            <div class="sidebar-brand">
 
-        sidebarContainer.innerHTML =
-            await sidebarResponse.text();
+                <div class="brand-logo">
+                    P
+                </div>
 
+                <div class="brand-text">
 
-        // ====================================
-        // DISPLAY TEAMS IMMEDIATELY
-        // ====================================
+                    <h1>
+                        PATH
+                    </h1>
 
-        const cachedTeams =
-            getCachedTeams();
+                    <p>
+                        PMED Assignment and Team Hub
+                    </p>
 
-        renderSidebarTeams(
-            cachedTeams.length
-                ? cachedTeams
-                : defaultTeams
-        );
+                </div>
 
-        setActiveSidebarItem();
+            </div>
 
 
-        // ====================================
-        // REFRESH FROM DATABASE IN BACKGROUND
-        // ====================================
+            <nav class="sidebar-nav">
 
-        refreshSidebarTeams();
+                <a
+                    href="/admin.html"
+                    class="nav-item"
+                    id="adminHomeLink"
+                >
 
-    } catch (error) {
+                    <div class="nav-icon">
+                        🏠
+                    </div>
 
-        console.error(
-            "Sidebar error:",
-            error
+                    <div class="nav-text">
+                        <strong>
+                            Home
+                        </strong>
+                    </div>
+
+                </a>
+
+
+                <div id="adminTeamNavItems"></div>
+
+            </nav>
+
+        </aside>
+    `;
+
+
+    // Display cached teams instantly.
+    const cachedTeams =
+        getAdminCachedTeams();
+
+    if (cachedTeams.length) {
+
+        renderAdminTeams(
+            cachedTeams
         );
     }
+
+
+    setAdminActiveItem();
+
+
+    // Refresh from database.
+    await refreshAdminTeams();
 }
 
 
@@ -111,30 +116,34 @@ async function loadSidebar() {
 // GET CACHED TEAMS
 // ============================================
 
-function getCachedTeams() {
+function getAdminCachedTeams() {
 
     try {
 
         const cached =
             localStorage.getItem(
-                SIDEBAR_TEAMS_CACHE
+                ADMIN_TEAM_CACHE
             );
+
 
         if (!cached) {
             return [];
         }
 
+
         const teams =
             JSON.parse(cached);
+
 
         return Array.isArray(teams)
             ? teams
             : [];
 
+
     } catch (error) {
 
         console.error(
-            "Sidebar cache error:",
+            "Admin sidebar cache error:",
             error
         );
 
@@ -144,68 +153,59 @@ function getCachedTeams() {
 
 
 // ============================================
-// SAVE TEAMS TO CACHE
+// REFRESH TEAMS
 // ============================================
 
-function saveTeamsToCache(teams) {
-
-    try {
-
-        localStorage.setItem(
-            SIDEBAR_TEAMS_CACHE,
-            JSON.stringify(teams)
-        );
-
-    } catch (error) {
-
-        console.error(
-            "Unable to save sidebar cache:",
-            error
-        );
-    }
-}
-
-
-// ============================================
-// REFRESH TEAMS FROM DATABASE
-// ============================================
-
-async function refreshSidebarTeams() {
+async function refreshAdminTeams() {
 
     try {
 
         const response =
-            await fetch("/api/teams");
+            await fetch(
+                "/api/teams",
+                {
+                    cache: "no-store"
+                }
+            );
 
-        const teams =
+
+        const result =
             await response.json();
+
 
         if (!response.ok) {
 
             throw new Error(
-                teams.error ||
-                "Unable to load sections."
+                result.error ||
+                "Unable to load teams."
             );
         }
 
-        if (!Array.isArray(teams)) {
-            return;
-        }
+
+        const teams =
+            Array.isArray(result)
+                ? result
+                : [];
 
 
-        // Save newest teams
-        saveTeamsToCache(teams);
+        localStorage.setItem(
+            ADMIN_TEAM_CACHE,
+            JSON.stringify(teams)
+        );
 
 
-        // Update sidebar
-        renderSidebarTeams(teams);
+        renderAdminTeams(
+            teams
+        );
 
-        setActiveSidebarItem();
+
+        setAdminActiveItem();
+
 
     } catch (error) {
 
         console.error(
-            "Sidebar refresh error:",
+            "Admin sidebar error:",
             error
         );
     }
@@ -213,58 +213,64 @@ async function refreshSidebarTeams() {
 
 
 // ============================================
-// RENDER SIDEBAR TEAMS
+// RENDER TEAMS
 // ============================================
 
-function renderSidebarTeams(teams) {
+function renderAdminTeams(teams) {
 
     const container =
         document.getElementById(
-            "teamNavItems"
+            "adminTeamNavItems"
         );
+
 
     if (!container) {
         return;
     }
+
 
     container.innerHTML =
         teams
             .map(team => {
 
                 const code =
-                    escapeSidebarHTML(
-                        team.code
-                    );
+                    String(
+                        team.code || ""
+                    )
+                        .trim()
+                        .toUpperCase();
+
 
                 const name =
-                    escapeSidebarHTML(
-                        team.name
-                    );
+                    team.name || code;
+
+
+                const icon =
+                    adminTeamIcons[code] ||
+                    "📁";
+
 
                 return `
                     <a
-                        href="/team.html?team=${encodeURIComponent(team.code)}"
-                        class="nav-item team-link"
-                        data-team="${code}"
+                        href="/team.html?team=${encodeURIComponent(code)}"
+                        class="nav-item"
+                        data-admin-team="${escapeSidebarHTML(code)}"
+                        title="${escapeSidebarHTML(name)}"
                     >
 
                         <div class="nav-icon">
-                            ${getTeamIcon(team.code)}
+                            ${icon}
                         </div>
 
                         <div class="nav-text">
 
                             <strong>
-                                ${
-                                    team.code === "DIVISION"
+                                ${escapeSidebarHTML(
+                                    code === "DIVISION"
                                         ? "Division"
                                         : code
-                                }
+                                )}
                             </strong>
-
-                            <span>
-                                ${name}
-                            </span>
 
                         </div>
 
@@ -276,61 +282,29 @@ function renderSidebarTeams(teams) {
 
 
 // ============================================
-// ICONS
-// ============================================
-
-function getTeamIcon(code) {
-
-    const icons = {
-
-        PPS: "📋",
-
-        MES: "📊",
-
-        IMS: "💻",
-
-        AMIA: "🌾",
-
-        RSBSA: "👥",
-
-        F2C2: "🔗",
-
-        RAFC: "🏛️",
-
-        DIVISION: "🏢",
-
-        RAED: "⚙️"
-    };
-
-    return (
-        icons[
-            String(code)
-                .toUpperCase()
-        ] || "📁"
-    );
-}
-
-
-// ============================================
 // ACTIVE SIDEBAR ITEM
 // ============================================
 
-function setActiveSidebarItem() {
+function setAdminActiveItem() {
 
     const currentPath =
         window.location.pathname;
+
 
     const params =
         new URLSearchParams(
             window.location.search
         );
 
+
     const selectedTeam =
         params.get("team");
 
 
     document
-        .querySelectorAll(".nav-item")
+        .querySelectorAll(
+            ".sidebar .nav-item"
+        )
         .forEach(item => {
 
             item.classList.remove(
@@ -339,17 +313,17 @@ function setActiveSidebarItem() {
         });
 
 
-    // HOME
+    // ADMIN HOME
     if (
-        currentPath === "/" ||
+        currentPath === "/admin.html" ||
         currentPath.endsWith(
-            "index.html"
+            "/admin.html"
         )
     ) {
 
         document
-            .querySelector(
-                '[data-page="home"]'
+            .getElementById(
+                "adminHomeLink"
             )
             ?.classList
             .add("active");
@@ -358,12 +332,17 @@ function setActiveSidebarItem() {
     }
 
 
-    // TEAM
+    // ADMIN TEAM PAGE
     if (selectedTeam) {
+
+        const code =
+            selectedTeam
+                .toUpperCase();
+
 
         document
             .querySelector(
-                `[data-team="${selectedTeam.toUpperCase()}"]`
+                `[data-admin-team="${CSS.escape(code)}"]`
             )
             ?.classList
             .add("active");
@@ -384,6 +363,7 @@ function escapeSidebarHTML(value) {
         return "";
     }
 
+
     return String(value)
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
@@ -397,7 +377,4 @@ function escapeSidebarHTML(value) {
 // START
 // ============================================
 
-document.addEventListener(
-    "DOMContentLoaded",
-    loadSidebar
-);
+loadAdminSidebar();
