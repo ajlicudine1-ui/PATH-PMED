@@ -22,7 +22,7 @@
     >
 </head>
 
-<body class="admin-page">
+<body>
 
     <div class="app-layout">
 
@@ -37,21 +37,16 @@
             <header class="topbar">
 
                 <div>
-                    <h2>PATH</h2>
+
+                    <h2>
+                        PATH
+                    </h2>
 
                     <p>
                         PMED Assignment and Team Hub
                     </p>
+
                 </div>
-
-
-                <button
-                    type="button"
-                    class="logout-button"
-                    id="logoutBtn"
-                >
-                    Logout
-                </button>
 
             </header>
 
@@ -60,42 +55,16 @@
             <section class="page-content">
 
                 <!-- PAGE HEADING -->
-                <div class="page-heading dashboard-heading">
+                <div class="page-heading">
 
-                    <div>
+                    <h1>
+                        Dashboard
+                    </h1>
 
-                        <h1>
-                            Dashboard
-                        </h1>
-
-                        <p>
-                            Monitor PMED personnel assignments,
-                            responsibilities, and team activities.
-                        </p>
-
-                    </div>
-
-
-                    <div class="dashboard-actions">
-
-                        <button
-                            type="button"
-                            class="manage-section-button"
-                            id="manageSectionsBtn"
-                        >
-                            Manage Sections
-                        </button>
-
-
-                        <button
-                            type="button"
-                            class="add-section-button"
-                            id="addSectionBtn"
-                        >
-                            + Add Section
-                        </button>
-
-                    </div>
+                    <p>
+                        View PMED personnel assignments,
+                        responsibilities, and team activities.
+                    </p>
 
                 </div>
 
@@ -144,13 +113,8 @@
                 </div>
 
 
-                <!-- =========================================
-                     RECENT ASSIGNMENTS VIEW
-                ========================================== -->
-                <div
-                    class="content-card"
-                    id="recentAssignmentsView"
-                >
+                <!-- RECENT ASSIGNMENTS -->
+                <div class="content-card">
 
                     <div class="card-header">
 
@@ -198,7 +162,7 @@
                             </thead>
 
 
-                            <tbody id="dashboardTableBody">
+                            <tbody id="viewerTableBody">
 
                                 <tr>
 
@@ -206,79 +170,7 @@
                                         colspan="4"
                                         class="empty-state"
                                     >
-                                        No assignments found.
-                                    </td>
-
-                                </tr>
-
-                            </tbody>
-
-                        </table>
-
-                    </div>
-
-                </div>
-
-
-                <!-- =========================================
-                     MANAGE SECTIONS VIEW
-                ========================================== -->
-                <div
-                    class="content-card hidden"
-                    id="manageSectionsView"
-                >
-
-                    <div class="card-header">
-
-                        <div>
-
-                            <h2>
-                                Manage Sections
-                            </h2>
-
-                            <p>
-                                Edit or remove PMED sections.
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="table-wrapper">
-
-                        <table>
-
-                            <thead>
-
-                                <tr>
-
-                                    <th>
-                                        Section Code
-                                    </th>
-
-                                    <th>
-                                        Section Name
-                                    </th>
-
-                                    <th class="actions-column">
-                                        Actions
-                                    </th>
-
-                                </tr>
-
-                            </thead>
-
-
-                            <tbody id="sectionsTableBody">
-
-                                <tr>
-
-                                    <td
-                                        colspan="3"
-                                        class="empty-state"
-                                    >
-                                        Loading sections...
+                                        Loading assignments...
                                     </td>
 
                                 </tr>
@@ -298,120 +190,11 @@
     </div>
 
 
-    <!-- =========================================
-         ADD / EDIT SECTION MODAL
-    ========================================== -->
-    <div
-        class="modal-overlay"
-        id="sectionModal"
-    >
+    <!-- VIEWER SIDEBAR -->
+    <script src="/js/viewer-sidebar.js"></script>
 
-        <div class="modal-card">
-
-            <div class="modal-header">
-
-                <div>
-
-                    <h2 id="sectionModalTitle">
-                        Add Section
-                    </h2>
-
-                    <p id="sectionModalDescription">
-                        Add a new PMED section or division.
-                    </p>
-
-                </div>
-
-
-                <button
-                    type="button"
-                    class="modal-close"
-                    id="closeSectionModal"
-                    aria-label="Close"
-                >
-                    &times;
-                </button>
-
-            </div>
-
-
-            <form id="sectionForm">
-
-                <div class="form-group">
-
-                    <label for="sectionCode">
-                        Section Code
-                    </label>
-
-                    <input
-                        type="text"
-                        id="sectionCode"
-                        placeholder="Example: RAED"
-                        maxlength="20"
-                        autocomplete="off"
-                        required
-                    >
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label for="sectionName">
-                        Section Name
-                    </label>
-
-                    <input
-                        type="text"
-                        id="sectionName"
-                        placeholder="Enter complete section name"
-                        maxlength="200"
-                        autocomplete="off"
-                        required
-                    >
-
-                </div>
-
-
-                <div class="modal-actions">
-
-                    <button
-                        type="button"
-                        class="cancel-button"
-                        id="cancelSection"
-                    >
-                        Cancel
-                    </button>
-
-
-                    <button
-                        type="submit"
-                        class="save-button"
-                        id="saveSection"
-                    >
-                        Save Section
-                    </button>
-
-                </div>
-
-            </form>
-
-        </div>
-
-    </div>
-
-
-    <!-- SUPABASE BROWSER LIBRARY -->
-    <script
-        src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
-    ></script>
-
-    <!-- ADMIN SESSION GUARD -->
-    <script src="/js/auth.js"></script>
-
-    <!-- APP SCRIPTS -->
-    <script src="/js/sidebar.js"></script>
-    <script src="/js/dashboard.js"></script>
+    <!-- VIEWER DASHBOARD -->
+    <script src="/js/viewer.js"></script>
 
 </body>
 

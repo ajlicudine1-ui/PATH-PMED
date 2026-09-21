@@ -2,7 +2,6 @@
 // PATH - ADMIN LOGIN
 // ============================================
 
-
 // IMPORTANT:
 // Use only the publishable key here.
 // NEVER use SUPABASE_SECRET_KEY in frontend JS.
@@ -12,7 +11,6 @@ const SUPABASE_URL =
 
 const SUPABASE_PUBLISHABLE_KEY =
     "sb_publishable_sugs8pHalzzKSKu33TfgmA_5Tx_OM0-";
-
 
 const supabaseClient =
     window.supabase.createClient(
@@ -50,17 +48,30 @@ async function checkExistingSession() {
     const {
         data: {
             session
-        }
+        },
+        error
     } =
         await supabaseClient
             .auth
             .getSession();
 
 
+    if (error) {
+
+        console.error(
+            "Session check error:",
+            error
+        );
+
+        return;
+    }
+
+
     if (session) {
 
-        window.location.href =
-            "/index.html";
+        window.location.replace(
+            "/admin.html"
+        );
     }
 }
 
@@ -129,8 +140,9 @@ loginForm?.addEventListener(
             }
 
 
-            window.location.href =
-                "/index.html";
+            window.location.replace(
+                "/admin.html"
+            );
 
 
         } catch (error) {
