@@ -93,7 +93,7 @@ function showCachedTeamInformation() {
             cachedTeam.name || "";
 
         document.title =
-            `PATH | ${cachedTeam.code}`;
+            `P.A.T.H | ${cachedTeam.code}`;
 
     } catch (error) {
 
@@ -519,7 +519,7 @@ async function loadTeam() {
             currentTeam.name;
 
         document.title =
-            `PATH | ${currentTeam.code}`;
+            `P.A.T.H | ${currentTeam.code}`;
 
         await loadAssignments();
 
