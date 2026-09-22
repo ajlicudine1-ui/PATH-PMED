@@ -975,11 +975,18 @@ async function refreshSidebarAfterSectionChange() {
 
 
         if (
-            typeof loadSidebar ===
+            typeof refreshAdminTeams ===
             "function"
         ) {
 
-            await loadSidebar();
+            await refreshAdminTeams();
+
+        } else if (
+            typeof loadAdminSidebar ===
+            "function"
+        ) {
+
+            await loadAdminSidebar();
         }
 
 
