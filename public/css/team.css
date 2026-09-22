@@ -546,3 +546,86 @@ td {
         max-width: 100%;
     }
 }
+
+
+/* Add to public/css/team.css */
+
+.grouped-person-cell {
+    vertical-align: middle;
+    font-weight: 600;
+    background: #fbfdfb;
+    border-right: 1px solid #e5e7eb;
+}
+
+.grouped-person-cell[rowspan] {
+    padding-top: 16px;
+    padding-bottom: 16px;
+}
+/* Responsible Person format guide */
+
+.field-guide {
+    display: block;
+    margin-top: 7px;
+    font-size: 12px;
+    line-height: 1.45;
+    color: #667085;
+}
+
+.field-guide strong {
+    color: #344054;
+    font-weight: 600;
+}
+
+
+/* Add to the bottom of public/css/team.css */
+
+.label-example {
+    margin-left: 6px;
+    font-size: 12px;
+    font-weight: 400;
+    color: #667085;
+}
+/* =========================================
+   P.A.T.H VIEWER TOP BAR
+========================================= */
+
+.viewer-topbar {
+    min-height: 118px;
+
+    display: flex;
+    align-items: center;
+
+    padding:
+        24px
+        42px;
+
+    background: #ffffff;
+
+    border-bottom:
+        1px solid #e5e7eb;
+}
+
+
+.viewer-topbar-brand h2 {
+    margin: 0;
+
+    color: #176b39;
+
+    font-size: 28px;
+    line-height: 1;
+
+    font-weight: 800;
+
+    letter-spacing: 1.4px;
+}
+
+
+.viewer-topbar-brand p {
+    margin-top: 8px;
+
+    color: #667085;
+
+    font-size: 14px;
+
+    line-height: 1.4;
+}

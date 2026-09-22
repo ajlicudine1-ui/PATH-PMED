@@ -1,5 +1,6 @@
 // ============================================
-// PATH - VIEWER SIDEBAR
+// P.A.T.H - VIEWER SIDEBAR
+// PMED Assignment and Team Hub
 // ============================================
 
 const VIEWER_TEAM_CACHE =
@@ -7,18 +8,71 @@ const VIEWER_TEAM_CACHE =
 
 
 // ============================================
+// LOAD VIEWER SIDEBAR STYLESHEET
+// ============================================
+
+function ensureViewerSidebarStyles() {
+
+    const stylesheetId =
+        "viewerSidebarStyles";
+
+    if (
+        document.getElementById(
+            stylesheetId
+        )
+    ) {
+        return;
+    }
+
+    const link =
+        document.createElement(
+            "link"
+        );
+
+    link.id =
+        stylesheetId;
+
+    link.rel =
+        "stylesheet";
+
+    link.href =
+        "/css/viewer-sidebar.css";
+
+    document.head.appendChild(
+        link
+    );
+}
+
+
+// ============================================
 // TEAM ICON IMAGES
 // ============================================
 
 const viewerTeamIcons = {
-    PPS: "/images/PPS.png",
-    MES: "/images/MES.png",
-    IMS: "/images/IMS.png",
-    AMIA: "/images/AMIA.png",
-    RSBSA: "/images/RSBSA.png",
-    F2C2: "/images/F2C2.png",
-    RAFC: "/images/RAFC.png",
-    DIVISION: "/images/Division.png"
+
+    PPS:
+        "/images/PPS.png",
+
+    MES:
+        "/images/MES.png",
+
+    IMS:
+        "/images/IMS.png",
+
+    AMIA:
+        "/images/AMIA.png",
+
+    RSBSA:
+        "/images/RSBSA.png",
+
+    F2C2:
+        "/images/F2C2.png",
+
+    RAFC:
+        "/images/RAFC.png",
+
+    DIVISION:
+        "/images/Division.png"
 };
 
 
@@ -34,7 +88,9 @@ function getViewerTeamIconPath(code) {
             .toUpperCase();
 
     return (
-        viewerTeamIcons[normalizedCode] ||
+        viewerTeamIcons[
+            normalizedCode
+        ] ||
         "/images/Division.png"
     );
 }
@@ -45,6 +101,8 @@ function getViewerTeamIconPath(code) {
 // ============================================
 
 async function loadViewerSidebar() {
+
+    ensureViewerSidebarStyles();
 
     const sidebarContainer =
         document.getElementById(
@@ -57,11 +115,11 @@ async function loadViewerSidebar() {
 
 
     sidebarContainer.innerHTML = `
-        <aside class="sidebar">
+        <aside class="sidebar viewer-sidebar">
 
-            <div class="sidebar-brand">
+            <div class="sidebar-brand viewer-sidebar-brand">
 
-                <div class="brand-logo">
+                <div class="brand-logo viewer-brand-logo">
 
                     <img
                         src="/images/PMED-LOGO.png"
@@ -72,10 +130,10 @@ async function loadViewerSidebar() {
                 </div>
 
 
-                <div class="brand-text">
+                <div class="brand-text viewer-brand-text">
 
                     <h1>
-                        PATH
+                        P.A.T.H
                     </h1>
 
                     <p>
@@ -87,7 +145,7 @@ async function loadViewerSidebar() {
             </div>
 
 
-            <nav class="sidebar-nav">
+            <nav class="sidebar-nav viewer-sidebar-nav">
 
                 <a
                     href="/"
@@ -117,7 +175,10 @@ async function loadViewerSidebar() {
                 </a>
 
 
-                <div id="viewerTeamNavItems"></div>
+                <div
+                    id="viewerTeamNavItems"
+                    class="viewer-team-nav-items"
+                ></div>
 
             </nav>
 
@@ -157,6 +218,7 @@ function getViewerCachedTeams() {
                 VIEWER_TEAM_CACHE
             );
 
+
         if (!cached) {
             return [];
         }
@@ -165,9 +227,11 @@ function getViewerCachedTeams() {
         const teams =
             JSON.parse(cached);
 
+
         return Array.isArray(teams)
             ? teams
             : [];
+
 
     } catch (error) {
 
@@ -175,6 +239,7 @@ function getViewerCachedTeams() {
             "Viewer sidebar cache error:",
             error
         );
+
 
         return [];
     }
@@ -196,6 +261,7 @@ async function refreshViewerTeams() {
                     cache: "no-store"
                 }
             );
+
 
         const result =
             await response.json();
@@ -229,6 +295,7 @@ async function refreshViewerTeams() {
 
         setViewerActiveItem();
 
+
     } catch (error) {
 
         console.error(
@@ -249,6 +316,7 @@ function renderViewerTeams(teams) {
         document.getElementById(
             "viewerTeamNavItems"
         );
+
 
     if (!container) {
         return;
@@ -347,7 +415,7 @@ function setViewerActiveItem() {
 
     document
         .querySelectorAll(
-            ".sidebar .nav-item"
+            ".viewer-sidebar .nav-item"
         )
         .forEach(item => {
 

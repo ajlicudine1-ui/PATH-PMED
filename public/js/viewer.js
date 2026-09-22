@@ -113,6 +113,72 @@ async function loadViewerDashboard() {
 
 
 // ============================================
+// NORMALIZE PERSON NAME
+// ============================================
+
+function normalizeViewerDashboardName(name) {
+
+    return String(name || "")
+        .trim()
+        .toLowerCase()
+        .replace(/[.,]/g, "")
+        .replace(/\s+/g, " ");
+}
+
+
+// ============================================
+// GROUP ASSIGNMENTS BY PERSON
+// ============================================
+
+function groupViewerDashboardAssignments(records) {
+
+    const groups =
+        new Map();
+
+
+    records.forEach(record => {
+
+        const personnel =
+            record.personnel || {};
+
+
+        const fullName =
+            personnel.full_name || "";
+
+
+        const key =
+            normalizeViewerDashboardName(
+                fullName
+            ) ||
+            `assignment-${record.id}`;
+
+
+        if (!groups.has(key)) {
+
+            groups.set(
+                key,
+                {
+                    fullName,
+                    records: []
+                }
+            );
+        }
+
+
+        groups
+            .get(key)
+            .records
+            .push(record);
+    });
+
+
+    return Array.from(
+        groups.values()
+    );
+}
+
+
+// ============================================
 // RENDER ASSIGNMENTS
 // ============================================
 
@@ -140,46 +206,78 @@ function renderViewerAssignments(records) {
     }
 
 
+    const groupedRecords =
+        groupViewerDashboardAssignments(
+            records
+        );
+
+
     viewerTableBody.innerHTML =
-        records
-            .map(record => {
+        groupedRecords
+            .map(group => {
 
-                const personnel =
-                    record.personnel || {};
-
-                const team =
-                    record.teams || {};
+                const rowCount =
+                    group.records.length;
 
 
-                return `
-                    <tr>
+                return group.records
+                    .map(
+                        (record, index) => {
 
-                        <td>
-                            ${escapeViewerHTML(
-                                personnel.full_name || ""
-                            )}
-                        </td>
+                            const personnel =
+                                record.personnel || {};
 
-                        <td>
-                            ${escapeViewerHTML(
-                                personnel.designation || ""
-                            )}
-                        </td>
+                            const team =
+                                record.teams || {};
 
-                        <td>
-                            ${escapeViewerHTML(
-                                record.functions_activities || ""
-                            )}
-                        </td>
+                            const designation =
+                                record.designation ||
+                                personnel.designation ||
+                                "";
 
-                        <td>
-                            ${escapeViewerHTML(
-                                team.code || ""
-                            )}
-                        </td>
+                            const responsiblePersonCell =
+                                index === 0
+                                    ? `
+                                        <td
+                                            rowspan="${rowCount}"
+                                            class="viewer-dashboard-grouped-person-cell"
+                                        >
+                                            ${escapeViewerHTML(
+                                                group.fullName
+                                            )}
+                                        </td>
+                                    `
+                                    : "";
 
-                    </tr>
-                `;
+
+                            return `
+                                <tr>
+
+                                    ${responsiblePersonCell}
+
+                                    <td>
+                                        ${escapeViewerHTML(
+                                            designation
+                                        )}
+                                    </td>
+
+                                    <td>
+                                        ${escapeViewerHTML(
+                                            record.functions_activities || ""
+                                        )}
+                                    </td>
+
+                                    <td>
+                                        ${escapeViewerHTML(
+                                            team.code || ""
+                                        )}
+                                    </td>
+
+                                </tr>
+                            `;
+                        }
+                    )
+                    .join("");
             })
             .join("");
 }

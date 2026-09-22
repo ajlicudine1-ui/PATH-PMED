@@ -815,4 +815,160 @@ button {
         margin-top: 8px;
     }
 }
+/* =========================================
+   P.A.T.H VIEWER TOP BAR
+========================================= */
 
+.viewer-topbar {
+    min-height: 118px;
+
+    display: flex;
+    align-items: center;
+
+    padding:
+        24px
+        42px;
+
+    background: #ffffff;
+
+    border-bottom:
+        1px solid #e5e7eb;
+}
+
+
+.viewer-topbar-brand h2 {
+    margin: 0;
+
+    color: #176b39;
+
+    font-size: 28px;
+    line-height: 1;
+
+    font-weight: 800;
+
+    letter-spacing: 1.4px;
+}
+
+
+.viewer-topbar-brand p {
+    margin-top: 8px;
+
+    color: #667085;
+
+    font-size: 14px;
+
+    line-height: 1.4;
+}
+
+/* =========================================
+   TOP BAR LAYOUT FIX
+========================================= */
+
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    width: 100%;
+
+    box-sizing: border-box;
+}
+
+
+.topbar > div {
+    min-width: 0;
+}
+
+
+.logout-button {
+    flex-shrink: 0;
+
+    margin-left: auto;
+
+    align-self: center;
+}
+
+
+/* =========================================
+   FINAL TOP BAR / LOGOUT POSITION FIX
+========================================= */
+
+.topbar,
+.viewer-topbar {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+
+    width: 100% !important;
+
+    box-sizing: border-box;
+}
+
+
+.topbar > div,
+.viewer-topbar > div,
+.viewer-topbar-brand {
+    flex: 1 1 auto !important;
+
+    width: auto !important;
+    min-width: 0 !important;
+
+    margin: 0 !important;
+}
+
+
+.topbar .logout-button,
+.viewer-topbar .logout-button,
+.logout-button {
+    position: static !important;
+
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 auto !important;
+
+    width: auto !important;
+
+    margin:
+        0
+        0
+        0
+        auto !important;
+
+    align-self: center !important;
+}
+
+
+/* Keep the header on one row on desktop/tablet */
+@media (min-width: 701px) {
+
+    .topbar,
+    .viewer-topbar {
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+    }
+}
+
+
+/* Mobile can still keep text and logout aligned */
+@media (max-width: 700px) {
+
+    .topbar,
+    .viewer-topbar {
+        gap: 14px;
+
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+    }
+
+    .topbar .logout-button,
+    .viewer-topbar .logout-button {
+        margin-left: auto !important;
+    }
+}

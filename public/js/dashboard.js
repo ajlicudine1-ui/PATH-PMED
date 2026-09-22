@@ -156,6 +156,63 @@ async function loadDashboard() {
 // RENDER ASSIGNMENTS
 // ============================================
 
+function normalizeDashboardPersonName(name) {
+
+    return String(name || "")
+        .trim()
+        .toLowerCase()
+        .replace(/[.,]/g, "")
+        .replace(/\s+/g, " ");
+}
+
+
+function groupDashboardAssignmentsByPerson(records) {
+
+    const groups = new Map();
+
+
+    records.forEach(record => {
+
+        const personnel =
+            record.personnel || {};
+
+
+        const fullName =
+            personnel.full_name || "";
+
+
+        const key =
+            normalizeDashboardPersonName(
+                fullName
+            ) ||
+            `assignment-${record.id}`;
+
+
+        if (!groups.has(key)) {
+
+            groups.set(
+                key,
+                {
+                    fullName,
+                    records: []
+                }
+            );
+        }
+
+
+        groups
+            .get(key)
+            .records
+            .push(record);
+    });
+
+
+    return Array.from(
+        groups.values()
+    );
+}
+
+
 function renderDashboardAssignments(records) {
 
     if (!dashboardTableBody) {
@@ -182,46 +239,78 @@ function renderDashboardAssignments(records) {
     }
 
 
+    const groupedRecords =
+        groupDashboardAssignmentsByPerson(
+            records
+        );
+
+
     dashboardTableBody.innerHTML =
-        records
-            .map(record => {
+        groupedRecords
+            .map(group => {
 
-                const personnel =
-                    record.personnel || {};
-
-                const team =
-                    record.teams || {};
+                const rowCount =
+                    group.records.length;
 
 
-                return `
-                    <tr>
+                return group.records
+                    .map(
+                        (record, index) => {
 
-                        <td>
-                            ${escapeDashboardHTML(
-                                personnel.full_name || ""
-                            )}
-                        </td>
+                            const personnel =
+                                record.personnel || {};
 
-                        <td>
-                            ${escapeDashboardHTML(
-                                personnel.designation || ""
-                            )}
-                        </td>
+                            const team =
+                                record.teams || {};
 
-                        <td>
-                            ${escapeDashboardHTML(
-                                record.functions_activities || ""
-                            )}
-                        </td>
+                            const designation =
+                                record.designation ||
+                                personnel.designation ||
+                                "";
 
-                        <td>
-                            ${escapeDashboardHTML(
-                                team.code || ""
-                            )}
-                        </td>
+                            const responsiblePersonCell =
+                                index === 0
+                                    ? `
+                                        <td
+                                            rowspan="${rowCount}"
+                                            class="dashboard-grouped-person-cell"
+                                        >
+                                            ${escapeDashboardHTML(
+                                                group.fullName
+                                            )}
+                                        </td>
+                                    `
+                                    : "";
 
-                    </tr>
-                `;
+
+                            return `
+                                <tr>
+
+                                    ${responsiblePersonCell}
+
+                                    <td>
+                                        ${escapeDashboardHTML(
+                                            designation
+                                        )}
+                                    </td>
+
+                                    <td>
+                                        ${escapeDashboardHTML(
+                                            record.functions_activities || ""
+                                        )}
+                                    </td>
+
+                                    <td>
+                                        ${escapeDashboardHTML(
+                                            team.code || ""
+                                        )}
+                                    </td>
+
+                                </tr>
+                            `;
+                        }
+                    )
+                    .join("");
             })
             .join("");
 }

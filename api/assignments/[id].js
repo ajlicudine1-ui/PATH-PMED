@@ -8,6 +8,24 @@ import {
 } from "../../lib/requireAuth.js";
 
 
+// ==========================================
+// NORMALIZE PERSON NAME
+// ==========================================
+
+function normalizePersonName(value) {
+
+    return String(value || "")
+        .trim()
+        .toLowerCase()
+        .replace(/[.,]/g, "")
+        .replace(/\s+/g, " ");
+}
+
+
+// ==========================================
+// API HANDLER
+// ==========================================
+
 export default async function handler(req, res) {
 
     const {
@@ -44,6 +62,7 @@ export default async function handler(req, res) {
                         id,
                         personnel_id,
                         team_id,
+                        designation,
                         functions_activities,
                         personnel (
                             id,
@@ -136,8 +155,18 @@ export default async function handler(req, res) {
             }
 
 
+            const cleanName =
+                responsiblePerson.trim();
+
+            const cleanDesignation =
+                designation.trim();
+
+            const cleanFunctions =
+                functionsActivities.trim();
+
+
             // ==========================================
-            // GET CURRENT ASSIGNMENT
+            // GET CURRENT ASSIGNMENT + PERSONNEL
             // ==========================================
 
             const {
@@ -146,9 +175,18 @@ export default async function handler(req, res) {
             } =
                 await supabaseAdmin
                     .from("assignments")
-                    .select(
-                        "id, personnel_id"
-                    )
+                    .select(`
+                        id,
+                        personnel_id,
+                        team_id,
+                        designation,
+                        functions_activities,
+                        personnel (
+                            id,
+                            full_name,
+                            designation
+                        )
+                    `)
                     .eq(
                         "id",
                         id
@@ -172,35 +210,146 @@ export default async function handler(req, res) {
             }
 
 
+            const oldPersonnelId =
+                currentAssignment.personnel_id;
+
+            const oldPersonnelName =
+                currentAssignment
+                    .personnel
+                    ?.full_name ||
+                "";
+
+            const oldNormalizedName =
+                normalizePersonName(
+                    oldPersonnelName
+                );
+
+            const newNormalizedName =
+                normalizePersonName(
+                    cleanName
+                );
+
+
+            let targetPersonnelId =
+                oldPersonnelId;
+
+            let personnelChanged =
+                false;
+
+
             // ==========================================
-            // UPDATE PERSONNEL
+            // RESPONSIBLE PERSON CHANGED
             // ==========================================
 
-            const {
-                error: personnelError
-            } =
-                await supabaseAdmin
-                    .from("personnel")
-                    .update({
-                        full_name:
-                            responsiblePerson.trim(),
+            if (
+                oldNormalizedName !==
+                newNormalizedName
+            ) {
 
-                        designation:
-                            designation.trim(),
-
-                        updated_at:
-                            new Date()
-                                .toISOString()
-                    })
-                    .eq(
-                        "id",
-                        currentAssignment
-                            .personnel_id
-                    );
+                const {
+                    data: personnelRecords,
+                    error: personnelLookupError
+                } =
+                    await supabaseAdmin
+                        .from("personnel")
+                        .select(`
+                            id,
+                            full_name,
+                            designation
+                        `);
 
 
-            if (personnelError) {
-                throw personnelError;
+                if (personnelLookupError) {
+                    throw personnelLookupError;
+                }
+
+
+                const existingPersonnel =
+                    personnelRecords
+                        ?.find(record => {
+
+                            return (
+                                normalizePersonName(
+                                    record.full_name
+                                ) ===
+                                newNormalizedName
+                            );
+                        });
+
+
+                // Reuse an existing person if found
+                if (existingPersonnel) {
+
+                    targetPersonnelId =
+                        existingPersonnel.id;
+
+                } else {
+
+                    // Otherwise create a new person
+                    const {
+                        data: newPersonnel,
+                        error: createPersonnelError
+                    } =
+                        await supabaseAdmin
+                            .from("personnel")
+                            .insert({
+                                full_name:
+                                    cleanName,
+
+                                // Kept only for backward compatibility.
+                                // Assignment-specific designation is stored
+                                // in assignments.designation.
+                                designation:
+                                    cleanDesignation
+                            })
+                            .select(`
+                                id,
+                                full_name,
+                                designation
+                            `)
+                            .single();
+
+
+                    if (createPersonnelError) {
+                        throw createPersonnelError;
+                    }
+
+
+                    targetPersonnelId =
+                        newPersonnel.id;
+                }
+
+
+                personnelChanged =
+                    String(targetPersonnelId) !==
+                    String(oldPersonnelId);
+
+            } else {
+
+                // Same person, but allow formatting/capitalization
+                // corrections to the canonical displayed name.
+                const {
+                    error: updatePersonnelError
+                } =
+                    await supabaseAdmin
+                        .from("personnel")
+                        .update({
+                            full_name:
+                                cleanName,
+
+                            updated_at:
+                                new Date()
+                                    .toISOString()
+                        })
+                        .eq(
+                            "id",
+                            oldPersonnelId
+                        );
+
+
+                if (updatePersonnelError) {
+                    throw updatePersonnelError;
+                }
             }
 
 
@@ -215,8 +364,14 @@ export default async function handler(req, res) {
                 await supabaseAdmin
                     .from("assignments")
                     .update({
+                        personnel_id:
+                            targetPersonnelId,
+
+                        designation:
+                            cleanDesignation,
+
                         functions_activities:
-                            functionsActivities.trim(),
+                            cleanFunctions,
 
                         updated_at:
                             new Date()
@@ -230,14 +385,82 @@ export default async function handler(req, res) {
                         id,
                         personnel_id,
                         team_id,
+                        designation,
                         functions_activities,
-                        updated_at
+                        updated_at,
+                        personnel (
+                            id,
+                            full_name,
+                            designation
+                        )
                     `)
                     .single();
 
 
             if (assignmentError) {
                 throw assignmentError;
+            }
+
+
+            // ==========================================
+            // CLEAN UP OLD PERSONNEL IF NOW UNUSED
+            // ==========================================
+
+            let oldPersonnelDeleted =
+                false;
+
+
+            if (
+                personnelChanged &&
+                oldPersonnelId
+            ) {
+
+                const {
+                    count,
+                    error: countError
+                } =
+                    await supabaseAdmin
+                        .from("assignments")
+                        .select(
+                            "id",
+                            {
+                                count: "exact",
+                                head: true
+                            }
+                        )
+                        .eq(
+                            "personnel_id",
+                            oldPersonnelId
+                        );
+
+
+                if (countError) {
+                    throw countError;
+                }
+
+
+                if (count === 0) {
+
+                    const {
+                        error: deletePersonnelError
+                    } =
+                        await supabaseAdmin
+                            .from("personnel")
+                            .delete()
+                            .eq(
+                                "id",
+                                oldPersonnelId
+                            );
+
+
+                    if (deletePersonnelError) {
+                        throw deletePersonnelError;
+                    }
+
+
+                    oldPersonnelDeleted =
+                        true;
+                }
             }
 
 
@@ -248,7 +471,11 @@ export default async function handler(req, res) {
                         "Assignment updated successfully.",
 
                     assignment:
-                        updatedAssignment
+                        updatedAssignment,
+
+                    personnelChanged,
+
+                    oldPersonnelDeleted
                 });
 
 
@@ -307,6 +534,7 @@ export default async function handler(req, res) {
                         id,
                         personnel_id,
                         team_id,
+                        designation,
                         functions_activities
                     `)
                     .eq(
@@ -356,6 +584,7 @@ export default async function handler(req, res) {
                         id,
                         personnel_id,
                         team_id,
+                        designation,
                         functions_activities
                     `)
                     .single();

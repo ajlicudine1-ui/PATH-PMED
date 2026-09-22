@@ -8,7 +8,165 @@ import {
 } from "../lib/requireAuth.js";
 
 
+// ==========================================
+// NORMALIZE PERSON NAME
+// ==========================================
+
+function normalizePersonName(value) {
+
+    return String(value || "")
+        .trim()
+        .toLowerCase()
+
+        // Remove periods and commas
+        .replace(/[.,]/g, "")
+
+        // Convert multiple spaces to one
+        .replace(/\s+/g, " ");
+}
+
+
+// ==========================================
+// VALIDATE AND FORMAT RESPONSIBLE PERSON
+// Format: Given Name(s) + Middle Initial + Last Name
+// Example: Yhoebe Rae C. Bernal
+// ==========================================
+
+function titleCasePersonNamePart(value) {
+
+    return String(value || "")
+        .toLowerCase()
+        .replace(
+            /(^|[-'’])([\p{L}])/gu,
+            (match, separator, letter) =>
+                separator + letter.toUpperCase()
+        );
+}
+
+
+function parseResponsiblePersonName(value) {
+
+    const cleanValue =
+        String(value || "")
+            .trim()
+            .replace(/\s+/g, " ");
+
+
+    const parts =
+        cleanValue.split(" ");
+
+
+    if (parts.length < 3) {
+
+        return {
+            valid: false,
+            formatted: cleanValue
+        };
+    }
+
+
+    let middleInitialIndex =
+        -1;
+
+
+    for (
+        let index = 1;
+        index < parts.length - 1;
+        index += 1
+    ) {
+
+        if (
+            /^[\p{L}]\.?$/u.test(
+                parts[index]
+            )
+        ) {
+
+            middleInitialIndex =
+                index;
+
+            break;
+        }
+    }
+
+
+    if (middleInitialIndex === -1) {
+
+        return {
+            valid: false,
+            formatted: cleanValue
+        };
+    }
+
+
+    const givenNames =
+        parts.slice(
+            0,
+            middleInitialIndex
+        );
+
+
+    const surnames =
+        parts.slice(
+            middleInitialIndex + 1
+        );
+
+
+    const validNamePart =
+        /^[\p{L}][\p{L}'’\-]*$/u;
+
+
+    const namesAreValid =
+        givenNames.every(
+            part =>
+                validNamePart.test(part)
+        ) &&
+        surnames.every(
+            part =>
+                validNamePart.test(part)
+        );
+
+
+    if (!namesAreValid) {
+
+        return {
+            valid: false,
+            formatted: cleanValue
+        };
+    }
+
+
+    const middleInitial =
+        parts[middleInitialIndex]
+            .replace(".", "")
+            .toUpperCase() +
+        ".";
+
+
+    const formatted =
+        [
+            ...givenNames.map(
+                titleCasePersonNamePart
+            ),
+            middleInitial,
+            ...surnames.map(
+                titleCasePersonNamePart
+            )
+        ].join(" ");
+
+
+    return {
+        valid: true,
+        formatted
+    };
+}
+
+
+// ==========================================
+// API HANDLER
+// ==========================================
+
 export default async function handler(req, res) {
+
 
     // ==========================================
     // GET ASSIGNMENTS - PUBLIC
@@ -37,34 +195,38 @@ export default async function handler(req, res) {
             const {
                 data,
                 error
-            } = await supabase
-                .from("assignments")
-                .select(`
-                    id,
-                    functions_activities,
-                    personnel (
+            } =
+                await supabase
+                    .from("assignments")
+                    .select(`
                         id,
-                        full_name,
-                        designation
-                    ),
-                    teams!inner (
-                        id,
-                        code,
-                        name
+                        personnel_id,
+                        team_id,
+                        designation,
+                        functions_activities,
+                        personnel (
+                            id,
+                            full_name,
+                            designation
+                        ),
+                        teams!inner (
+                            id,
+                            code,
+                            name
+                        )
+                    `)
+                    .eq(
+                        "teams.code",
+                        team
+                            .trim()
+                            .toUpperCase()
                     )
-                `)
-                .eq(
-                    "teams.code",
-                    team
-                        .trim()
-                        .toUpperCase()
-                )
-                .order(
-                    "id",
-                    {
-                        ascending: false
-                    }
-                );
+                    .order(
+                        "id",
+                        {
+                            ascending: false
+                        }
+                    );
 
 
             if (error) {
@@ -126,6 +288,10 @@ export default async function handler(req, res) {
             } = req.body;
 
 
+            // ==========================================
+            // VALIDATION
+            // ==========================================
+
             if (
                 !teamCode ||
                 !responsiblePerson ||
@@ -142,21 +308,62 @@ export default async function handler(req, res) {
             }
 
 
+            const cleanTeamCode =
+                teamCode
+                    .trim()
+                    .toUpperCase();
+
+
+            const parsedResponsiblePerson =
+                parseResponsiblePersonName(
+                    responsiblePerson
+                );
+
+
+            if (!parsedResponsiblePerson.valid) {
+
+                return res
+                    .status(400)
+                    .json({
+                        error:
+                            "Responsible Person must use the format: First Name Middle Initial. Last Name (example: Yhoebe Rae C. Bernal)."
+                    });
+            }
+
+
+            const cleanName =
+                parsedResponsiblePerson
+                    .formatted;
+
+
+            const cleanDesignation =
+                designation
+                    .trim();
+
+
+            const cleanFunctions =
+                functionsActivities
+                    .trim();
+
+
+            // ==========================================
             // FIND TEAM
+            // ==========================================
 
             const {
                 data: team,
                 error: teamError
-            } = await supabaseAdmin
-                .from("teams")
-                .select("id")
-                .eq(
-                    "code",
-                    teamCode
-                        .trim()
-                        .toUpperCase()
-                )
-                .single();
+            } =
+                await supabaseAdmin
+                    .from("teams")
+                    .select(
+                        "id, code, name"
+                    )
+                    .eq(
+                        "code",
+                        cleanTeamCode
+                    )
+                    .single();
 
 
             if (teamError) {
@@ -164,53 +371,142 @@ export default async function handler(req, res) {
             }
 
 
-            // CREATE PERSONNEL
+            if (!team) {
 
-            const {
-                data: personnel,
-                error: personnelError
-            } = await supabaseAdmin
-                .from("personnel")
-                .insert({
-                    full_name:
-                        responsiblePerson.trim(),
-
-                    designation:
-                        designation.trim()
-                })
-                .select(
-                    "id, full_name, designation"
-                )
-                .single();
-
-
-            if (personnelError) {
-                throw personnelError;
+                return res
+                    .status(404)
+                    .json({
+                        error:
+                            "Team not found."
+                    });
             }
 
 
+            // ==========================================
+            // GET EXISTING PERSONNEL
+            // ==========================================
+
+            const {
+                data: personnelRecords,
+                error: personnelLookupError
+            } =
+                await supabaseAdmin
+                    .from("personnel")
+                    .select(`
+                        id,
+                        full_name,
+                        designation
+                    `);
+
+
+            if (personnelLookupError) {
+                throw personnelLookupError;
+            }
+
+
+            const normalizedInputName =
+                normalizePersonName(
+                    cleanName
+                );
+
+
+            // ==========================================
+            // FIND SAME PERSON
+            // ==========================================
+
+            let personnel =
+                personnelRecords
+                    ?.find(record => {
+
+                        return (
+                            normalizePersonName(
+                                record.full_name
+                            ) ===
+                            normalizedInputName
+                        );
+                    });
+
+
+            let createdNewPersonnel =
+                false;
+
+
+            // ==========================================
+            // CREATE PERSONNEL ONLY IF NOT FOUND
+            // ==========================================
+
+            if (!personnel) {
+
+                const {
+                    data: newPersonnel,
+                    error: createPersonnelError
+                } =
+                    await supabaseAdmin
+                        .from("personnel")
+                        .insert({
+                            full_name:
+                                cleanName,
+
+                            // Kept for backward compatibility.
+                            // Individual assignment designation
+                            // is now stored in assignments.
+                            designation:
+                                cleanDesignation
+                        })
+                        .select(`
+                            id,
+                            full_name,
+                            designation
+                        `)
+                        .single();
+
+
+                if (createPersonnelError) {
+                    throw createPersonnelError;
+                }
+
+
+                personnel =
+                    newPersonnel;
+
+
+                createdNewPersonnel =
+                    true;
+            }
+
+
+            // ==========================================
             // CREATE ASSIGNMENT
+            // ==========================================
 
             const {
                 data: assignment,
                 error: assignmentError
-            } = await supabaseAdmin
-                .from("assignments")
-                .insert({
-                    team_id:
-                        team.id,
+            } =
+                await supabaseAdmin
+                    .from("assignments")
+                    .insert({
 
-                    personnel_id:
-                        personnel.id,
+                        team_id:
+                            team.id,
 
-                    functions_activities:
-                        functionsActivities.trim()
-                })
-                .select(`
-                    id,
-                    functions_activities
-                `)
-                .single();
+                        personnel_id:
+                            personnel.id,
+
+                        designation:
+                            cleanDesignation,
+
+                        functions_activities:
+                            cleanFunctions
+                    })
+                    .select(`
+                        id,
+                        personnel_id,
+                        team_id,
+                        designation,
+                        functions_activities
+                    `)
+                    .single();
 
 
             if (assignmentError) {
@@ -218,14 +514,25 @@ export default async function handler(req, res) {
             }
 
 
+            // ==========================================
+            // RESPONSE
+            // ==========================================
+
             return res
                 .status(201)
                 .json({
+
                     message:
-                        "Assignment added successfully.",
+                        createdNewPersonnel
+                            ? "New personnel and assignment added successfully."
+                            : "Assignment added to existing personnel successfully.",
 
                     assignment,
-                    personnel
+
+                    personnel,
+
+                    reusedPersonnel:
+                        !createdNewPersonnel
                 });
 
 
@@ -246,6 +553,10 @@ export default async function handler(req, res) {
         }
     }
 
+
+    // ==========================================
+    // METHOD NOT ALLOWED
+    // ==========================================
 
     return res
         .status(405)

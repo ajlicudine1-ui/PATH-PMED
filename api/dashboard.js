@@ -2,120 +2,167 @@ import {
     supabaseAdmin
 } from "../lib/supabase.js";
 
+
 export default async function handler(req, res) {
 
     if (req.method !== "GET") {
-        return res.status(405).json({
-            error: "Method not allowed"
-        });
+
+        return res
+            .status(405)
+            .json({
+                error:
+                    "Method not allowed"
+            });
     }
+
 
     try {
 
-        // Total personnel
+        // ==========================================
+        // TOTAL PERSONNEL
+        // Count unique personnel currently linked
+        // to at least one assignment.
+        // ==========================================
+
         const {
-            count: personnelCount,
+            data: assignmentPersonnel,
             error: personnelError
-        } = await supabaseAdmin
-            .from("personnel")
-            .select(
-                "*",
-                {
-                    count: "exact",
-                    head: true
-                }
-            );
+        } =
+            await supabaseAdmin
+                .from("assignments")
+                .select("personnel_id");
+
 
         if (personnelError) {
             throw personnelError;
         }
 
 
-        // Total teams
+        const uniquePersonnel =
+            new Set(
+                (assignmentPersonnel || [])
+                    .map(item =>
+                        item.personnel_id
+                    )
+                    .filter(Boolean)
+            );
+
+
+        const personnelCount =
+            uniquePersonnel.size;
+
+
+        // ==========================================
+        // TOTAL TEAMS
+        // ==========================================
+
         const {
             count: teamsCount,
             error: teamsError
-        } = await supabaseAdmin
-            .from("teams")
-            .select(
-                "*",
-                {
-                    count: "exact",
-                    head: true
-                }
-            );
+        } =
+            await supabaseAdmin
+                .from("teams")
+                .select(
+                    "*",
+                    {
+                        count: "exact",
+                        head: true
+                    }
+                );
+
 
         if (teamsError) {
             throw teamsError;
         }
 
 
-        // Total assignments
+        // ==========================================
+        // TOTAL ASSIGNMENTS
+        // ==========================================
+
         const {
             count: assignmentsCount,
             error: assignmentsCountError
-        } = await supabaseAdmin
-            .from("assignments")
-            .select(
-                "*",
-                {
-                    count: "exact",
-                    head: true
-                }
-            );
+        } =
+            await supabaseAdmin
+                .from("assignments")
+                .select(
+                    "*",
+                    {
+                        count: "exact",
+                        head: true
+                    }
+                );
+
 
         if (assignmentsCountError) {
             throw assignmentsCountError;
         }
 
 
-        // Recent assignments
+        // ==========================================
+        // RECENT ASSIGNMENTS
+        // ==========================================
+
         const {
             data: assignments,
             error: assignmentsError
-        } = await supabaseAdmin
-            .from("assignments")
-            .select(`
-                id,
-                functions_activities,
-                created_at,
-                personnel (
+        } =
+            await supabaseAdmin
+                .from("assignments")
+                .select(`
                     id,
-                    full_name,
-                    designation
-                ),
-                teams (
-                    id,
-                    code,
-                    name
+                    personnel_id,
+                    team_id,
+                    designation,
+                    functions_activities,
+                    created_at,
+                    personnel (
+                        id,
+                        full_name,
+                        designation
+                    ),
+                    teams (
+                        id,
+                        code,
+                        name
+                    )
+                `)
+                .order(
+                    "created_at",
+                    {
+                        ascending: false
+                    }
                 )
-            `)
-            .order(
-                "created_at",
-                {
-                    ascending: false
-                }
-            )
-            .limit(10);
+                .limit(10);
+
 
         if (assignmentsError) {
             throw assignmentsError;
         }
 
 
-        return res.status(200).json({
-            totalPersonnel:
-                personnelCount || 0,
+        // ==========================================
+        // RESPONSE
+        // ==========================================
 
-            totalTeams:
-                teamsCount || 0,
+        return res
+            .status(200)
+            .json({
 
-            totalAssignments:
-                assignmentsCount || 0,
+                totalPersonnel:
+                    personnelCount || 0,
 
-            assignments:
-                assignments || []
-        });
+                totalTeams:
+                    teamsCount || 0,
+
+                totalAssignments:
+                    assignmentsCount || 0,
+
+                assignments:
+                    assignments || []
+            });
+
 
     } catch (error) {
 
@@ -124,8 +171,12 @@ export default async function handler(req, res) {
             error
         );
 
-        return res.status(500).json({
-            error: error.message
-        });
+
+        return res
+            .status(500)
+            .json({
+                error:
+                    error.message
+            });
     }
 }

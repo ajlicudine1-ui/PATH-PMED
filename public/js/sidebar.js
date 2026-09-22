@@ -1,5 +1,6 @@
 // ============================================
-// PATH - ADMIN SIDEBAR
+// P.A.T.H - ADMIN SIDEBAR
+// PMED Assignment and Team Hub
 // ============================================
 
 const ADMIN_TEAM_CACHE =
@@ -57,9 +58,9 @@ async function loadAdminSidebar() {
 
 
     sidebarContainer.innerHTML = `
-        <aside class="sidebar">
+        <aside class="sidebar admin-sidebar">
 
-            <div class="sidebar-brand">
+            <div class="sidebar-brand admin-sidebar-brand">
 
                 <div class="brand-logo">
 
@@ -75,7 +76,7 @@ async function loadAdminSidebar() {
                 <div class="brand-text">
 
                     <h1>
-                        PATH
+                        P.A.T.H
                     </h1>
 
                     <p>
@@ -157,6 +158,7 @@ function getAdminCachedTeams() {
                 ADMIN_TEAM_CACHE
             );
 
+
         if (!cached) {
             return [];
         }
@@ -165,9 +167,11 @@ function getAdminCachedTeams() {
         const teams =
             JSON.parse(cached);
 
+
         return Array.isArray(teams)
             ? teams
             : [];
+
 
     } catch (error) {
 
@@ -175,6 +179,7 @@ function getAdminCachedTeams() {
             "Admin sidebar cache error:",
             error
         );
+
 
         return [];
     }
@@ -196,6 +201,7 @@ async function refreshAdminTeams() {
                     cache: "no-store"
                 }
             );
+
 
         const result =
             await response.json();
@@ -229,6 +235,7 @@ async function refreshAdminTeams() {
 
         setAdminActiveItem();
 
+
     } catch (error) {
 
         console.error(
@@ -249,6 +256,7 @@ function renderAdminTeams(teams) {
         document.getElementById(
             "adminTeamNavItems"
         );
+
 
     if (!container) {
         return;
@@ -347,7 +355,7 @@ function setAdminActiveItem() {
 
     document
         .querySelectorAll(
-            ".sidebar .nav-item"
+            ".admin-sidebar .nav-item"
         )
         .forEach(item => {
 

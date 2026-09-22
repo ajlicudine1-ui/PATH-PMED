@@ -441,6 +441,63 @@ async function loadViewerTeamName() {
 // RENDER ASSIGNMENTS
 // ============================================
 
+function normalizeViewerPersonName(name) {
+
+    return String(name || "")
+        .trim()
+        .toLowerCase()
+        .replace(/[.,]/g, "")
+        .replace(/\s+/g, " ");
+}
+
+
+function groupViewerAssignmentsByPerson(records) {
+
+    const groups = new Map();
+
+
+    records.forEach(record => {
+
+        const personnel =
+            record.personnel || {};
+
+
+        const fullName =
+            personnel.full_name || "";
+
+
+        const key =
+            normalizeViewerPersonName(
+                fullName
+            ) ||
+            `assignment-${record.id}`;
+
+
+        if (!groups.has(key)) {
+
+            groups.set(
+                key,
+                {
+                    fullName,
+                    records: []
+                }
+            );
+        }
+
+
+        groups
+            .get(key)
+            .records
+            .push(record);
+    });
+
+
+    return Array.from(
+        groups.values()
+    );
+}
+
+
 function renderViewerTeamAssignments(records) {
 
     if (!viewerAssignmentsTableBody) {
@@ -467,37 +524,71 @@ function renderViewerTeamAssignments(records) {
     }
 
 
+    const groupedRecords =
+        groupViewerAssignmentsByPerson(
+            records
+        );
+
+
     viewerAssignmentsTableBody.innerHTML =
-        records
-            .map(record => {
+        groupedRecords
+            .map(group => {
 
-                const personnel =
-                    record.personnel || {};
+                const rowCount =
+                    group.records.length;
 
 
-                return `
-                    <tr>
+                return group.records
+                    .map(
+                        (record, index) => {
 
-                        <td>
-                            ${escapeViewerTeamHTML(
-                                personnel.full_name || ""
-                            )}
-                        </td>
+                            const personnel =
+                                record.personnel || {};
 
-                        <td>
-                            ${escapeViewerTeamHTML(
-                                personnel.designation || ""
-                            )}
-                        </td>
 
-                        <td>
-                            ${escapeViewerTeamHTML(
-                                record.functions_activities || ""
-                            )}
-                        </td>
+                            const designation =
+                                record.designation ||
+                                personnel.designation ||
+                                "";
 
-                    </tr>
-                `;
+
+                            const responsiblePersonCell =
+                                index === 0
+                                    ? `
+                                        <td
+                                            rowspan="${rowCount}"
+                                            class="viewer-grouped-person-cell"
+                                        >
+                                            ${escapeViewerTeamHTML(
+                                                group.fullName
+                                            )}
+                                        </td>
+                                    `
+                                    : "";
+
+
+                            return `
+                                <tr>
+
+                                    ${responsiblePersonCell}
+
+                                    <td>
+                                        ${escapeViewerTeamHTML(
+                                            designation
+                                        )}
+                                    </td>
+
+                                    <td>
+                                        ${escapeViewerTeamHTML(
+                                            record.functions_activities || ""
+                                        )}
+                                    </td>
+
+                                </tr>
+                            `;
+                        }
+                    )
+                    .join("");
             })
             .join("");
 }
@@ -538,7 +629,8 @@ viewerSearchInput?.addEventListener(
 
                     return [
                         personnel.full_name,
-                        personnel.designation,
+                        record.designation ||
+                            personnel.designation,
                         record.functions_activities
                     ]
                         .filter(Boolean)

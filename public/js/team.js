@@ -168,6 +168,208 @@ let selectedAssignmentId = null;
 
 
 // ============================================
+// RESPONSIBLE PERSON NAME FORMAT
+// Required: Given Name(s) + Middle Initial + Last Name
+// Example: Yhoebe Rae C. Bernal
+// ============================================
+
+function titleCasePersonNamePart(value) {
+
+    return String(value || "")
+        .toLowerCase()
+        .replace(
+            /(^|[-'’])([\p{L}])/gu,
+            (match, separator, letter) =>
+                separator + letter.toUpperCase()
+        );
+}
+
+
+function parseResponsiblePersonName(value) {
+
+    const cleanValue =
+        String(value || "")
+            .trim()
+            .replace(/\s+/g, " ");
+
+
+    const parts =
+        cleanValue.split(" ");
+
+
+    if (parts.length < 3) {
+
+        return {
+            valid: false,
+            formatted: cleanValue
+        };
+    }
+
+
+    let middleInitialIndex =
+        -1;
+
+
+    for (
+        let index = 1;
+        index < parts.length - 1;
+        index += 1
+    ) {
+
+        if (
+            /^[\p{L}]\.?$/u.test(
+                parts[index]
+            )
+        ) {
+
+            middleInitialIndex =
+                index;
+
+            break;
+        }
+    }
+
+
+    if (middleInitialIndex === -1) {
+
+        return {
+            valid: false,
+            formatted: cleanValue
+        };
+    }
+
+
+    const givenNames =
+        parts.slice(
+            0,
+            middleInitialIndex
+        );
+
+
+    const surnames =
+        parts.slice(
+            middleInitialIndex + 1
+        );
+
+
+    const validNamePart =
+        /^[\p{L}][\p{L}'’\-]*$/u;
+
+
+    const namesAreValid =
+        givenNames.every(
+            part =>
+                validNamePart.test(part)
+        ) &&
+        surnames.every(
+            part =>
+                validNamePart.test(part)
+        );
+
+
+    if (!namesAreValid) {
+
+        return {
+            valid: false,
+            formatted: cleanValue
+        };
+    }
+
+
+    const middleInitial =
+        parts[middleInitialIndex]
+            .replace(".", "")
+            .toUpperCase() +
+        ".";
+
+
+    const formatted =
+        [
+            ...givenNames.map(
+                titleCasePersonNamePart
+            ),
+            middleInitial,
+            ...surnames.map(
+                titleCasePersonNamePart
+            )
+        ].join(" ");
+
+
+    return {
+        valid: true,
+        formatted
+    };
+}
+
+
+if (responsiblePersonInput) {
+
+    responsiblePersonInput.placeholder =
+        "e.g., Juan D. La Cruz";
+
+
+    // Visible name-format guide under the input
+    if (
+        !document.getElementById(
+            "responsiblePersonGuide"
+        )
+    ) {
+
+        const guide =
+            document.createElement("small");
+
+        guide.id =
+            "responsiblePersonGuide";
+
+        guide.className =
+            "field-guide";
+
+        
+
+        responsiblePersonInput
+            .insertAdjacentElement(
+                "afterend",
+                guide
+            );
+    }
+
+
+    responsiblePersonInput.addEventListener(
+        "input",
+        () => {
+
+            responsiblePersonInput
+                .setCustomValidity("");
+        }
+    );
+
+
+    responsiblePersonInput.addEventListener(
+        "blur",
+        () => {
+
+            if (modalMode !== "add") {
+                return;
+            }
+
+
+            const parsedName =
+                parseResponsiblePersonName(
+                    responsiblePersonInput.value
+                );
+
+
+            if (parsedName.valid) {
+
+                responsiblePersonInput.value =
+                    parsedName.formatted;
+            }
+        }
+    );
+}
+
+
+// ============================================
 // LAST RESPONSIBLE PERSON PER SECTION
 // ============================================
 
@@ -413,6 +615,55 @@ async function loadAssignments() {
 // DISPLAY ASSIGNMENTS
 // ============================================
 
+function normalizePersonName(name) {
+
+    return String(name || "")
+        .trim()
+        .toLowerCase()
+        .replace(/[.,]/g, "")
+        .replace(/\s+/g, " ");
+}
+
+
+function groupAssignmentsByPerson(records) {
+
+    const groups = new Map();
+
+    records.forEach(record => {
+
+        const personnel =
+            record.personnel || {};
+
+        const fullName =
+            personnel.full_name || "";
+
+        const key =
+            normalizePersonName(fullName) ||
+            `assignment-${record.id}`;
+
+        if (!groups.has(key)) {
+
+            groups.set(
+                key,
+                {
+                    fullName,
+                    records: []
+                }
+            );
+        }
+
+        groups
+            .get(key)
+            .records
+            .push(record);
+    });
+
+    return Array.from(
+        groups.values()
+    );
+}
+
+
 function renderAssignments(records) {
 
     closeAllActionMenus();
@@ -433,89 +684,119 @@ function renderAssignments(records) {
         return;
     }
 
+    const groupedRecords =
+        groupAssignmentsByPerson(
+            records
+        );
+
     tableBody.innerHTML =
-        records
-            .map(record => {
+        groupedRecords
+            .map(group => {
 
-                const personnel =
-                    record.personnel || {};
+                const rowCount =
+                    group.records.length;
 
-                const fullName =
-                    personnel.full_name || "";
+                return group.records
+                    .map(
+                        (record, index) => {
 
-                const designation =
-                    personnel.designation || "";
+                            const personnel =
+                                record.personnel || {};
 
-                const functionsActivities =
-                    record.functions_activities || "";
+                            const designation =
+                                record.designation ||
+                                personnel.designation ||
+                                "";
 
-                return `
-                    <tr>
+                            const functionsActivities =
+                                record.functions_activities || "";
 
-                        <td>
-                            ${escapeHTML(fullName)}
-                        </td>
+                            const responsiblePersonCell =
+                                index === 0
+                                    ? `
+                                        <td
+                                            rowspan="${rowCount}"
+                                            class="grouped-person-cell"
+                                        >
+                                            ${escapeHTML(
+                                                group.fullName
+                                            )}
+                                        </td>
+                                    `
+                                    : "";
 
-                        <td>
-                            ${escapeHTML(designation)}
-                        </td>
+                            return `
+                                <tr>
 
-                        <td>
-                            ${escapeHTML(functionsActivities)}
-                        </td>
+                                    ${responsiblePersonCell}
 
-                        <td class="actions-cell">
+                                    <td>
+                                        ${escapeHTML(
+                                            designation
+                                        )}
+                                    </td>
 
-                            <div class="actions-dropdown">
+                                    <td>
+                                        ${escapeHTML(
+                                            functionsActivities
+                                        )}
+                                    </td>
 
-                                <button
-                                    type="button"
-                                    class="action-button"
-                                    data-id="${record.id}"
-                                >
-                                    Actions
-                                    <span class="action-arrow">
-                                        ▾
-                                    </span>
-                                </button>
+                                    <td class="actions-cell">
 
-                                <div
-                                    class="actions-menu"
-                                    data-menu-id="${record.id}"
-                                >
+                                        <div class="actions-dropdown">
 
-                                    <button
-                                        type="button"
-                                        class="actions-menu-item view-action"
-                                        data-id="${record.id}"
-                                    >
-                                        View
-                                    </button>
+                                            <button
+                                                type="button"
+                                                class="action-button"
+                                                data-id="${record.id}"
+                                            >
+                                                Actions
+                                                <span class="action-arrow">
+                                                    ▾
+                                                </span>
+                                            </button>
 
-                                    <button
-                                        type="button"
-                                        class="actions-menu-item edit-action"
-                                        data-id="${record.id}"
-                                    >
-                                        Edit
-                                    </button>
+                                            <div
+                                                class="actions-menu"
+                                                data-menu-id="${record.id}"
+                                            >
 
-                                    <button
-                                        type="button"
-                                        class="actions-menu-item delete-action"
-                                        data-id="${record.id}"
-                                    >
-                                        Delete
-                                    </button>
+                                                <button
+                                                    type="button"
+                                                    class="actions-menu-item view-action"
+                                                    data-id="${record.id}"
+                                                >
+                                                    View
+                                                </button>
 
-                                </div>
+                                                <button
+                                                    type="button"
+                                                    class="actions-menu-item edit-action"
+                                                    data-id="${record.id}"
+                                                >
+                                                    Edit
+                                                </button>
 
-                            </div>
+                                                <button
+                                                    type="button"
+                                                    class="actions-menu-item delete-action"
+                                                    data-id="${record.id}"
+                                                >
+                                                    Delete
+                                                </button>
 
-                        </td>
+                                            </div>
 
-                    </tr>
-                `;
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+                            `;
+                        }
+                    )
+                    .join("");
             })
             .join("");
 }
@@ -555,10 +836,12 @@ if (searchInput) {
                         "";
 
                     const designation =
-                        record.personnel
-                            ?.designation
-                            ?.toLowerCase() ||
-                        "";
+                        (
+                            record.designation ||
+                            record.personnel?.designation ||
+                            ""
+                        )
+                            .toLowerCase();
 
                     const activity =
                         record.functions_activities
@@ -637,7 +920,9 @@ async function openViewAssignment(id) {
             assignment.personnel?.full_name || "";
 
         designationInput.value =
-            assignment.personnel?.designation || "";
+            assignment.designation ||
+            assignment.personnel?.designation ||
+            "";
 
         functionsActivitiesInput.value =
             assignment.functions_activities || "";
@@ -688,7 +973,9 @@ async function openEditAssignment(id) {
             assignment.personnel?.full_name || "";
 
         designationInput.value =
-            assignment.personnel?.designation || "";
+            assignment.designation ||
+            assignment.personnel?.designation ||
+            "";
 
         functionsActivitiesInput.value =
             assignment.functions_activities || "";
@@ -906,10 +1193,56 @@ if (assignmentForm) {
                 return;
             }
 
-            const responsiblePerson =
+            let responsiblePerson =
                 responsiblePersonInput
                     .value
                     .trim();
+
+
+            // ============================================
+            // RESPONSIBLE PERSON FORMAT VALIDATION
+            // ============================================
+
+            if (modalMode === "add") {
+
+                const parsedName =
+                    parseResponsiblePersonName(
+                        responsiblePerson
+                    );
+
+
+                if (!parsedName.valid) {
+
+                    responsiblePersonInput
+                        .setCustomValidity(
+                            "Use the format: First Name Middle Initial. Last Name (example: Juan D. La Cruz)."
+                        );
+
+
+                    responsiblePersonInput
+                        .reportValidity();
+
+
+                    responsiblePersonInput
+                        .focus();
+
+
+                    return;
+                }
+
+
+                responsiblePerson =
+                    parsedName.formatted;
+
+
+                responsiblePersonInput.value =
+                    responsiblePerson;
+
+
+                responsiblePersonInput
+                    .setCustomValidity("");
+            }
+
 
             const designation =
                 designationInput
