@@ -34,6 +34,7 @@ export default async function handler(req, res) {
 
 
         if (personnelError) {
+
             throw personnelError;
         }
 
@@ -72,6 +73,7 @@ export default async function handler(req, res) {
 
 
         if (teamsError) {
+
             throw teamsError;
         }
 
@@ -96,6 +98,7 @@ export default async function handler(req, res) {
 
 
         if (assignmentsCountError) {
+
             throw assignmentsCountError;
         }
 
@@ -120,7 +123,8 @@ export default async function handler(req, res) {
                     personnel (
                         id,
                         full_name,
-                        designation
+                        designation,
+                        employment_status
                     ),
                     teams (
                         id,
@@ -138,6 +142,7 @@ export default async function handler(req, res) {
 
 
         if (assignmentsError) {
+
             throw assignmentsError;
         }
 

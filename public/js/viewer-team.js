@@ -21,6 +21,11 @@ const viewerAssignmentsTableBody =
 const viewerSearchInput =
     document.getElementById("searchInput");
 
+const viewerEmploymentStatusFilter =
+    document.getElementById(
+        "employmentStatusFilter"
+    );
+
 
 // ============================================
 // STATE
@@ -124,7 +129,7 @@ function showCachedViewerTeamInformation() {
 
 
         document.title =
-            `P.A.T.H | ${team.code}`;
+            "P.A.T.H | PMED Assignment and Team Hub";
 
 
     } catch (error) {
@@ -176,9 +181,7 @@ function showCachedViewerAssignments() {
             records;
 
 
-        renderViewerTeamAssignments(
-            viewerAssignments
-        );
+        applyViewerAssignmentFilters();
 
 
         return true;
@@ -283,9 +286,7 @@ async function loadViewerTeam() {
         updateViewerTeamHeading();
 
 
-        renderViewerTeamAssignments(
-            viewerAssignments
-        );
+        applyViewerAssignmentFilters();
 
 
     } catch (error) {
@@ -353,7 +354,7 @@ function updateViewerTeamHeading() {
     if (team.code) {
 
         document.title =
-            `P.A.T.H | ${team.code}`;
+            "P.A.T.H | PMED Assignment and Team Hub";
     }
 }
 
@@ -424,7 +425,7 @@ async function loadViewerTeamName() {
 
 
         document.title =
-            `P.A.T.H | ${team.code}`;
+            "P.A.T.H | PMED Assignment and Team Hub";
 
 
     } catch (error) {
@@ -595,59 +596,103 @@ function renderViewerTeamAssignments(records) {
 
 
 // ============================================
-// SEARCH
+// SEARCH + EMPLOYMENT STATUS FILTER
 // ============================================
+
+function applyViewerAssignmentFilters() {
+
+    const query =
+        String(
+            viewerSearchInput?.value || ""
+        )
+            .trim()
+            .toLowerCase();
+
+
+    const selectedStatus =
+        String(
+            viewerEmploymentStatusFilter?.value || ""
+        )
+            .trim()
+            .toLowerCase();
+
+
+    const filtered =
+        viewerAssignments.filter(
+            record => {
+
+                const personnel =
+                    record.personnel || {};
+
+
+                const name =
+                    String(
+                        personnel.full_name || ""
+                    )
+                        .toLowerCase();
+
+
+                const employmentStatus =
+                    String(
+                        personnel.employment_status || ""
+                    )
+                        .toLowerCase();
+
+
+                const designation =
+                    String(
+                        record.designation ||
+                        personnel.designation ||
+                        ""
+                    )
+                        .toLowerCase();
+
+
+                const activity =
+                    String(
+                        record.functions_activities ||
+                        ""
+                    )
+                        .toLowerCase();
+
+
+                const matchesSearch =
+                    !query ||
+                    name.includes(query) ||
+                    employmentStatus.includes(query) ||
+                    designation.includes(query) ||
+                    activity.includes(query);
+
+
+                const matchesEmploymentStatus =
+                    !selectedStatus ||
+                    employmentStatus ===
+                        selectedStatus;
+
+
+                return (
+                    matchesSearch &&
+                    matchesEmploymentStatus
+                );
+            }
+        );
+
+
+    renderViewerTeamAssignments(
+        filtered
+    );
+}
+
 
 viewerSearchInput?.addEventListener(
     "input",
-    () => {
-
-        const query =
-            viewerSearchInput
-                .value
-                .trim()
-                .toLowerCase();
+    applyViewerAssignmentFilters
+);
 
 
-        if (!query) {
-
-            renderViewerTeamAssignments(
-                viewerAssignments
-            );
-
-            return;
-        }
-
-
-        const filtered =
-            viewerAssignments.filter(
-                record => {
-
-                    const personnel =
-                        record.personnel || {};
-
-
-                    return [
-                        personnel.full_name,
-                        record.designation ||
-                            personnel.designation,
-                        record.functions_activities
-                    ]
-                        .filter(Boolean)
-                        .some(
-                            value =>
-                                String(value)
-                                    .toLowerCase()
-                                    .includes(query)
-                        );
-                }
-            );
-
-
-        renderViewerTeamAssignments(
-            filtered
-        );
-    }
+viewerEmploymentStatusFilter?.addEventListener(
+    "change",
+    applyViewerAssignmentFilters
 );
 
 

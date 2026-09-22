@@ -26,20 +26,62 @@
         rel="stylesheet"
         href="/css/team.css"
     >
+
+    <style>
+        .team-toolbar-controls {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .employment-status-filter {
+            min-width: 210px;
+            height: 52px;
+            padding: 0 42px 0 16px;
+            border: 1px solid #d7dde5;
+            border-radius: 12px;
+            background: #ffffff;
+            color: #344054;
+            font: inherit;
+            font-size: 15px;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .employment-status-filter:focus {
+            border-color: #2f8a4b;
+            box-shadow: 0 0 0 3px rgba(47, 138, 75, 0.12);
+        }
+
+        .team-toolbar-controls #searchInput {
+            min-width: 280px;
+        }
+
+        @media (max-width: 800px) {
+            .team-toolbar-controls {
+                width: 100%;
+                align-items: stretch;
+            }
+
+            .employment-status-filter,
+            .team-toolbar-controls #searchInput {
+                width: 100%;
+                min-width: 0;
+            }
+        }
+    </style>
 </head>
 
 <body class="admin-page">
 
     <div class="app-layout">
 
-        <!-- SIDEBAR COMPONENT -->
         <div id="sidebarContainer"></div>
 
-
-        <!-- MAIN CONTENT -->
         <main class="main-content">
 
-            <!-- TOP BAR -->
             <header class="topbar viewer-topbar">
 
                 <div class="viewer-topbar-brand">
@@ -53,6 +95,7 @@
                     </p>
 
                 </div>
+
                 <button
                     type="button"
                     class="logout-button"
@@ -63,21 +106,14 @@
 
             </header>
 
-
-            <!-- PAGE CONTENT -->
             <section class="page-content">
 
-                <!-- TEAM HEADER -->
                 <div class="team-page-header">
 
                     <div>
-
                         <h1 id="teamCode"></h1>
-
                         <p id="teamName"></p>
-
                     </div>
-
 
                     <button
                         class="add-button"
@@ -89,80 +125,77 @@
 
                 </div>
 
-
-                <!-- TEAM CARD -->
                 <div class="team-card">
 
-                    <!-- TOOLBAR -->
                     <div class="team-toolbar">
 
                         <div>
-
-                            <h2>
-                                Personnel Assignments
-                            </h2>
-
+                            <h2>Personnel Assignments</h2>
                             <p>
                                 Personnel functions and responsibilities
                                 assigned to this team.
                             </p>
-
                         </div>
 
 
-                        <input
-                            type="search"
-                            id="searchInput"
-                            placeholder="Search personnel..."
-                            autocomplete="off"
-                        >
+                        <div class="team-toolbar-controls">
+
+                            <select
+                                id="employmentStatusFilter"
+                                class="employment-status-filter"
+                                aria-label="Filter by employment status"
+                            >
+                                <option value="">
+                                    All Employment Status
+                                </option>
+
+                                <option value="Permanent">
+                                    Permanent
+                                </option>
+
+                                <option value="Contractual">
+                                    Contractual
+                                </option>
+
+                                <option value="Job Order">
+                                    Job Order
+                                </option>
+                            </select>
+
+
+                            <input
+                                type="search"
+                                id="searchInput"
+                                placeholder="Search personnel..."
+                                autocomplete="off"
+                            >
+
+                        </div>
 
                     </div>
 
-
-                    <!-- TABLE -->
                     <div class="table-wrapper">
 
                         <table>
 
                             <thead>
-
                                 <tr>
-
-                                    <th>
-                                        Responsible Person
-                                    </th>
-
-                                    <th>
-                                        Designation
-                                    </th>
-
-                                    <th>
-                                        Functions / Activities
-                                    </th>
-
-                                    <th>
-                                        Actions
-                                    </th>
-
+                                    <th>Responsible Person</th>
+                                    <th>Designation</th>
+                                    <th>Functions / Activities</th>
+                                    <th>Actions</th>
                                 </tr>
-
                             </thead>
 
-
                             <tbody id="teamTableBody">
-
                                 <tr>
-
                                     <td
                                         colspan="4"
                                         class="empty-state"
                                     >
                                         Loading assignments...
                                     </td>
-
                                 </tr>
-
                             </tbody>
 
                         </table>
@@ -177,10 +210,6 @@
 
     </div>
 
-
-    <!-- =========================================
-         ASSIGNMENT MODAL
-    ========================================== -->
     <div
         class="modal-overlay"
         id="assignmentModal"
@@ -188,22 +217,15 @@
 
         <div class="modal-card">
 
-            <!-- MODAL HEADER -->
             <div class="modal-header">
 
                 <div>
-
-                    <h2>
-                        Add Assignment
-                    </h2>
-
+                    <h2>Add Assignment</h2>
                     <p>
                         Add a new personnel assignment
                         for the selected team.
                     </p>
-
                 </div>
-
 
                 <button
                     type="button"
@@ -216,11 +238,8 @@
 
             </div>
 
-
-            <!-- FORM -->
             <form id="assignmentForm">
 
-                <!-- RESPONSIBLE PERSON -->
                 <div class="form-group">
 
                     <label for="responsiblePerson">
@@ -241,8 +260,36 @@
 
                 </div>
 
+                <div class="form-group">
 
-                <!-- DESIGNATION -->
+                    <label for="employmentStatus">
+                        Employment Status
+                    </label>
+
+                    <select
+                        id="employmentStatus"
+                        name="employmentStatus"
+                        required
+                    >
+                        <option value="" selected disabled>
+                            Select employment status
+                        </option>
+
+                        <option value="Permanent">
+                            Permanent
+                        </option>
+
+                        <option value="Contractual">
+                            Contractual
+                        </option>
+
+                        <option value="Job Order">
+                            Job Order
+                        </option>
+                    </select>
+
+                </div>
+
                 <div class="form-group">
 
                     <label for="designation">
@@ -260,8 +307,6 @@
 
                 </div>
 
-
-                <!-- FUNCTIONS / ACTIVITIES -->
                 <div class="form-group">
 
                     <label for="functionsActivities">
@@ -278,8 +323,6 @@
 
                 </div>
 
-
-                <!-- BUTTONS -->
                 <div class="modal-actions">
 
                     <button
@@ -289,7 +332,6 @@
                     >
                         Cancel
                     </button>
-
 
                     <button
                         type="submit"
@@ -307,19 +349,12 @@
 
     </div>
 
-
-    <!-- SUPABASE -->
     <script
         src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
     ></script>
 
-    <!-- ADMIN AUTH GUARD -->
     <script src="/js/auth.js"></script>
-
-    <!-- SIDEBAR COMPONENT -->
     <script src="/js/sidebar.js"></script>
-
-    <!-- TEAM PAGE SCRIPT -->
     <script src="/js/team.js"></script>
 
 </body>

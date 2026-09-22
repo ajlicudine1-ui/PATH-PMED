@@ -27,6 +27,18 @@ const viewerTableBody =
         "viewerTableBody"
     );
 
+const viewerEmploymentStatusFilter =
+    document.getElementById(
+        "employmentStatusFilter"
+    );
+
+
+// ============================================
+// STATE
+// ============================================
+
+let viewerAssignments = [];
+
 
 // ============================================
 // LOAD VIEWER DASHBOARD
@@ -78,11 +90,13 @@ async function loadViewerDashboard() {
         }
 
 
-        renderViewerAssignments(
+        viewerAssignments =
             Array.isArray(data.assignments)
                 ? data.assignments
-                : []
-        );
+                : [];
+
+
+        applyViewerDashboardFilter();
 
 
     } catch (error) {
@@ -179,12 +193,63 @@ function groupViewerDashboardAssignments(records) {
 
 
 // ============================================
+// FILTER BY EMPLOYMENT STATUS
+// ============================================
+
+function applyViewerDashboardFilter() {
+
+    const selectedStatus =
+        String(
+            viewerEmploymentStatusFilter?.value || ""
+        )
+            .trim()
+            .toLowerCase();
+
+
+    const filtered =
+        viewerAssignments.filter(
+            record => {
+
+                const employmentStatus =
+                    String(
+                        record.personnel
+                            ?.employment_status ||
+                        ""
+                    )
+                        .trim()
+                        .toLowerCase();
+
+
+                return (
+                    !selectedStatus ||
+                    employmentStatus ===
+                        selectedStatus
+                );
+            }
+        );
+
+
+    renderViewerAssignments(
+        filtered
+    );
+}
+
+
+viewerEmploymentStatusFilter
+    ?.addEventListener(
+        "change",
+        applyViewerDashboardFilter
+    );
+
+
+// ============================================
 // RENDER ASSIGNMENTS
 // ============================================
 
 function renderViewerAssignments(records) {
 
     if (!viewerTableBody) {
+
         return;
     }
 
@@ -293,6 +358,7 @@ function escapeViewerHTML(value) {
         value === null ||
         value === undefined
     ) {
+
         return "";
     }
 

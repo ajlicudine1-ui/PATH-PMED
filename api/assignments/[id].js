@@ -67,7 +67,8 @@ export default async function handler(req, res) {
                         personnel (
                             id,
                             full_name,
-                            designation
+                            designation,
+                            employment_status
                         ),
                         teams (
                             id,
@@ -135,6 +136,7 @@ export default async function handler(req, res) {
 
             const {
                 responsiblePerson,
+                employmentStatus,
                 designation,
                 functionsActivities
             } = req.body;
@@ -142,6 +144,7 @@ export default async function handler(req, res) {
 
             if (
                 !responsiblePerson ||
+                !employmentStatus ||
                 !designation ||
                 !functionsActivities
             ) {
@@ -157,6 +160,35 @@ export default async function handler(req, res) {
 
             const cleanName =
                 responsiblePerson.trim();
+
+
+            const allowedEmploymentStatuses = [
+                "Permanent",
+                "Contractual",
+                "Job Order"
+            ];
+
+
+            const cleanEmploymentStatus =
+                allowedEmploymentStatuses.find(
+                    status =>
+                        status.toLowerCase() ===
+                        String(employmentStatus)
+                            .trim()
+                            .toLowerCase()
+                );
+
+
+            if (!cleanEmploymentStatus) {
+
+                return res
+                    .status(400)
+                    .json({
+                        error:
+                            "Employment Status must be Permanent, Contractual, or Job Order."
+                    });
+            }
+
 
             const cleanDesignation =
                 designation.trim();
@@ -184,7 +216,8 @@ export default async function handler(req, res) {
                         personnel (
                             id,
                             full_name,
-                            designation
+                            designation,
+                            employment_status
                         )
                     `)
                     .eq(
@@ -255,7 +288,8 @@ export default async function handler(req, res) {
                         .select(`
                             id,
                             full_name,
-                            designation
+                            designation,
+                            employment_status
                         `);
 
 
@@ -283,6 +317,33 @@ export default async function handler(req, res) {
                     targetPersonnelId =
                         existingPersonnel.id;
 
+
+                    const {
+                        error: updateTargetPersonnelError
+                    } =
+                        await supabaseAdmin
+                            .from("personnel")
+                            .update({
+                                full_name:
+                                    cleanName,
+
+                                employment_status:
+                                    cleanEmploymentStatus,
+
+                                updated_at:
+                                    new Date()
+                                        .toISOString()
+                            })
+                            .eq(
+                                "id",
+                                targetPersonnelId
+                            );
+
+
+                    if (updateTargetPersonnelError) {
+                        throw updateTargetPersonnelError;
+                    }
+
                 } else {
 
                     // Otherwise create a new person
@@ -300,12 +361,16 @@ export default async function handler(req, res) {
                                 // Assignment-specific designation is stored
                                 // in assignments.designation.
                                 designation:
-                                    cleanDesignation
+                                    cleanDesignation,
+
+                                employment_status:
+                                    cleanEmploymentStatus
                             })
                             .select(`
                                 id,
                                 full_name,
-                                designation
+                                designation,
+                                employment_status
                             `)
                             .single();
 
@@ -336,6 +401,9 @@ export default async function handler(req, res) {
                         .update({
                             full_name:
                                 cleanName,
+
+                            employment_status:
+                                cleanEmploymentStatus,
 
                             updated_at:
                                 new Date()
@@ -391,7 +459,8 @@ export default async function handler(req, res) {
                         personnel (
                             id,
                             full_name,
-                            designation
+                            designation,
+                            employment_status
                         )
                     `)
                     .single();

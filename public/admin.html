@@ -27,6 +27,57 @@
         rel="stylesheet"
         href="/css/dashboard.css"
     >
+
+    <style>
+        .dashboard-employment-status-filter {
+            min-width: 210px;
+            height: 38px;
+            min-height: 38px;
+            max-height: 38px;
+
+            box-sizing: border-box;
+
+            padding: 0 36px 0 12px;
+
+            border: 1px solid #d8dee7;
+            border-radius: 8px;
+
+            background: #ffffff;
+
+            color: #344054;
+
+            font-family: inherit;
+            font-size: 14px;
+
+            cursor: pointer;
+            outline: none;
+
+            transition: 0.2s ease;
+        }
+
+        .dashboard-employment-status-filter:focus {
+            border-color: #2f7d3f;
+
+            box-shadow:
+                0 0 0 3px
+                rgba(47, 125, 63, 0.08);
+        }
+
+        @media (max-width: 800px) {
+
+            #recentAssignmentsView .card-header {
+                align-items: flex-start;
+                gap: 12px;
+                flex-wrap: wrap;
+            }
+
+            .dashboard-employment-status-filter {
+                width: 100%;
+                min-width: 0;
+            }
+        }
+    </style>
+
 </head>
 
 <body class="admin-page">
@@ -176,6 +227,29 @@
                             </p>
 
                         </div>
+
+
+                        <select
+                            id="dashboardEmploymentStatusFilter"
+                            class="dashboard-employment-status-filter"
+                            aria-label="Filter by employment status"
+                        >
+                            <option value="">
+                                All Employment Status
+                            </option>
+
+                            <option value="Permanent">
+                                Permanent
+                            </option>
+
+                            <option value="Contractual">
+                                Contractual
+                            </option>
+
+                            <option value="Job Order">
+                                Job Order
+                            </option>
+                        </select>
 
                     </div>
 
@@ -422,7 +496,7 @@
 
     <!-- APP SCRIPTS -->
     <script src="/js/sidebar.js"></script>
-    <script src="/js/dashboard.js"></script>
+    <script src="/js/dashboard.js?v=2"></script>
 
 </body>
 

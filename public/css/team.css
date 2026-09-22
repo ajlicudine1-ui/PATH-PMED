@@ -336,6 +336,7 @@ td {
 }
 
 .form-group input,
+.form-group select,
 .form-group textarea {
     width: 100%;
 
@@ -360,7 +361,18 @@ td {
     min-height: 120px;
 }
 
+.form-group select {
+    height: 44px;
+
+    background: #ffffff;
+
+    color: #344054;
+
+    cursor: pointer;
+}
+
 .form-group input:focus,
+.form-group select:focus,
 .form-group textarea:focus {
     border-color: var(--green);
 
@@ -374,6 +386,7 @@ td {
 ========================================= */
 
 .form-group input:disabled,
+.form-group select:disabled,
 .form-group textarea:disabled {
     background: #f8fafc;
 
@@ -628,4 +641,80 @@ td {
     font-size: 14px;
 
     line-height: 1.4;
+}
+
+.team-toolbar-controls {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.team-toolbar-controls .employment-status-filter,
+.team-toolbar-controls #searchInput {
+    height: 38px !important;
+    min-height: 38px !important;
+    max-height: 38px !important;
+
+    box-sizing: border-box !important;
+
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+
+    border: 1px solid #d8dee7;
+    border-radius: 8px;
+
+    background: #ffffff;
+
+    color: #344054;
+
+    font-family: inherit;
+    font-size: 14px;
+
+    outline: none;
+
+    transition: 0.2s ease;
+}
+
+.team-toolbar-controls .employment-status-filter {
+    min-width: 210px;
+
+    padding-left: 12px !important;
+    padding-right: 36px !important;
+
+    cursor: pointer;
+}
+
+.team-toolbar-controls #searchInput {
+    width: 280px;
+    min-width: 280px;
+
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+}
+
+.team-toolbar-controls .employment-status-filter:focus,
+.team-toolbar-controls #searchInput:focus {
+    border-color: var(--green);
+
+    box-shadow:
+        0 0 0 3px rgba(47, 125, 63, 0.08);
+}
+
+@media (max-width: 800px) {
+
+    .team-toolbar-controls {
+        width: 100%;
+
+        justify-content: flex-start;
+
+        align-items: stretch;
+    }
+
+    .team-toolbar-controls .employment-status-filter,
+    .team-toolbar-controls #searchInput {
+        width: 100%;
+        min-width: 0;
+    }
 }

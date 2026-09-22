@@ -29,7 +29,7 @@ function normalizePersonName(value) {
 // ==========================================
 // VALIDATE AND FORMAT RESPONSIBLE PERSON
 // Format: Given Name(s) + Middle Initial + Last Name
-// Example: Yhoebe Rae C. Bernal
+// Example: Juan D. La Cruz
 // ==========================================
 
 function titleCasePersonNamePart(value) {
@@ -207,7 +207,8 @@ export default async function handler(req, res) {
                         personnel (
                             id,
                             full_name,
-                            designation
+                            designation,
+                            employment_status
                         ),
                         teams!inner (
                             id,
@@ -283,6 +284,7 @@ export default async function handler(req, res) {
             const {
                 teamCode,
                 responsiblePerson,
+                employmentStatus,
                 designation,
                 functionsActivities
             } = req.body;
@@ -295,6 +297,7 @@ export default async function handler(req, res) {
             if (
                 !teamCode ||
                 !responsiblePerson ||
+                !employmentStatus ||
                 !designation ||
                 !functionsActivities
             ) {
@@ -326,7 +329,7 @@ export default async function handler(req, res) {
                     .status(400)
                     .json({
                         error:
-                            "Responsible Person must use the format: First Name Middle Initial. Last Name (example: Yhoebe Rae C. Bernal)."
+                            "Responsible Person must use the format: First Name Middle Initial. Last Name (example: Juan D. La Cruz)."
                     });
             }
 
@@ -334,6 +337,34 @@ export default async function handler(req, res) {
             const cleanName =
                 parsedResponsiblePerson
                     .formatted;
+
+
+            const allowedEmploymentStatuses = [
+                "Permanent",
+                "Contractual",
+                "Job Order"
+            ];
+
+
+            const cleanEmploymentStatus =
+                allowedEmploymentStatuses.find(
+                    status =>
+                        status.toLowerCase() ===
+                        String(employmentStatus)
+                            .trim()
+                            .toLowerCase()
+                );
+
+
+            if (!cleanEmploymentStatus) {
+
+                return res
+                    .status(400)
+                    .json({
+                        error:
+                            "Employment Status must be Permanent, Contractual, or Job Order."
+                    });
+            }
 
 
             const cleanDesignation =
@@ -395,7 +426,8 @@ export default async function handler(req, res) {
                     .select(`
                         id,
                         full_name,
-                        designation
+                        designation,
+                        employment_status
                     `);
 
 
@@ -431,6 +463,48 @@ export default async function handler(req, res) {
                 false;
 
 
+            if (personnel) {
+
+                const {
+                    data: updatedPersonnel,
+                    error: updatePersonnelError
+                } =
+                    await supabaseAdmin
+                        .from("personnel")
+                        .update({
+                            full_name:
+                                cleanName,
+
+                            employment_status:
+                                cleanEmploymentStatus,
+
+                            updated_at:
+                                new Date()
+                                    .toISOString()
+                        })
+                        .eq(
+                            "id",
+                            personnel.id
+                        )
+                        .select(`
+                            id,
+                            full_name,
+                            designation,
+                            employment_status
+                        `)
+                        .single();
+
+
+                if (updatePersonnelError) {
+                    throw updatePersonnelError;
+                }
+
+
+                personnel =
+                    updatedPersonnel;
+            }
+
+
             // ==========================================
             // CREATE PERSONNEL ONLY IF NOT FOUND
             // ==========================================
@@ -451,12 +525,16 @@ export default async function handler(req, res) {
                             // Individual assignment designation
                             // is now stored in assignments.
                             designation:
-                                cleanDesignation
+                                cleanDesignation,
+
+                            employment_status:
+                                cleanEmploymentStatus
                         })
                         .select(`
                             id,
                             full_name,
-                            designation
+                            designation,
+                            employment_status
                         `)
                         .single();
 

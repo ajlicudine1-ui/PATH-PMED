@@ -12,9 +12,9 @@
     <title>P.A.T.H | Team Assignments</title>
 
     <link
-    rel="icon"
-    type="image/png"
-    href="/images/PMED-LOGO.png"
+        rel="icon"
+        type="image/png"
+        href="/images/PMED-LOGO.png"
     >
 
     <link
@@ -22,12 +22,88 @@
         href="/css/global.css"
     >
 
-    
-
     <link
         rel="stylesheet"
         href="/css/viewer-team.css"
     >
+
+    <style>
+        .viewer-team-toolbar-controls {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .viewer-team-toolbar-controls .employment-status-filter,
+        .viewer-team-toolbar-controls #searchInput {
+            height: 38px !important;
+            min-height: 38px !important;
+            max-height: 38px !important;
+
+            box-sizing: border-box !important;
+
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+
+            border: 1px solid #d8dee7;
+            border-radius: 8px;
+
+            background: #ffffff;
+
+            color: #344054;
+
+            font-family: inherit;
+            font-size: 14px;
+
+            outline: none;
+
+            transition: 0.2s ease;
+        }
+
+        .viewer-team-toolbar-controls .employment-status-filter {
+            min-width: 210px;
+
+            padding-left: 12px !important;
+            padding-right: 36px !important;
+
+            cursor: pointer;
+        }
+
+        .viewer-team-toolbar-controls #searchInput {
+            width: 280px;
+            min-width: 280px;
+
+            padding-left: 12px !important;
+            padding-right: 12px !important;
+        }
+
+        .viewer-team-toolbar-controls .employment-status-filter:focus,
+        .viewer-team-toolbar-controls #searchInput:focus {
+            border-color: #2f7d3f;
+
+            box-shadow:
+                0 0 0 3px rgba(47, 125, 63, 0.08);
+        }
+
+        @media (max-width: 800px) {
+
+            .viewer-team-toolbar-controls {
+                width: 100%;
+
+                justify-content: flex-start;
+
+                align-items: stretch;
+            }
+
+            .viewer-team-toolbar-controls .employment-status-filter,
+            .viewer-team-toolbar-controls #searchInput {
+                width: 100%;
+                min-width: 0;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -98,14 +174,41 @@
                         </div>
 
 
-                        <!-- SEARCH -->
-                        <input
-                            type="search"
-                            id="searchInput"
-                            class="viewer-search"
-                            placeholder="Search personnel, designation, or activity..."
-                            autocomplete="off"
-                        >
+                        <!-- FILTER + SEARCH -->
+                        <div class="viewer-team-toolbar-controls">
+
+                            <select
+                                id="employmentStatusFilter"
+                                class="employment-status-filter"
+                                aria-label="Filter by employment status"
+                            >
+                                <option value="">
+                                    All Employment Status
+                                </option>
+
+                                <option value="Permanent">
+                                    Permanent
+                                </option>
+
+                                <option value="Contractual">
+                                    Contractual
+                                </option>
+
+                                <option value="Job Order">
+                                    Job Order
+                                </option>
+                            </select>
+
+
+                            <input
+                                type="search"
+                                id="searchInput"
+                                class="viewer-search"
+                                placeholder="Search personnel, designation, or activity..."
+                                autocomplete="off"
+                            >
+
+                        </div>
 
                     </div>
 
@@ -167,13 +270,9 @@
     <!-- VIEWER SIDEBAR -->
     <script src="/js/viewer-sidebar.js"></script>
 
-    <!-- VIEWERpageEc-->
-
-   <script src="/js/viewer-team.js?v=3"></script>
+    <!-- VIEWER TEAM PAGE -->
+    <script src="/js/viewer-team.js?v=4"></script>
 
 </body>
 
 </html>
-
-
-

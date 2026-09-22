@@ -34,6 +34,11 @@ const tableBody =
 const searchInput =
     document.getElementById("searchInput");
 
+const employmentStatusFilter =
+    document.getElementById(
+        "employmentStatusFilter"
+    );
+
 
 // ============================================
 // SHOW TEAM INFO IMMEDIATELY FROM CACHE
@@ -93,7 +98,7 @@ function showCachedTeamInformation() {
             cachedTeam.name || "";
 
         document.title =
-            `P.A.T.H | ${cachedTeam.code}`;
+            "P.A.T.H | PMED Assignment and Team Hub";
 
     } catch (error) {
 
@@ -148,6 +153,9 @@ const modalDescription =
 
 const responsiblePersonInput =
     document.getElementById("responsiblePerson");
+
+const employmentStatusInput =
+    document.getElementById("employmentStatus");
 
 const designationInput =
     document.getElementById("designation");
@@ -428,6 +436,32 @@ function getLastResponsiblePerson() {
 }
 
 
+function getEmploymentStatusForPerson(name) {
+
+    const normalizedName =
+        normalizePersonName(name);
+
+    if (!normalizedName) {
+        return "";
+    }
+
+    const match =
+        assignments.find(record => {
+
+            return (
+                normalizePersonName(
+                    record.personnel?.full_name
+                ) === normalizedName
+            );
+        });
+
+    return (
+        match?.personnel?.employment_status ||
+        ""
+    );
+}
+
+
 // ============================================
 // LOAD TEAM
 // ============================================
@@ -519,7 +553,7 @@ async function loadTeam() {
             currentTeam.name;
 
         document.title =
-            `P.A.T.H | ${currentTeam.code}`;
+            "P.A.T.H | PMED Assignment and Team Hub";
 
         await loadAssignments();
 
@@ -588,7 +622,7 @@ async function loadAssignments() {
                 ? result
                 : [];
 
-        renderAssignments(assignments);
+        applyAssignmentFilters();
 
     } catch (error) {
 
@@ -803,60 +837,104 @@ function renderAssignments(records) {
 
 
 // ============================================
-// SEARCH
+// SEARCH + EMPLOYMENT STATUS FILTER
 // ============================================
+
+function applyAssignmentFilters() {
+
+    const keyword =
+        String(
+            searchInput?.value || ""
+        )
+            .toLowerCase()
+            .trim();
+
+
+    const selectedStatus =
+        String(
+            employmentStatusFilter?.value || ""
+        )
+            .toLowerCase()
+            .trim();
+
+
+    const filteredAssignments =
+        assignments.filter(record => {
+
+            const personnel =
+                record.personnel || {};
+
+
+            const name =
+                String(
+                    personnel.full_name || ""
+                )
+                    .toLowerCase();
+
+
+            const employmentStatus =
+                String(
+                    personnel.employment_status || ""
+                )
+                    .toLowerCase();
+
+
+            const designation =
+                String(
+                    record.designation ||
+                    personnel.designation ||
+                    ""
+                )
+                    .toLowerCase();
+
+
+            const activity =
+                String(
+                    record.functions_activities || ""
+                )
+                    .toLowerCase();
+
+
+            const matchesKeyword =
+                !keyword ||
+                name.includes(keyword) ||
+                employmentStatus.includes(keyword) ||
+                designation.includes(keyword) ||
+                activity.includes(keyword);
+
+
+            const matchesStatus =
+                !selectedStatus ||
+                employmentStatus === selectedStatus;
+
+
+            return (
+                matchesKeyword &&
+                matchesStatus
+            );
+        });
+
+
+    renderAssignments(
+        filteredAssignments
+    );
+}
+
 
 if (searchInput) {
 
     searchInput.addEventListener(
         "input",
-        event => {
+        applyAssignmentFilters
+    );
+}
 
-            const keyword =
-                event.target.value
-                    .toLowerCase()
-                    .trim();
 
-            if (!keyword) {
+if (employmentStatusFilter) {
 
-                renderAssignments(
-                    assignments
-                );
-
-                return;
-            }
-
-            const filtered =
-                assignments.filter(record => {
-
-                    const name =
-                        record.personnel
-                            ?.full_name
-                            ?.toLowerCase() ||
-                        "";
-
-                    const designation =
-                        (
-                            record.designation ||
-                            record.personnel?.designation ||
-                            ""
-                        )
-                            .toLowerCase();
-
-                    const activity =
-                        record.functions_activities
-                            ?.toLowerCase() ||
-                        "";
-
-                    return (
-                        name.includes(keyword) ||
-                        designation.includes(keyword) ||
-                        activity.includes(keyword)
-                    );
-                });
-
-            renderAssignments(filtered);
-        }
+    employmentStatusFilter.addEventListener(
+        "change",
+        applyAssignmentFilters
     );
 }
 
@@ -876,7 +954,15 @@ function openAddAssignmentModal() {
     responsiblePersonInput.value =
         getLastResponsiblePerson();
 
+    employmentStatusInput.value =
+        getEmploymentStatusForPerson(
+            responsiblePersonInput.value
+        );
+
     responsiblePersonInput.disabled =
+        false;
+
+    employmentStatusInput.disabled =
         false;
 
     designationInput.disabled =
@@ -919,6 +1005,9 @@ async function openViewAssignment(id) {
         responsiblePersonInput.value =
             assignment.personnel?.full_name || "";
 
+        employmentStatusInput.value =
+            assignment.personnel?.employment_status || "";
+
         designationInput.value =
             assignment.designation ||
             assignment.personnel?.designation ||
@@ -928,6 +1017,7 @@ async function openViewAssignment(id) {
             assignment.functions_activities || "";
 
         responsiblePersonInput.disabled = true;
+        employmentStatusInput.disabled = true;
         designationInput.disabled = true;
         functionsActivitiesInput.disabled = true;
 
@@ -972,6 +1062,9 @@ async function openEditAssignment(id) {
         responsiblePersonInput.value =
             assignment.personnel?.full_name || "";
 
+        employmentStatusInput.value =
+            assignment.personnel?.employment_status || "";
+
         designationInput.value =
             assignment.designation ||
             assignment.personnel?.designation ||
@@ -981,6 +1074,7 @@ async function openEditAssignment(id) {
             assignment.functions_activities || "";
 
         responsiblePersonInput.disabled = false;
+        employmentStatusInput.disabled = false;
         designationInput.disabled = false;
         functionsActivitiesInput.disabled = false;
 
@@ -1088,6 +1182,9 @@ function closeModal() {
     assignmentForm.reset();
 
     responsiblePersonInput.disabled =
+        false;
+
+    employmentStatusInput.disabled =
         false;
 
     designationInput.disabled =
@@ -1244,6 +1341,11 @@ if (assignmentForm) {
             }
 
 
+            const employmentStatus =
+                employmentStatusInput
+                    .value
+                    .trim();
+
             const designation =
                 designationInput
                     .value
@@ -1256,6 +1358,7 @@ if (assignmentForm) {
 
             if (
                 !responsiblePerson ||
+                !employmentStatus ||
                 !designation ||
                 !functionsActivities
             ) {
@@ -1311,6 +1414,7 @@ if (assignmentForm) {
                                 JSON.stringify({
                                     teamCode,
                                     responsiblePerson,
+                                    employmentStatus,
                                     designation,
                                     functionsActivities
                                 })

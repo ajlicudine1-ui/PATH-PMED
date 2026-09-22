@@ -19,6 +19,11 @@ const totalAssignmentsElement =
 const dashboardTableBody =
     document.getElementById("dashboardTableBody");
 
+const dashboardEmploymentStatusFilter =
+    document.getElementById(
+        "dashboardEmploymentStatusFilter"
+    );
+
 
 // ============================================
 // VIEW ELEMENTS
@@ -85,6 +90,8 @@ let sectionFormMode =
 let selectedSectionId =
     null;
 
+let dashboardAssignments = [];
+
 
 // ============================================
 // LOAD DASHBOARD
@@ -136,11 +143,12 @@ async function loadDashboard() {
         }
 
 
-        renderDashboardAssignments(
+        dashboardAssignments =
             Array.isArray(data.assignments)
                 ? data.assignments
-                : []
-        );
+                : [];
+
+        applyDashboardEmploymentStatusFilter();
 
     } catch (error) {
 
@@ -150,6 +158,57 @@ async function loadDashboard() {
         );
     }
 }
+
+
+// ============================================
+// FILTER BY EMPLOYMENT STATUS
+// ============================================
+
+function applyDashboardEmploymentStatusFilter() {
+
+    const selectedStatus =
+        String(
+            dashboardEmploymentStatusFilter?.value || ""
+        )
+            .trim()
+            .toLowerCase();
+
+
+    const filtered =
+        dashboardAssignments.filter(
+            record => {
+
+                const employmentStatus =
+                    String(
+                        record.personnel
+                            ?.employment_status ||
+                        ""
+                    )
+                        .trim()
+                        .toLowerCase();
+
+
+                return (
+                    !selectedStatus ||
+                    employmentStatus ===
+                        selectedStatus
+                );
+            }
+        );
+
+
+    renderDashboardAssignments(
+        filtered
+    );
+}
+
+
+dashboardEmploymentStatusFilter
+    ?.addEventListener(
+        "change",
+        applyDashboardEmploymentStatusFilter
+    );
+
 
 
 // ============================================
