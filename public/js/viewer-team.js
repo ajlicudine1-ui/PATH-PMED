@@ -124,7 +124,7 @@ function showCachedViewerTeamInformation() {
 
 
         document.title =
-            `PATH | ${team.code}`;
+            `P.A.T.H | ${team.code}`;
 
 
     } catch (error) {
@@ -353,7 +353,7 @@ function updateViewerTeamHeading() {
     if (team.code) {
 
         document.title =
-            `PATH | ${team.code}`;
+            `P.A.T.H | ${team.code}`;
     }
 }
 
@@ -424,7 +424,7 @@ async function loadViewerTeamName() {
 
 
         document.title =
-            `PATH | ${team.code}`;
+            `P.A.T.H | ${team.code}`;
 
 
     } catch (error) {
