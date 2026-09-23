@@ -21,11 +21,6 @@ const viewerAssignmentsTableBody =
 const viewerSearchInput =
     document.getElementById("searchInput");
 
-const viewerEmploymentStatusFilter =
-    document.getElementById(
-        "employmentStatusFilter"
-    );
-
 
 // ============================================
 // STATE
@@ -129,7 +124,7 @@ function showCachedViewerTeamInformation() {
 
 
         document.title =
-            "P.A.T.H | PMED Assignment and Team Hub";
+            `P.A.T.H | ${team.code}`;
 
 
     } catch (error) {
@@ -181,7 +176,9 @@ function showCachedViewerAssignments() {
             records;
 
 
-        applyViewerAssignmentFilters();
+        renderViewerTeamAssignments(
+            viewerAssignments
+        );
 
 
         return true;
@@ -286,7 +283,9 @@ async function loadViewerTeam() {
         updateViewerTeamHeading();
 
 
-        applyViewerAssignmentFilters();
+        renderViewerTeamAssignments(
+            viewerAssignments
+        );
 
 
     } catch (error) {
@@ -354,7 +353,7 @@ function updateViewerTeamHeading() {
     if (team.code) {
 
         document.title =
-            "P.A.T.H | PMED Assignment and Team Hub";
+            `P.A.T.H | ${team.code}`;
     }
 }
 
@@ -425,7 +424,7 @@ async function loadViewerTeamName() {
 
 
         document.title =
-            "P.A.T.H | PMED Assignment and Team Hub";
+            `P.A.T.H | ${team.code}`;
 
 
     } catch (error) {
@@ -435,6 +434,32 @@ async function loadViewerTeamName() {
             error
         );
     }
+}
+
+
+
+
+// ============================================
+// FORMAT FUNCTIONS / ACTIVITIES FOR DISPLAY
+// Preserves line breaks and blank lines,
+// while removing accidental leading spaces/tabs.
+// ============================================
+
+function formatViewerActivityDisplay(value) {
+
+    const normalized =
+        String(value || "")
+            .replace(/\r\n/g, "\n")
+            .split("\n")
+            .map(line => line.trimStart())
+            .join("\n")
+            .trim();
+
+
+    return escapeViewerTeamHTML(
+        normalized
+    )
+        .replace(/\n/g, "<br>");
 }
 
 
@@ -580,7 +605,7 @@ function renderViewerTeamAssignments(records) {
                                     </td>
 
                                     <td>
-                                        ${escapeViewerTeamHTML(
+                                        ${formatViewerActivityDisplay(
                                             record.functions_activities || ""
                                         )}
                                     </td>
@@ -596,103 +621,59 @@ function renderViewerTeamAssignments(records) {
 
 
 // ============================================
-// SEARCH + EMPLOYMENT STATUS FILTER
+// SEARCH
 // ============================================
-
-function applyViewerAssignmentFilters() {
-
-    const query =
-        String(
-            viewerSearchInput?.value || ""
-        )
-            .trim()
-            .toLowerCase();
-
-
-    const selectedStatus =
-        String(
-            viewerEmploymentStatusFilter?.value || ""
-        )
-            .trim()
-            .toLowerCase();
-
-
-    const filtered =
-        viewerAssignments.filter(
-            record => {
-
-                const personnel =
-                    record.personnel || {};
-
-
-                const name =
-                    String(
-                        personnel.full_name || ""
-                    )
-                        .toLowerCase();
-
-
-                const employmentStatus =
-                    String(
-                        personnel.employment_status || ""
-                    )
-                        .toLowerCase();
-
-
-                const designation =
-                    String(
-                        record.designation ||
-                        personnel.designation ||
-                        ""
-                    )
-                        .toLowerCase();
-
-
-                const activity =
-                    String(
-                        record.functions_activities ||
-                        ""
-                    )
-                        .toLowerCase();
-
-
-                const matchesSearch =
-                    !query ||
-                    name.includes(query) ||
-                    employmentStatus.includes(query) ||
-                    designation.includes(query) ||
-                    activity.includes(query);
-
-
-                const matchesEmploymentStatus =
-                    !selectedStatus ||
-                    employmentStatus ===
-                        selectedStatus;
-
-
-                return (
-                    matchesSearch &&
-                    matchesEmploymentStatus
-                );
-            }
-        );
-
-
-    renderViewerTeamAssignments(
-        filtered
-    );
-}
-
 
 viewerSearchInput?.addEventListener(
     "input",
-    applyViewerAssignmentFilters
-);
+    () => {
+
+        const query =
+            viewerSearchInput
+                .value
+                .trim()
+                .toLowerCase();
 
 
-viewerEmploymentStatusFilter?.addEventListener(
-    "change",
-    applyViewerAssignmentFilters
+        if (!query) {
+
+            renderViewerTeamAssignments(
+                viewerAssignments
+            );
+
+            return;
+        }
+
+
+        const filtered =
+            viewerAssignments.filter(
+                record => {
+
+                    const personnel =
+                        record.personnel || {};
+
+
+                    return [
+                        personnel.full_name,
+                        record.designation ||
+                            personnel.designation,
+                        record.functions_activities
+                    ]
+                        .filter(Boolean)
+                        .some(
+                            value =>
+                                String(value)
+                                    .toLowerCase()
+                                    .includes(query)
+                        );
+                }
+            );
+
+
+        renderViewerTeamAssignments(
+            filtered
+        );
+    }
 );
 
 

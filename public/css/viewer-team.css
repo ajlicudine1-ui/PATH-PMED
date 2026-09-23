@@ -427,3 +427,370 @@
 
     line-height: 1.4;
 }
+/* =========================================
+   P.A.T.H - VIEWER DASHBOARD FULL LAYOUT
+   First screen = heading + compact cards + calendar
+   Second screen = recent assignments
+========================================= */
+
+html,
+body {
+    scroll-behavior: smooth;
+}
+
+.page-content {
+    padding-top: 20px;
+    padding-bottom: 36px;
+}
+
+
+/* =========================================
+   FIRST SCREEN
+========================================= */
+
+.viewer-dashboard-overview {
+    min-height: calc(100vh - 92px);
+
+    display: grid;
+
+    grid-template-rows:
+        auto
+        auto
+        minmax(0, 1fr);
+
+    gap: 14px;
+
+    padding-bottom: 18px;
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================
+   PAGE HEADING
+========================================= */
+
+.viewer-dashboard-overview > .page-heading {
+    margin: 0;
+
+    padding: 16px 20px;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 6px 18px rgba(16, 24, 40, 0.045);
+}
+
+.viewer-dashboard-overview > .page-heading h1 {
+    margin: 0 0 4px;
+
+    font-size: clamp(24px, 2vw, 30px);
+}
+
+.viewer-dashboard-overview > .page-heading p {
+    margin: 0;
+
+    line-height: 1.45;
+}
+
+
+/* =========================================
+   SUMMARY CARDS - TOP ROW
+========================================= */
+
+.viewer-dashboard-overview > .stats-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 14px;
+
+    margin: 0;
+}
+
+.viewer-dashboard-overview .stat-card {
+    min-height: 82px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 14px 18px;
+
+    border-radius: 14px;
+
+    box-shadow:
+        0 6px 18px rgba(16, 24, 40, 0.045);
+}
+
+.viewer-dashboard-overview .stat-card span {
+    margin: 0;
+
+    font-size: 13px;
+}
+
+.viewer-dashboard-overview .stat-card strong {
+    margin-left: 16px;
+
+    line-height: 1;
+
+    font-size: clamp(28px, 2.8vw, 38px);
+}
+
+
+/* =========================================
+   CALENDAR - BELOW CARDS
+========================================= */
+
+.viewer-dashboard-overview > .viewer-calendar-card {
+    min-width: 0;
+    min-height: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    margin: 0;
+
+    padding: 16px 18px;
+
+    border-radius: 14px;
+
+    box-shadow:
+        0 6px 18px rgba(16, 24, 40, 0.045);
+
+    overflow: hidden;
+}
+
+.viewer-dashboard-overview
+.viewer-calendar-card
+.calendar-card-header {
+    flex: 0 0 auto;
+
+    margin-bottom: 6px;
+}
+
+.viewer-dashboard-overview
+.viewer-calendar-card
+.calendar-card-header h2 {
+    margin-bottom: 3px;
+
+    font-size: 18px;
+}
+
+.viewer-dashboard-overview
+.viewer-calendar-card
+.calendar-card-header p {
+    font-size: 12px;
+}
+
+.viewer-dashboard-overview
+.viewer-calendar-card
+.calendar-toolbar {
+    flex: 0 0 auto;
+
+    margin-bottom: 6px;
+}
+
+.viewer-dashboard-overview
+.viewer-calendar-card
+.calendar-toolbar h3 {
+    min-width: 165px;
+
+    font-size: 15px;
+}
+
+.viewer-dashboard-overview
+.viewer-calendar-card
+.calendar-nav-button {
+    width: 32px;
+    height: 32px;
+
+    font-size: 20px;
+}
+
+.viewer-dashboard-overview
+.viewer-calendar-card
+.calendar-weekdays {
+    flex: 0 0 auto;
+}
+
+.viewer-dashboard-overview
+.viewer-calendar-card
+.calendar-weekdays span {
+    padding: 6px 4px;
+
+    font-size: 10px;
+}
+
+.viewer-dashboard-overview
+.viewer-calendar-card
+.calendar-grid {
+    flex: 1 1 auto;
+
+    min-height: 0;
+}
+
+.viewer-dashboard-overview
+.viewer-calendar-card
+.calendar-day {
+    min-height: 56px;
+
+    padding: 5px;
+}
+
+.viewer-dashboard-overview
+.viewer-calendar-card
+.calendar-day-number {
+    width: 20px;
+    height: 20px;
+
+    margin-bottom: 2px;
+
+    font-size: 10px;
+}
+
+.viewer-dashboard-overview
+.viewer-calendar-card
+.calendar-day-activities {
+    gap: 2px;
+}
+
+.viewer-dashboard-overview
+.viewer-calendar-card
+.calendar-activity {
+    padding: 3px 4px;
+
+    font-size: 8px;
+}
+
+.viewer-dashboard-overview
+.viewer-calendar-card
+.calendar-activity-time,
+.viewer-dashboard-overview
+.viewer-calendar-card
+.calendar-activity-team {
+    font-size: 7px;
+}
+
+
+/* =========================================
+   SECOND SCREEN - RECENT ASSIGNMENTS
+========================================= */
+
+.viewer-recent-assignments {
+    min-height: calc(100vh - 110px);
+
+    margin-top: 24px;
+
+    padding: 24px;
+
+    border-radius: 14px;
+
+    box-shadow:
+        0 6px 18px rgba(16, 24, 40, 0.045);
+
+    scroll-margin-top: 96px;
+}
+
+.viewer-recent-assignments .card-header {
+    margin-bottom: 18px;
+}
+
+
+/* =========================================
+   MEDIUM SCREENS
+========================================= */
+
+@media (max-width: 1100px) {
+
+    .viewer-dashboard-overview {
+        min-height: auto;
+    }
+
+    .viewer-dashboard-overview > .stats-grid {
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+    }
+
+    .viewer-dashboard-overview
+    > .viewer-calendar-card {
+        overflow-x: auto;
+    }
+
+    .viewer-dashboard-overview
+    .viewer-calendar-card
+    .calendar-weekdays,
+    .viewer-dashboard-overview
+    .viewer-calendar-card
+    .calendar-grid {
+        min-width: 760px;
+    }
+
+    .viewer-recent-assignments {
+        min-height: auto;
+    }
+}
+
+
+/* =========================================
+   TABLET / MOBILE
+========================================= */
+
+@media (max-width: 800px) {
+
+    .page-content {
+        padding-top: 16px;
+    }
+
+    .viewer-dashboard-overview {
+        display: block;
+
+        min-height: auto;
+
+        padding-bottom: 22px;
+    }
+
+    .viewer-dashboard-overview > .page-heading {
+        margin-bottom: 14px;
+
+        padding: 16px;
+    }
+
+    .viewer-dashboard-overview > .stats-grid {
+        grid-template-columns: 1fr;
+
+        margin-bottom: 14px;
+    }
+
+    .viewer-dashboard-overview .stat-card {
+        min-height: 72px;
+    }
+
+    .viewer-dashboard-overview
+    > .viewer-calendar-card {
+        padding: 14px;
+
+        overflow-x: auto;
+    }
+
+    .viewer-dashboard-overview
+    .viewer-calendar-card
+    .calendar-weekdays,
+    .viewer-dashboard-overview
+    .viewer-calendar-card
+    .calendar-grid {
+        min-width: 720px;
+    }
+
+    .viewer-recent-assignments {
+        min-height: auto;
+
+        margin-top: 0;
+
+        padding: 18px;
+    }
+}

@@ -27,6 +27,16 @@
         href="/css/dashboard.css"
     >
 
+    <link
+        rel="stylesheet"
+        href="/css/calendar.css?v=4"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/css/viewer-dashboard-layout.css?v=2"
+    >
+
     <style>
         .employment-status-filter {
             min-width: 210px;
@@ -110,6 +120,9 @@
             <!-- PAGE CONTENT -->
             <section class="page-content">
 
+                <!-- DASHBOARD OVERVIEW - FIRST SCREEN -->
+                <div class="viewer-dashboard-overview">
+
                 <!-- PAGE HEADING -->
                 <div class="page-heading">
 
@@ -169,8 +182,84 @@
                 </div>
 
 
+
+                <!-- CALENDAR OF ACTIVITIES -->
+                <div class="content-card calendar-card viewer-calendar-card">
+
+                    <div class="calendar-card-header">
+
+                        <div>
+
+                            <h2>
+                                Calendar of Activities
+                            </h2>
+
+                            <p>
+                                View scheduled PMED activities.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="calendar-toolbar">
+
+                        <button
+                            type="button"
+                            class="calendar-nav-button"
+                            id="viewerPreviousMonthBtn"
+                            aria-label="Previous month"
+                        >
+                            &#8249;
+                        </button>
+
+
+                        <h3 id="viewerCalendarMonthLabel">
+                            Month Year
+                        </h3>
+
+
+                        <button
+                            type="button"
+                            class="calendar-nav-button"
+                            id="viewerNextMonthBtn"
+                            aria-label="Next month"
+                        >
+                            &#8250;
+                        </button>
+
+                    </div>
+
+
+                    <div class="calendar-weekdays">
+
+                        <span>Sun</span>
+                        <span>Mon</span>
+                        <span>Tue</span>
+                        <span>Wed</span>
+                        <span>Thu</span>
+                        <span>Fri</span>
+                        <span>Sat</span>
+
+                    </div>
+
+
+                    <div
+                        class="calendar-grid"
+                        id="viewerCalendarGrid"
+                    >
+                    </div>
+
+                </div>
+
+
+                </div>
+                <!-- END DASHBOARD OVERVIEW -->
+
+
                 <!-- RECENT ASSIGNMENTS -->
-                <div class="content-card">
+                <div class="content-card viewer-recent-assignments">
 
                     <div class="card-header">
 
@@ -269,11 +358,94 @@
     </div>
 
 
+
+    <!-- VIEW ACTIVITY MODAL -->
+    <div
+        class="modal-overlay"
+        id="viewerActivityModal"
+    >
+
+        <div class="modal-card calendar-modal-card">
+
+            <div class="modal-header">
+
+                <div>
+
+                    <h2 id="viewerActivityModalTitle">
+                        Activity Details
+                    </h2>
+
+                    <p>
+                        View PMED calendar activity information.
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="modal-close"
+                    id="viewerCloseActivityModal"
+                    aria-label="Close"
+                >
+                    &times;
+                </button>
+
+            </div>
+
+
+            <div class="viewer-activity-details">
+
+                <div class="viewer-activity-detail">
+                    <span>Activity</span>
+                    <strong id="viewerActivityTitle"></strong>
+                </div>
+
+                <div class="viewer-activity-detail">
+                    <span>Date</span>
+                    <strong id="viewerActivityDate"></strong>
+                </div>
+
+                <div class="viewer-activity-detail">
+                    <span>Time</span>
+                    <strong id="viewerActivityTime"></strong>
+                </div>
+
+                <div class="viewer-activity-detail">
+                    <span>Section</span>
+                    <strong id="viewerActivitySection"></strong>
+                </div>
+
+                <div class="viewer-activity-detail viewer-activity-detail-full">
+                    <span>Description</span>
+                    <p id="viewerActivityDescription"></p>
+                </div>
+
+            </div>
+
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    class="cancel-button"
+                    id="viewerCloseActivityButton"
+                >
+                    Close
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
     <!-- VIEWER SIDEBAR -->
     <script src="/js/viewer-sidebar.js"></script>
 
     <!-- VIEWER DASHBOARD -->
-    <script src="/js/viewer.js?v=2"></script>
+    <script src="/js/viewer.js?v=3"></script>
 
 </body>
 

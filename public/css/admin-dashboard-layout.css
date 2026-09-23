@@ -1,0 +1,238 @@
+/* =========================================
+   P.A.T.H - ADMIN DASHBOARD COMPACT LAYOUT
+   Cards + calendar balanced for one desktop screen
+========================================= */
+
+.admin-page .page-content {
+    padding-top: 18px;
+    padding-bottom: 32px;
+}
+
+
+/* =========================================
+   PAGE HEADING
+========================================= */
+
+.admin-page .page-heading {
+    margin-bottom: 16px;
+}
+
+.admin-page .dashboard-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.admin-page .page-heading h1 {
+    margin-bottom: 5px;
+    font-size: 30px;
+}
+
+.admin-page .page-heading p {
+    font-size: 14px;
+    line-height: 1.35;
+}
+
+
+/* =========================================
+   ADMIN ACTION BUTTONS
+========================================= */
+
+.admin-page .dashboard-actions {
+    gap: 9px;
+}
+
+.admin-page .manage-section-button,
+.admin-page .add-section-button {
+    padding: 10px 16px;
+    font-size: 13px;
+    border-radius: 9px;
+}
+
+
+/* =========================================
+   SUMMARY CARDS
+========================================= */
+
+.admin-page .stats-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+.admin-page .stat-card {
+    min-height: 92px;
+    padding: 17px 20px;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+
+    border-radius: 12px;
+
+    box-shadow:
+        0 4px 14px rgba(30, 41, 59, 0.05);
+}
+
+.admin-page .stat-card span {
+    margin-bottom: 0;
+    font-size: 14px;
+}
+
+.admin-page .stat-card strong {
+    margin-left: 14px;
+    font-size: 34px;
+}
+
+
+/* =========================================
+   CALENDAR CARD
+========================================= */
+
+.admin-page .calendar-card {
+    margin-top: 0;
+    margin-bottom: 28px;
+
+    padding: 18px 20px;
+
+    border-radius: 14px;
+}
+
+.admin-page .calendar-card-header {
+    margin-bottom: 8px;
+}
+
+.admin-page .calendar-card-header h2 {
+    margin-bottom: 3px;
+    font-size: 20px;
+}
+
+.admin-page .calendar-card-header p {
+    font-size: 12px;
+}
+
+.admin-page .calendar-add-button {
+    padding: 9px 15px;
+    font-size: 13px;
+    border-radius: 9px;
+}
+
+
+/* =========================================
+   CALENDAR TOOLBAR
+========================================= */
+
+.admin-page .calendar-toolbar {
+    gap: 12px;
+    margin: 7px 0 9px;
+}
+
+.admin-page .calendar-toolbar h3 {
+    min-width: 160px;
+    font-size: 15px;
+}
+
+.admin-page .calendar-nav-button {
+    width: 32px;
+    height: 32px;
+    font-size: 20px;
+}
+
+
+/* =========================================
+   CALENDAR GRID
+========================================= */
+
+.admin-page .calendar-weekdays span {
+    padding: 7px 4px;
+    font-size: 11px;
+}
+
+.admin-page .calendar-day {
+    min-height: 58px;
+    padding: 5px;
+}
+
+.admin-page .calendar-day-number {
+    width: 21px;
+    height: 21px;
+    margin-bottom: 3px;
+    font-size: 10px;
+}
+
+.admin-page .calendar-day-activities {
+    gap: 3px;
+}
+
+.admin-page .calendar-activity {
+    padding: 3px 5px;
+    font-size: 9px;
+}
+
+.admin-page .calendar-activity-time,
+.admin-page .calendar-activity-team {
+    font-size: 8px;
+}
+
+
+/* =========================================
+   RECENT ASSIGNMENTS
+========================================= */
+
+.admin-page #recentAssignmentsView {
+    margin-top: 0;
+}
+
+.admin-page #recentAssignmentsView .card-header {
+    margin-bottom: 18px;
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 1050px) {
+
+    .admin-page .stats-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .admin-page .calendar-card {
+        overflow-x: auto;
+    }
+
+    .admin-page .calendar-weekdays,
+    .admin-page .calendar-grid {
+        min-width: 760px;
+    }
+}
+
+
+@media (max-width: 760px) {
+
+    .admin-page .dashboard-heading {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .admin-page .dashboard-actions {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .admin-page .manage-section-button,
+    .admin-page .add-section-button {
+        width: 100%;
+    }
+
+    .admin-page .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-page .stat-card {
+        min-height: 74px;
+    }
+}

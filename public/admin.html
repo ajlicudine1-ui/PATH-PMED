@@ -28,56 +28,15 @@
         href="/css/dashboard.css"
     >
 
-    <style>
-        .dashboard-employment-status-filter {
-            min-width: 210px;
-            height: 38px;
-            min-height: 38px;
-            max-height: 38px;
+    <link
+        rel="stylesheet"
+        href="/css/calendar.css"
+    >
 
-            box-sizing: border-box;
-
-            padding: 0 36px 0 12px;
-
-            border: 1px solid #d8dee7;
-            border-radius: 8px;
-
-            background: #ffffff;
-
-            color: #344054;
-
-            font-family: inherit;
-            font-size: 14px;
-
-            cursor: pointer;
-            outline: none;
-
-            transition: 0.2s ease;
-        }
-
-        .dashboard-employment-status-filter:focus {
-            border-color: #2f7d3f;
-
-            box-shadow:
-                0 0 0 3px
-                rgba(47, 125, 63, 0.08);
-        }
-
-        @media (max-width: 800px) {
-
-            #recentAssignmentsView .card-header {
-                align-items: flex-start;
-                gap: 12px;
-                flex-wrap: wrap;
-            }
-
-            .dashboard-employment-status-filter {
-                width: 100%;
-                min-width: 0;
-            }
-        }
-    </style>
-
+    <link
+        rel="stylesheet"
+        href="/css/admin-dashboard-layout.css?v=1"
+    >
 </head>
 
 <body class="admin-page">
@@ -201,6 +160,89 @@
                             0
                         </strong>
 
+                    </div>
+
+                </div>
+
+
+
+                <!-- =========================================
+                     CALENDAR OF ACTIVITIES
+                ========================================== -->
+                <div class="content-card calendar-card">
+
+                    <div class="calendar-card-header">
+
+                        <div>
+
+                            <h2>
+                                Calendar of Activities
+                            </h2>
+
+                            <p>
+                                Schedule and manage PMED activities.
+                            </p>
+
+                        </div>
+
+
+                        <button
+                            type="button"
+                            class="calendar-add-button"
+                            id="addActivityBtn"
+                        >
+                            + Add Activity
+                        </button>
+
+                    </div>
+
+
+                    <div class="calendar-toolbar">
+
+                        <button
+                            type="button"
+                            class="calendar-nav-button"
+                            id="previousMonthBtn"
+                            aria-label="Previous month"
+                        >
+                            &#8249;
+                        </button>
+
+
+                        <h3 id="calendarMonthLabel">
+                            Month Year
+                        </h3>
+
+
+                        <button
+                            type="button"
+                            class="calendar-nav-button"
+                            id="nextMonthBtn"
+                            aria-label="Next month"
+                        >
+                            &#8250;
+                        </button>
+
+                    </div>
+
+
+                    <div class="calendar-weekdays">
+
+                        <span>Sun</span>
+                        <span>Mon</span>
+                        <span>Tue</span>
+                        <span>Wed</span>
+                        <span>Thu</span>
+                        <span>Fri</span>
+                        <span>Sat</span>
+
+                    </div>
+
+
+                    <div
+                        class="calendar-grid"
+                        id="calendarGrid"
+                    >
                     </div>
 
                 </div>
@@ -383,6 +425,184 @@
     </div>
 
 
+
+    <!-- =========================================
+         ADD / EDIT ACTIVITY MODAL
+    ========================================== -->
+    <div
+        class="modal-overlay"
+        id="activityModal"
+    >
+
+        <div class="modal-card calendar-modal-card">
+
+            <div class="modal-header">
+
+                <div>
+
+                    <h2 id="activityModalTitle">
+                        Add Activity
+                    </h2>
+
+                    <p id="activityModalDescription">
+                        Add an activity to the PMED calendar.
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="modal-close"
+                    id="closeActivityModal"
+                    aria-label="Close"
+                >
+                    &times;
+                </button>
+
+            </div>
+
+
+            <form id="activityForm">
+
+                <div class="form-group">
+
+                    <label for="activityTitle">
+                        Activity Title
+                    </label>
+
+                    <input
+                        type="text"
+                        id="activityTitle"
+                        maxlength="200"
+                        placeholder="Enter activity title"
+                        autocomplete="off"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="calendar-form-grid">
+
+                    <div class="form-group">
+
+                        <label for="activityDate">
+                            Date
+                        </label>
+
+                        <input
+                            type="date"
+                            id="activityDate"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="activityTeam">
+                            Section
+                        </label>
+
+                        <select id="activityTeam">
+                            <option value="">
+                                All PMED / General
+                            </option>
+                        </select>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="activityStartTime">
+                            Start Time
+                        </label>
+
+                        <input
+                            type="time"
+                            id="activityStartTime"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="activityEndTime">
+                            End Time
+                        </label>
+
+                        <input
+                            type="time"
+                            id="activityEndTime"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="activityDescription">
+                        Description
+                    </label>
+
+                    <textarea
+                        id="activityDescription"
+                        rows="4"
+                        maxlength="1000"
+                        placeholder="Enter activity details"
+                    ></textarea>
+
+                </div>
+
+
+                <div class="modal-actions calendar-modal-actions">
+
+                    <button
+                        type="button"
+                        class="delete-calendar-button"
+                        id="deleteActivityBtn"
+                        hidden
+                    >
+                        Delete
+                    </button>
+
+
+                    <div class="calendar-modal-actions-right">
+
+                        <button
+                            type="button"
+                            class="cancel-button"
+                            id="cancelActivity"
+                        >
+                            Cancel
+                        </button>
+
+
+                        <button
+                            type="submit"
+                            class="save-button"
+                            id="saveActivityBtn"
+                        >
+                            Save Activity
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
     <!-- =========================================
          ADD / EDIT SECTION MODAL
     ========================================== -->
@@ -496,7 +716,7 @@
 
     <!-- APP SCRIPTS -->
     <script src="/js/sidebar.js"></script>
-    <script src="/js/dashboard.js?v=2"></script>
+    <script src="/js/dashboard.js?v=4"></script>
 
 </body>
 

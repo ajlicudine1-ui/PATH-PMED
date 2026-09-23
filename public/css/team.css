@@ -718,3 +718,17 @@ td {
         min-width: 0;
     }
 }
+
+
+
+/* =========================================
+   FUNCTIONS / ACTIVITIES FORMATTING
+   Preserve line breaks and blank lines
+   entered in the textarea.
+========================================= */
+
+.functions-activities-cell {
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    word-break: normal;
+}

@@ -645,6 +645,24 @@ async function loadAssignments() {
 }
 
 
+
+
+// ============================================
+// NORMALIZE ACTIVITY DISPLAY INDENTATION
+// Keeps line breaks, removes leading spaces/tabs
+// ============================================
+
+function normalizeActivityDisplay(value) {
+
+    return String(value || "")
+        .replace(/\r\n/g, "\n")
+        .split("\n")
+        .map(line => line.trimStart())
+        .join("\n")
+        .trim();
+}
+
+
 // ============================================
 // DISPLAY ASSIGNMENTS
 // ============================================
@@ -770,11 +788,11 @@ function renderAssignments(records) {
                                         )}
                                     </td>
 
-                                    <td>
-                                        ${escapeHTML(
+                                    <td class="functions-activities-cell">${escapeHTML(
+                                        normalizeActivityDisplay(
                                             functionsActivities
-                                        )}
-                                    </td>
+                                        )
+                                    )}</td>
 
                                     <td class="actions-cell">
 

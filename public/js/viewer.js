@@ -33,11 +33,84 @@ const viewerEmploymentStatusFilter =
     );
 
 
+
+
+// ============================================
+// VIEWER CALENDAR ELEMENTS
+// ============================================
+
+const viewerCalendarGrid =
+    document.getElementById(
+        "viewerCalendarGrid"
+    );
+
+const viewerCalendarMonthLabel =
+    document.getElementById(
+        "viewerCalendarMonthLabel"
+    );
+
+const viewerPreviousMonthBtn =
+    document.getElementById(
+        "viewerPreviousMonthBtn"
+    );
+
+const viewerNextMonthBtn =
+    document.getElementById(
+        "viewerNextMonthBtn"
+    );
+
+const viewerActivityModal =
+    document.getElementById(
+        "viewerActivityModal"
+    );
+
+const viewerCloseActivityModal =
+    document.getElementById(
+        "viewerCloseActivityModal"
+    );
+
+const viewerCloseActivityButton =
+    document.getElementById(
+        "viewerCloseActivityButton"
+    );
+
+const viewerActivityTitle =
+    document.getElementById(
+        "viewerActivityTitle"
+    );
+
+const viewerActivityDate =
+    document.getElementById(
+        "viewerActivityDate"
+    );
+
+const viewerActivityTime =
+    document.getElementById(
+        "viewerActivityTime"
+    );
+
+const viewerActivitySection =
+    document.getElementById(
+        "viewerActivitySection"
+    );
+
+const viewerActivityDescription =
+    document.getElementById(
+        "viewerActivityDescription"
+    );
+
+
 // ============================================
 // STATE
 // ============================================
 
 let viewerAssignments = [];
+
+let viewerCalendarCurrentDate =
+    new Date();
+
+let viewerCalendarActivities =
+    [];
 
 
 // ============================================
@@ -242,6 +315,32 @@ viewerEmploymentStatusFilter
     );
 
 
+
+
+// ============================================
+// FORMAT FUNCTIONS / ACTIVITIES FOR DISPLAY
+// Preserves line breaks and blank lines,
+// while removing accidental leading spaces/tabs.
+// ============================================
+
+function formatViewerDashboardActivityDisplay(value) {
+
+    const normalized =
+        String(value || "")
+            .replace(/\r\n/g, "\n")
+            .split("\n")
+            .map(line => line.trimStart())
+            .join("\n")
+            .trim();
+
+
+    return escapeViewerHTML(
+        normalized
+    )
+        .replace(/\n/g, "<br>");
+}
+
+
 // ============================================
 // RENDER ASSIGNMENTS
 // ============================================
@@ -327,7 +426,7 @@ function renderViewerAssignments(records) {
                                     </td>
 
                                     <td>
-                                        ${escapeViewerHTML(
+                                        ${formatViewerDashboardActivityDisplay(
                                             record.functions_activities || ""
                                         )}
                                     </td>
@@ -346,6 +445,588 @@ function renderViewerAssignments(records) {
             })
             .join("");
 }
+
+
+
+
+// ============================================
+// VIEWER CALENDAR HELPERS
+// ============================================
+
+function padViewerCalendarNumber(value) {
+
+    return String(value)
+        .padStart(2, "0");
+}
+
+
+function formatViewerCalendarDate(date) {
+
+    return [
+        date.getFullYear(),
+        padViewerCalendarNumber(
+            date.getMonth() + 1
+        ),
+        padViewerCalendarNumber(
+            date.getDate()
+        )
+    ].join("-");
+}
+
+
+function formatViewerActivityTime(value) {
+
+    if (!value) {
+        return "";
+    }
+
+
+    const parts =
+        String(value)
+            .split(":");
+
+
+    if (parts.length < 2) {
+        return value;
+    }
+
+
+    const hour =
+        Number(parts[0]);
+
+    const minute =
+        parts[1];
+
+    const suffix =
+        hour >= 12
+            ? "PM"
+            : "AM";
+
+    const displayHour =
+        hour % 12 || 12;
+
+
+    return `${displayHour}:${minute} ${suffix}`;
+}
+
+
+function getViewerCalendarMonthRange() {
+
+    const year =
+        viewerCalendarCurrentDate
+            .getFullYear();
+
+    const month =
+        viewerCalendarCurrentDate
+            .getMonth();
+
+
+    return {
+        start:
+            formatViewerCalendarDate(
+                new Date(
+                    year,
+                    month,
+                    1
+                )
+            ),
+
+        end:
+            formatViewerCalendarDate(
+                new Date(
+                    year,
+                    month + 1,
+                    0
+                )
+            )
+    };
+}
+
+
+// ============================================
+// LOAD VIEWER CALENDAR
+// ============================================
+
+async function loadViewerCalendarActivities() {
+
+    if (!viewerCalendarGrid) {
+        return;
+    }
+
+
+    const {
+        start,
+        end
+    } =
+        getViewerCalendarMonthRange();
+
+
+    try {
+
+        const response =
+            await fetch(
+                `/api/activities?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`,
+                {
+                    cache: "no-store"
+                }
+            );
+
+
+        const result =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                result.error ||
+                "Unable to load calendar activities."
+            );
+        }
+
+
+        viewerCalendarActivities =
+            Array.isArray(result)
+                ? result
+                : [];
+
+
+        renderViewerCalendar();
+
+
+    } catch (error) {
+
+        console.error(
+            "Viewer calendar error:",
+            error
+        );
+
+
+        viewerCalendarGrid.innerHTML = `
+            <div class="calendar-error">
+                ${escapeViewerHTML(
+                    error.message
+                )}
+            </div>
+        `;
+    }
+}
+
+
+// ============================================
+// RENDER VIEWER CALENDAR
+// ============================================
+
+function renderViewerCalendar() {
+
+    if (
+        !viewerCalendarGrid ||
+        !viewerCalendarMonthLabel
+    ) {
+        return;
+    }
+
+
+    const year =
+        viewerCalendarCurrentDate
+            .getFullYear();
+
+    const month =
+        viewerCalendarCurrentDate
+            .getMonth();
+
+
+    viewerCalendarMonthLabel.textContent =
+        viewerCalendarCurrentDate
+            .toLocaleDateString(
+                undefined,
+                {
+                    month: "long",
+                    year: "numeric"
+                }
+            );
+
+
+    const firstDay =
+        new Date(
+            year,
+            month,
+            1
+        );
+
+    const totalDays =
+        new Date(
+            year,
+            month + 1,
+            0
+        )
+            .getDate();
+
+    const leadingDays =
+        firstDay.getDay();
+
+    const today =
+        formatViewerCalendarDate(
+            new Date()
+        );
+
+
+    const cells = [];
+
+
+    for (
+        let index = 0;
+        index < leadingDays;
+        index += 1
+    ) {
+
+        cells.push(`
+            <div
+                class="calendar-day calendar-day-empty"
+                aria-hidden="true"
+            ></div>
+        `);
+    }
+
+
+    for (
+        let day = 1;
+        day <= totalDays;
+        day += 1
+    ) {
+
+        const date =
+            new Date(
+                year,
+                month,
+                day
+            );
+
+        const dateString =
+            formatViewerCalendarDate(
+                date
+            );
+
+
+        const dayActivities =
+            viewerCalendarActivities.filter(
+                activity =>
+                    activity.activity_date ===
+                    dateString
+            );
+
+
+        const activityHTML =
+            dayActivities
+                .map(activity => {
+
+                    const time =
+                        formatViewerActivityTime(
+                            activity.start_time
+                        );
+
+                    const teamCode =
+                        activity.teams?.code ||
+                        "";
+
+
+                    return `
+                        <button
+                            type="button"
+                            class="calendar-activity viewer-calendar-activity"
+                            data-activity-id="${escapeViewerHTML(
+                                activity.id
+                            )}"
+                        >
+                            ${
+                                time
+                                    ? `<span class="calendar-activity-time">${escapeViewerHTML(time)}</span>`
+                                    : ""
+                            }
+
+                            <span class="calendar-activity-title">
+                                ${escapeViewerHTML(
+                                    activity.title
+                                )}
+                            </span>
+
+                            ${
+                                teamCode
+                                    ? `<span class="calendar-activity-team">${escapeViewerHTML(teamCode)}</span>`
+                                    : ""
+                            }
+                        </button>
+                    `;
+                })
+                .join("");
+
+
+        const firstActivityId =
+            dayActivities.length
+                ? dayActivities[0].id
+                : "";
+
+
+        cells.push(`
+            <div
+                class="calendar-day ${
+                    dateString === today
+                        ? "calendar-day-today"
+                        : ""
+                } ${
+                    dayActivities.length
+                        ? "calendar-day-has-activity"
+                        : ""
+                }"
+                ${
+                    firstActivityId
+                        ? `data-activity-id="${escapeViewerHTML(firstActivityId)}"`
+                        : ""
+                }
+                ${
+                    firstActivityId
+                        ? 'role="button" tabindex="0"'
+                        : ""
+                }
+            >
+
+                <div class="calendar-day-number">
+                    ${day}
+                </div>
+
+                <div class="calendar-day-activities">
+                    ${activityHTML}
+                </div>
+
+            </div>
+        `);
+    }
+
+
+    viewerCalendarGrid.innerHTML =
+        cells.join("");
+}
+
+
+// ============================================
+// VIEWER CALENDAR NAVIGATION
+// ============================================
+
+viewerPreviousMonthBtn?.addEventListener(
+    "click",
+    async () => {
+
+        viewerCalendarCurrentDate =
+            new Date(
+                viewerCalendarCurrentDate
+                    .getFullYear(),
+                viewerCalendarCurrentDate
+                    .getMonth() - 1,
+                1
+            );
+
+
+        await loadViewerCalendarActivities();
+    }
+);
+
+
+viewerNextMonthBtn?.addEventListener(
+    "click",
+    async () => {
+
+        viewerCalendarCurrentDate =
+            new Date(
+                viewerCalendarCurrentDate
+                    .getFullYear(),
+                viewerCalendarCurrentDate
+                    .getMonth() + 1,
+                1
+            );
+
+
+        await loadViewerCalendarActivities();
+    }
+);
+
+
+// ============================================
+// VIEW ACTIVITY DETAILS
+// ============================================
+
+function openViewerActivityModal(activity) {
+
+    if (!activity) {
+        return;
+    }
+
+
+    viewerActivityTitle.textContent =
+        activity.title ||
+        "Activity";
+
+    viewerActivityDate.textContent =
+        activity.activity_date ||
+        "-";
+
+
+    const startTime =
+        formatViewerActivityTime(
+            activity.start_time
+        );
+
+    const endTime =
+        formatViewerActivityTime(
+            activity.end_time
+        );
+
+
+    viewerActivityTime.textContent =
+        startTime && endTime
+            ? `${startTime} - ${endTime}`
+            : startTime ||
+              endTime ||
+              "No time specified";
+
+
+    viewerActivitySection.textContent =
+        activity.teams?.code
+            ? `${activity.teams.code} - ${activity.teams.name || ""}`
+            : "All PMED / General";
+
+
+    viewerActivityDescription.textContent =
+        activity.description ||
+        "No description provided.";
+
+
+    viewerActivityModal?.classList.add(
+        "show"
+    );
+
+    document.body.style.overflow =
+        "hidden";
+}
+
+
+function closeViewerActivityModalWindow() {
+
+    viewerActivityModal?.classList.remove(
+        "show"
+    );
+
+    document.body.style.overflow =
+        "";
+}
+
+
+viewerCalendarGrid?.addEventListener(
+    "click",
+    event => {
+
+        const activityTarget =
+            event.target.closest(
+                "[data-activity-id]"
+            );
+
+
+        if (!activityTarget) {
+            return;
+        }
+
+
+        event.preventDefault();
+        event.stopPropagation();
+
+
+        const activity =
+            viewerCalendarActivities.find(
+                item =>
+                    String(item.id) ===
+                    String(
+                        activityTarget.dataset
+                            .activityId
+                    )
+            );
+
+
+        openViewerActivityModal(
+            activity
+        );
+    }
+);
+
+
+// Keyboard support for date cells that contain activities.
+viewerCalendarGrid?.addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            event.key !== "Enter" &&
+            event.key !== " "
+        ) {
+            return;
+        }
+
+
+        const activityTarget =
+            event.target.closest(
+                ".calendar-day-has-activity[data-activity-id]"
+            );
+
+
+        if (!activityTarget) {
+            return;
+        }
+
+
+        event.preventDefault();
+
+
+        const activity =
+            viewerCalendarActivities.find(
+                item =>
+                    String(item.id) ===
+                    String(
+                        activityTarget.dataset
+                            .activityId
+                    )
+            );
+
+
+        openViewerActivityModal(
+            activity
+        );
+    }
+);
+
+
+viewerCloseActivityModal?.addEventListener(
+    "click",
+    closeViewerActivityModalWindow
+);
+
+
+viewerCloseActivityButton?.addEventListener(
+    "click",
+    closeViewerActivityModalWindow
+);
+
+
+viewerActivityModal?.addEventListener(
+    "click",
+    event => {
+
+        if (
+            event.target ===
+            viewerActivityModal
+        ) {
+
+            closeViewerActivityModalWindow();
+        }
+    }
+);
 
 
 // ============================================
@@ -377,3 +1058,27 @@ function escapeViewerHTML(value) {
 // ============================================
 
 loadViewerDashboard();
+
+loadViewerCalendarActivities();
+
+
+
+// ============================================
+// CLOSE VIEWER ACTIVITY MODAL WITH ESCAPE
+// ============================================
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            event.key === "Escape" &&
+            viewerActivityModal?.classList.contains(
+                "show"
+            )
+        ) {
+
+            closeViewerActivityModalWindow();
+        }
+    }
+);
