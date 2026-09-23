@@ -76,7 +76,7 @@ async function loadAdminSidebar() {
                 <div class="brand-text">
 
                     <h1>
-                        P.A.T.H
+                        P.A.T.H.
                     </h1>
 
                     <p>

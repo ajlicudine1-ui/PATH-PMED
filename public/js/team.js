@@ -98,7 +98,7 @@ function showCachedTeamInformation() {
             cachedTeam.name || "";
 
         document.title =
-            "P.A.T.H | PMED Assignment and Team Hub";
+            "P.A.T.H. | PMED Assignment and Team Hub";
 
     } catch (error) {
 
@@ -559,7 +559,7 @@ async function loadTeam() {
             currentTeam.name;
 
         document.title =
-            "P.A.T.H | PMED Assignment and Team Hub";
+            "P.A.T.H. | PMED Assignment and Team Hub";
 
         await loadAssignments();
 

@@ -133,7 +133,7 @@ async function loadViewerSidebar() {
                 <div class="brand-text viewer-brand-text">
 
                     <h1>
-                        P.A.T.H
+                        P.A.T.H.
                     </h1>
 
                     <p>
