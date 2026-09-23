@@ -1,5 +1,5 @@
 // ============================================
-// PATH - PUBLIC VIEWER DASHBOARD
+// PATH - VIEWER TEAM PAGE
 // ============================================
 
 
@@ -7,96 +7,23 @@
 // ELEMENTS
 // ============================================
 
-const viewerTotalPersonnel =
+const viewerTeamCode =
+    document.getElementById("teamCode");
+
+const viewerTeamName =
+    document.getElementById("teamName");
+
+const viewerAssignmentsTableBody =
     document.getElementById(
-        "totalPersonnel"
+        "assignmentsTableBody"
     );
 
-const viewerTotalTeams =
-    document.getElementById(
-        "totalTeams"
-    );
-
-const viewerTotalAssignments =
-    document.getElementById(
-        "totalAssignments"
-    );
-
-const viewerTableBody =
-    document.getElementById(
-        "viewerTableBody"
-    );
+const viewerSearchInput =
+    document.getElementById("searchInput");
 
 const viewerEmploymentStatusFilter =
     document.getElementById(
         "employmentStatusFilter"
-    );
-
-
-
-
-// ============================================
-// VIEWER CALENDAR ELEMENTS
-// ============================================
-
-const viewerCalendarGrid =
-    document.getElementById(
-        "viewerCalendarGrid"
-    );
-
-const viewerCalendarMonthLabel =
-    document.getElementById(
-        "viewerCalendarMonthLabel"
-    );
-
-const viewerPreviousMonthBtn =
-    document.getElementById(
-        "viewerPreviousMonthBtn"
-    );
-
-const viewerNextMonthBtn =
-    document.getElementById(
-        "viewerNextMonthBtn"
-    );
-
-const viewerActivityModal =
-    document.getElementById(
-        "viewerActivityModal"
-    );
-
-const viewerCloseActivityModal =
-    document.getElementById(
-        "viewerCloseActivityModal"
-    );
-
-const viewerCloseActivityButton =
-    document.getElementById(
-        "viewerCloseActivityButton"
-    );
-
-const viewerActivityTitle =
-    document.getElementById(
-        "viewerActivityTitle"
-    );
-
-const viewerActivityDate =
-    document.getElementById(
-        "viewerActivityDate"
-    );
-
-const viewerActivityTime =
-    document.getElementById(
-        "viewerActivityTime"
-    );
-
-const viewerActivitySection =
-    document.getElementById(
-        "viewerActivitySection"
-    );
-
-const viewerActivityDescription =
-    document.getElementById(
-        "viewerActivityDescription"
     );
 
 
@@ -106,28 +33,227 @@ const viewerActivityDescription =
 
 let viewerAssignments = [];
 
-let viewerCalendarCurrentDate =
-    new Date();
-
-let viewerCalendarActivities =
-    [];
+let viewerPersonnelSequenceMap = new Map();
 
 
 // ============================================
-// LOAD VIEWER DASHBOARD
+// GET TEAM FROM URL
 // ============================================
 
-async function loadViewerDashboard() {
+const viewerParams =
+    new URLSearchParams(
+        window.location.search
+    );
+
+const viewerSelectedTeam =
+    viewerParams.get("team");
+
+
+// ============================================
+// CACHE KEYS
+// ============================================
+
+function getViewerAssignmentsCacheKey(code) {
+
+    return `path_viewer_assignments_${String(code).toUpperCase()}`;
+}
+
+
+// ============================================
+// SHOW TEAM INFO IMMEDIATELY
+// ============================================
+
+function showCachedViewerTeamInformation() {
+
+    if (!viewerSelectedTeam) {
+        return;
+    }
+
+
+    // Show team code immediately
+    viewerTeamCode.textContent =
+        String(viewerSelectedTeam)
+            .toUpperCase() === "DIVISION"
+            ? "Division"
+            : String(viewerSelectedTeam)
+                .toUpperCase();
+
+
+    viewerTeamName.textContent = "";
+
+
+    try {
+
+        const cached =
+            localStorage.getItem(
+                "path_sidebar_teams"
+            );
+
+
+        if (!cached) {
+            return;
+        }
+
+
+        const teams =
+            JSON.parse(cached);
+
+
+        if (!Array.isArray(teams)) {
+            return;
+        }
+
+
+        const team =
+            teams.find(
+                item =>
+                    String(item.code)
+                        .toUpperCase() ===
+                    String(viewerSelectedTeam)
+                        .toUpperCase()
+            );
+
+
+        if (!team) {
+            return;
+        }
+
+
+        viewerTeamCode.textContent =
+            String(team.code)
+                .toUpperCase() === "DIVISION"
+                ? "Division"
+                : team.code;
+
+
+        viewerTeamName.textContent =
+            team.name || "";
+
+
+        document.title =
+            `P.A.T.H | ${team.code}`;
+
+
+    } catch (error) {
+
+        console.error(
+            "Viewer team cache error:",
+            error
+        );
+    }
+}
+
+
+// ============================================
+// SHOW CACHED ASSIGNMENTS
+// ============================================
+
+function showCachedViewerAssignments() {
+
+    if (!viewerSelectedTeam) {
+        return false;
+    }
+
+
+    try {
+
+        const cached =
+            localStorage.getItem(
+                getViewerAssignmentsCacheKey(
+                    viewerSelectedTeam
+                )
+            );
+
+
+        if (!cached) {
+            return false;
+        }
+
+
+        const records =
+            JSON.parse(cached);
+
+
+        if (!Array.isArray(records)) {
+            return false;
+        }
+
+
+        viewerAssignments =
+            records;
+
+
+        applyViewerTeamFilters();
+
+
+        return true;
+
+
+    } catch (error) {
+
+        console.error(
+            "Viewer assignments cache error:",
+            error
+        );
+
+
+        return false;
+    }
+}
+
+
+// ============================================
+// LOAD TEAM
+// ============================================
+
+async function loadViewerTeam() {
+
+    if (!viewerSelectedTeam) {
+
+        showViewerTeamError(
+            "No section selected."
+        );
+
+        return;
+    }
+
+
+    const hasCachedAssignments =
+        showCachedViewerAssignments();
+
+
+    if (
+        !hasCachedAssignments &&
+        viewerAssignmentsTableBody
+    ) {
+
+        viewerAssignmentsTableBody.innerHTML = `
+            <tr>
+
+                <td
+                    colspan="3"
+                    class="empty-state"
+                >
+                    Loading assignments...
+                </td>
+
+            </tr>
+        `;
+    }
+
 
     try {
 
         const response =
             await fetch(
-                "/api/dashboard",
+                `/api/assignments?team=${encodeURIComponent(
+                    viewerSelectedTeam
+                )}`,
                 {
                     cache: "no-store"
                 }
             );
+
 
         const data =
             await response.json();
@@ -137,73 +263,399 @@ async function loadViewerDashboard() {
 
             throw new Error(
                 data.error ||
-                "Unable to load dashboard."
+                "Unable to load assignments."
             );
         }
 
 
-        if (viewerTotalPersonnel) {
-
-            viewerTotalPersonnel.textContent =
-                data.totalPersonnel ?? 0;
-        }
-
-
-        if (viewerTotalTeams) {
-
-            viewerTotalTeams.textContent =
-                data.totalTeams ?? 0;
-        }
-
-
-        if (viewerTotalAssignments) {
-
-            viewerTotalAssignments.textContent =
-                data.totalAssignments ?? 0;
-        }
-
-
         viewerAssignments =
-            Array.isArray(data.assignments)
-                ? data.assignments
+            Array.isArray(data)
+                ? data
                 : [];
 
 
-        applyViewerDashboardFilter();
+        // Cache latest assignments
+        localStorage.setItem(
+            getViewerAssignmentsCacheKey(
+                viewerSelectedTeam
+            ),
+            JSON.stringify(
+                viewerAssignments
+            )
+        );
+
+
+        updateViewerTeamHeading();
+
+        /*
+           Render immediately.
+           Personnel ordering is an enhancement and
+           must not block the table from loading.
+        */
+        applyViewerTeamFilters();
+
+
+        loadViewerPersonnelSequence()
+            .then(() => {
+
+                applyViewerTeamFilters();
+            })
+            .catch(error => {
+
+                console.error(
+                    "Viewer sequence refresh error:",
+                    error
+                );
+            });
 
 
     } catch (error) {
 
         console.error(
-            "Viewer dashboard error:",
+            "Viewer team error:",
             error
         );
 
 
-        if (viewerTableBody) {
+        // If cached data is already visible,
+        // keep it visible.
+        if (!hasCachedAssignments) {
 
-            viewerTableBody.innerHTML = `
-                <tr>
-                    <td
-                        colspan="4"
-                        class="empty-state"
-                    >
-                        ${escapeViewerHTML(
-                            error.message
-                        )}
-                    </td>
-                </tr>
-            `;
+            showViewerTeamError(
+                error.message
+            );
         }
     }
 }
 
 
 // ============================================
-// NORMALIZE PERSON NAME
+// UPDATE TEAM HEADING
 // ============================================
 
-function normalizeViewerDashboardName(name) {
+function updateViewerTeamHeading() {
+
+    if (!viewerAssignments.length) {
+
+        viewerTeamCode.textContent =
+            String(viewerSelectedTeam)
+                .toUpperCase() === "DIVISION"
+                ? "Division"
+                : String(viewerSelectedTeam)
+                    .toUpperCase();
+
+
+        loadViewerTeamName();
+
+
+        return;
+    }
+
+
+    const team =
+        viewerAssignments[0].teams || {};
+
+
+    viewerTeamCode.textContent =
+        String(team.code || viewerSelectedTeam)
+            .toUpperCase() === "DIVISION"
+            ? "Division"
+            : (
+                team.code ||
+                String(viewerSelectedTeam)
+                    .toUpperCase()
+            );
+
+
+    viewerTeamName.textContent =
+        team.name || "";
+
+
+    if (team.code) {
+
+        document.title =
+            `P.A.T.H | ${team.code}`;
+    }
+}
+
+
+// ============================================
+// LOAD TEAM NAME IF NO ASSIGNMENTS
+// ============================================
+
+async function loadViewerTeamName() {
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/teams",
+                {
+                    cache: "no-store"
+                }
+            );
+
+
+        const teams =
+            await response.json();
+
+
+        if (!response.ok) {
+            return;
+        }
+
+
+        if (!Array.isArray(teams)) {
+            return;
+        }
+
+
+        // Refresh shared team cache
+        localStorage.setItem(
+            "path_sidebar_teams",
+            JSON.stringify(teams)
+        );
+
+
+        const team =
+            teams.find(
+                item =>
+                    String(item.code)
+                        .toUpperCase() ===
+                    String(viewerSelectedTeam)
+                        .toUpperCase()
+            );
+
+
+        if (!team) {
+            return;
+        }
+
+
+        viewerTeamCode.textContent =
+            String(team.code)
+                .toUpperCase() === "DIVISION"
+                ? "Division"
+                : team.code;
+
+
+        viewerTeamName.textContent =
+            team.name ||
+            "PMED Section";
+
+
+        document.title =
+            `P.A.T.H | ${team.code}`;
+
+
+    } catch (error) {
+
+        console.error(
+            "Unable to load team name:",
+            error
+        );
+    }
+}
+
+
+
+
+// ============================================
+// FORMAT FUNCTIONS / ACTIVITIES FOR DISPLAY
+// Preserves line breaks and blank lines,
+// while removing accidental leading spaces/tabs.
+// ============================================
+
+function formatViewerActivityDisplay(value) {
+
+    const normalized =
+        String(value || "")
+            .replace(/\r\n/g, "\n")
+            .split("\n")
+            .map(line => line.trimStart())
+            .join("\n")
+            .trim();
+
+
+    return escapeViewerTeamHTML(
+        normalized
+    )
+        .replace(/\n/g, "<br>");
+}
+
+
+
+// ============================================
+// PERSONNEL DISPLAY SEQUENCE
+// VIEWER IS READ-ONLY
+// ============================================
+
+async function loadViewerPersonnelSequence() {
+
+    viewerPersonnelSequenceMap =
+        new Map();
+
+    if (!viewerSelectedTeam) {
+        return;
+    }
+
+
+    const controller =
+        new AbortController();
+
+    const timeoutId =
+        setTimeout(
+            () => controller.abort(),
+            4000
+        );
+
+
+    try {
+
+        const response =
+            await fetch(
+                `/api/personnel-sequence?team=${encodeURIComponent(
+                    viewerSelectedTeam
+                )}`,
+                {
+                    cache: "no-store",
+                    signal:
+                        controller.signal
+                }
+            );
+
+
+        const result =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                result.error ||
+                "Unable to load personnel sequence."
+            );
+        }
+
+
+        const rows =
+            Array.isArray(result)
+                ? result
+                : [];
+
+
+        rows.forEach(row => {
+
+            viewerPersonnelSequenceMap.set(
+                String(row.personnel_id),
+                Number(row.display_order)
+            );
+        });
+
+
+    } catch (error) {
+
+        /*
+           Ordering must never stop the Viewer Team
+           page from displaying assignments.
+        */
+        if (error.name !== "AbortError") {
+
+            console.error(
+                "Viewer personnel sequence error:",
+                error
+            );
+        }
+
+    } finally {
+
+        clearTimeout(
+            timeoutId
+        );
+    }
+}
+
+
+function sortViewerAssignmentsByPersonnelSequence(
+    records
+) {
+
+    const originalPersonPosition =
+        new Map();
+
+    records.forEach((record, index) => {
+
+        const personnelId =
+            String(
+                record?.personnel?.id ||
+                record?.personnel_id ||
+                ""
+            );
+
+        if (
+            personnelId &&
+            !originalPersonPosition.has(
+                personnelId
+            )
+        ) {
+
+            originalPersonPosition.set(
+                personnelId,
+                index
+            );
+        }
+    });
+
+
+    return [...records].sort(
+        (a, b) => {
+
+            const aId =
+                String(
+                    a?.personnel?.id ||
+                    a?.personnel_id ||
+                    ""
+                );
+
+            const bId =
+                String(
+                    b?.personnel?.id ||
+                    b?.personnel_id ||
+                    ""
+                );
+
+
+            const aOrder =
+                viewerPersonnelSequenceMap.has(aId)
+                    ? viewerPersonnelSequenceMap.get(aId)
+                    : Number.MAX_SAFE_INTEGER;
+
+            const bOrder =
+                viewerPersonnelSequenceMap.has(bId)
+                    ? viewerPersonnelSequenceMap.get(bId)
+                    : Number.MAX_SAFE_INTEGER;
+
+
+            if (aOrder !== bOrder) {
+
+                return aOrder - bOrder;
+            }
+
+
+            return (
+                (originalPersonPosition.get(aId) ?? 0) -
+                (originalPersonPosition.get(bId) ?? 0)
+            );
+        }
+    );
+}
+
+
+// ============================================
+// RENDER ASSIGNMENTS
+// ============================================
+
+function normalizeViewerPersonName(name) {
 
     return String(name || "")
         .trim()
@@ -213,14 +665,9 @@ function normalizeViewerDashboardName(name) {
 }
 
 
-// ============================================
-// GROUP ASSIGNMENTS BY PERSON
-// ============================================
+function groupViewerAssignmentsByPerson(records) {
 
-function groupViewerDashboardAssignments(records) {
-
-    const groups =
-        new Map();
+    const groups = new Map();
 
 
     records.forEach(record => {
@@ -234,7 +681,7 @@ function groupViewerDashboardAssignments(records) {
 
 
         const key =
-            normalizeViewerDashboardName(
+            normalizeViewerPersonName(
                 fullName
             ) ||
             `assignment-${record.id}`;
@@ -265,78 +712,25 @@ function groupViewerDashboardAssignments(records) {
 }
 
 
-// ============================================
-// FILTER BY EMPLOYMENT STATUS
-// ============================================
+function renderViewerTeamAssignments(records) {
 
-function applyViewerDashboardFilter() {
-
-    const selectedStatus =
-        String(
-            viewerEmploymentStatusFilter?.value || ""
-        )
-            .trim()
-            .toLowerCase();
-
-
-    const filtered =
-        viewerAssignments.filter(
-            record => {
-
-                const employmentStatus =
-                    String(
-                        record.personnel
-                            ?.employment_status ||
-                        ""
-                    )
-                        .trim()
-                        .toLowerCase();
-
-
-                return (
-                    !selectedStatus ||
-                    employmentStatus ===
-                        selectedStatus
-                );
-            }
-        );
-
-
-    renderViewerAssignments(
-        filtered
-    );
-}
-
-
-viewerEmploymentStatusFilter
-    ?.addEventListener(
-        "change",
-        applyViewerDashboardFilter
-    );
-
-
-// ============================================
-// RENDER ASSIGNMENTS
-// ============================================
-
-function renderViewerAssignments(records) {
-
-    if (!viewerTableBody) {
-
+    if (!viewerAssignmentsTableBody) {
         return;
     }
 
 
     if (!records.length) {
 
-        viewerTableBody.innerHTML = `
+        viewerAssignmentsTableBody.innerHTML = `
             <tr>
+
                 <td
-                    colspan="4"
+                    colspan="3"
                     class="empty-state"
                 >
-                    No assignments found.
+                    No assignments found for this section.
                 </td>
+
             </tr>
         `;
 
@@ -344,13 +738,18 @@ function renderViewerAssignments(records) {
     }
 
 
-    const groupedRecords =
-        groupViewerDashboardAssignments(
+    const orderedRecords =
+        sortViewerAssignmentsByPersonnelSequence(
             records
         );
 
+    const groupedRecords =
+        groupViewerAssignmentsByPerson(
+            orderedRecords
+        );
 
-    viewerTableBody.innerHTML =
+
+    viewerAssignmentsTableBody.innerHTML =
         groupedRecords
             .map(group => {
 
@@ -365,22 +764,21 @@ function renderViewerAssignments(records) {
                             const personnel =
                                 record.personnel || {};
 
-                            const team =
-                                record.teams || {};
 
                             const designation =
                                 record.designation ||
                                 personnel.designation ||
                                 "";
 
+
                             const responsiblePersonCell =
                                 index === 0
                                     ? `
                                         <td
                                             rowspan="${rowCount}"
-                                            class="viewer-dashboard-grouped-person-cell"
+                                            class="viewer-grouped-person-cell"
                                         >
-                                            ${escapeViewerHTML(
+                                            ${escapeViewerTeamHTML(
                                                 group.fullName
                                             )}
                                         </td>
@@ -394,20 +792,14 @@ function renderViewerAssignments(records) {
                                     ${responsiblePersonCell}
 
                                     <td>
-                                        ${escapeViewerHTML(
+                                        ${escapeViewerTeamHTML(
                                             designation
                                         )}
                                     </td>
 
                                     <td>
-                                        ${formatViewerDashboardActivityDisplay(
+                                        ${formatViewerActivityDisplay(
                                             record.functions_activities || ""
-                                        )}
-                                    </td>
-
-                                    <td>
-                                        ${escapeViewerHTML(
-                                            team.code || ""
                                         )}
                                     </td>
 
@@ -421,687 +813,167 @@ function renderViewerAssignments(records) {
 }
 
 
-
-
 // ============================================
-// VIEWER CALENDAR HELPERS
+// SEARCH + EMPLOYMENT STATUS FILTER
 // ============================================
 
-function padViewerCalendarNumber(value) {
+function applyViewerTeamFilters() {
 
-    return String(value)
-        .padStart(2, "0");
-}
-
-
-function formatViewerCalendarDate(date) {
-
-    return [
-        date.getFullYear(),
-        padViewerCalendarNumber(
-            date.getMonth() + 1
-        ),
-        padViewerCalendarNumber(
-            date.getDate()
+    const query =
+        String(
+            viewerSearchInput?.value || ""
         )
-    ].join("-");
-}
+            .trim()
+            .toLowerCase();
 
 
-function formatViewerActivityTime(value) {
-
-    if (!value) {
-        return "";
-    }
-
-
-    const parts =
-        String(value)
-            .split(":");
+    const selectedStatus =
+        String(
+            viewerEmploymentStatusFilter
+                ?.value || ""
+        )
+            .trim()
+            .toLowerCase();
 
 
-    if (parts.length < 2) {
-        return value;
-    }
+    const filtered =
+        viewerAssignments.filter(
+            record => {
+
+                const personnel =
+                    record.personnel || {};
 
 
-    const hour =
-        Number(parts[0]);
-
-    const minute =
-        parts[1];
-
-    const suffix =
-        hour >= 12
-            ? "PM"
-            : "AM";
-
-    const displayHour =
-        hour % 12 || 12;
+                const name =
+                    String(
+                        personnel.full_name || ""
+                    )
+                        .toLowerCase();
 
 
-    return `${displayHour}:${minute} ${suffix}`;
-}
+                const designation =
+                    String(
+                        record.designation ||
+                        personnel.designation ||
+                        ""
+                    )
+                        .toLowerCase();
 
 
-function getViewerCalendarMonthRange() {
-
-    const year =
-        viewerCalendarCurrentDate
-            .getFullYear();
-
-    const month =
-        viewerCalendarCurrentDate
-            .getMonth();
+                const activity =
+                    String(
+                        record.functions_activities ||
+                        ""
+                    )
+                        .toLowerCase();
 
 
-    return {
-        start:
-            formatViewerCalendarDate(
-                new Date(
-                    year,
-                    month,
-                    1
-                )
-            ),
-
-        end:
-            formatViewerCalendarDate(
-                new Date(
-                    year,
-                    month + 1,
-                    0
-                )
-            )
-    };
-}
+                const employmentStatus =
+                    String(
+                        personnel.employment_status ||
+                        ""
+                    )
+                        .trim()
+                        .toLowerCase();
 
 
-// ============================================
-// LOAD VIEWER CALENDAR
-// ============================================
-
-async function loadViewerCalendarActivities() {
-
-    if (!viewerCalendarGrid) {
-        return;
-    }
+                const matchesSearch =
+                    !query ||
+                    name.includes(query) ||
+                    designation.includes(query) ||
+                    activity.includes(query) ||
+                    employmentStatus.includes(query);
 
 
-    const {
-        start,
-        end
-    } =
-        getViewerCalendarMonthRange();
+                const matchesStatus =
+                    !selectedStatus ||
+                    employmentStatus ===
+                        selectedStatus;
 
 
-    try {
-
-        const response =
-            await fetch(
-                `/api/activities?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`,
-                {
-                    cache: "no-store"
-                }
-            );
-
-
-        const result =
-            await response.json();
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                result.error ||
-                "Unable to load calendar activities."
-            );
-        }
-
-
-        viewerCalendarActivities =
-            Array.isArray(result)
-                ? result
-                : [];
-
-
-        renderViewerCalendar();
-
-
-    } catch (error) {
-
-        console.error(
-            "Viewer calendar error:",
-            error
+                return (
+                    matchesSearch &&
+                    matchesStatus
+                );
+            }
         );
 
 
-        viewerCalendarGrid.innerHTML = `
-            <div class="calendar-error">
-                ${escapeViewerHTML(
-                    error.message
-                )}
-            </div>
+    renderViewerTeamAssignments(
+        filtered
+    );
+}
+
+
+viewerSearchInput
+    ?.addEventListener(
+        "input",
+        applyViewerTeamFilters
+    );
+
+
+viewerEmploymentStatusFilter
+    ?.addEventListener(
+        "change",
+        applyViewerTeamFilters
+    );
+
+
+// ============================================
+// ERROR
+// ============================================
+
+function showViewerTeamError(message) {
+
+    if (viewerTeamCode) {
+
+        viewerTeamCode.textContent =
+            viewerSelectedTeam
+                ? (
+                    String(
+                        viewerSelectedTeam
+                    ).toUpperCase() === "DIVISION"
+                        ? "Division"
+                        : String(
+                            viewerSelectedTeam
+                        ).toUpperCase()
+                )
+                : "Section";
+    }
+
+
+    if (viewerTeamName) {
+
+        viewerTeamName.textContent =
+            "Unable to load section.";
+    }
+
+
+    if (viewerAssignmentsTableBody) {
+
+        viewerAssignmentsTableBody.innerHTML = `
+            <tr>
+
+                <td
+                    colspan="3"
+                    class="empty-state"
+                >
+                    ${escapeViewerTeamHTML(
+                        message
+                    )}
+                </td>
+
+            </tr>
         `;
     }
 }
-
-
-
-// ============================================
-// VIEWER CALENDAR INTERACTION STYLES
-// Whole occupied date cell is clickable.
-// ============================================
-
-function ensureViewerCalendarInteractionStyles() {
-
-    if (
-        document.getElementById(
-            "pathViewerCalendarInteractionStyles"
-        )
-    ) {
-        return;
-    }
-
-
-    const style =
-        document.createElement(
-            "style"
-        );
-
-
-    style.id =
-        "pathViewerCalendarInteractionStyles";
-
-
-    style.textContent = `
-        .viewer-calendar-card
-        .calendar-day-has-activity {
-            cursor: pointer;
-
-            background:
-                linear-gradient(
-                    180deg,
-                    #ffffff 0%,
-                    #f7fcf8 100%
-                );
-
-            transition:
-                background 0.16s ease,
-                box-shadow 0.16s ease;
-        }
-
-        .viewer-calendar-card
-        .calendar-day-has-activity:hover {
-            background:
-                linear-gradient(
-                    180deg,
-                    #eef8f1 0%,
-                    #f7fcf8 100%
-                );
-
-            box-shadow:
-                inset 0 0 0 2px
-                rgba(31, 122, 69, 0.18);
-        }
-
-        .viewer-calendar-card
-        .calendar-day-has-activity:focus-visible {
-            outline:
-                2px solid #1f7a45;
-
-            outline-offset:
-                -2px;
-        }
-
-        .viewer-calendar-card
-        .calendar-activity {
-            width: 100%;
-
-            border:
-                1px solid #d5e7db;
-
-            border-radius: 7px;
-
-            background:
-                #edf7f0;
-
-            color:
-                #14532d;
-        }
-    `;
-
-
-    document.head.appendChild(
-        style
-    );
-}
-
-
-// ============================================
-// RENDER VIEWER CALENDAR
-// ============================================
-
-function renderViewerCalendar() {
-
-    if (
-        !viewerCalendarGrid ||
-        !viewerCalendarMonthLabel
-    ) {
-        return;
-    }
-
-
-    ensureViewerCalendarInteractionStyles();
-
-
-    const year =
-        viewerCalendarCurrentDate
-            .getFullYear();
-
-    const month =
-        viewerCalendarCurrentDate
-            .getMonth();
-
-
-    viewerCalendarMonthLabel.textContent =
-        viewerCalendarCurrentDate
-            .toLocaleDateString(
-                undefined,
-                {
-                    month: "long",
-                    year: "numeric"
-                }
-            );
-
-
-    const firstDay =
-        new Date(
-            year,
-            month,
-            1
-        );
-
-    const totalDays =
-        new Date(
-            year,
-            month + 1,
-            0
-        )
-            .getDate();
-
-    const leadingDays =
-        firstDay.getDay();
-
-    const today =
-        formatViewerCalendarDate(
-            new Date()
-        );
-
-
-    const cells = [];
-
-
-    for (
-        let index = 0;
-        index < leadingDays;
-        index += 1
-    ) {
-
-        cells.push(`
-            <div
-                class="calendar-day calendar-day-empty"
-                aria-hidden="true"
-            ></div>
-        `);
-    }
-
-
-    for (
-        let day = 1;
-        day <= totalDays;
-        day += 1
-    ) {
-
-        const date =
-            new Date(
-                year,
-                month,
-                day
-            );
-
-        const dateString =
-            formatViewerCalendarDate(
-                date
-            );
-
-
-        const dayActivities =
-            viewerCalendarActivities.filter(
-                activity =>
-                    activity.activity_date ===
-                    dateString
-            );
-
-
-        const activityHTML =
-            dayActivities
-                .map(activity => {
-
-                    const time =
-                        formatViewerActivityTime(
-                            activity.start_time
-                        );
-
-                    const teamCode =
-                        activity.teams?.code ||
-                        "";
-
-
-                    return `
-                        <button
-                            type="button"
-                            class="calendar-activity viewer-calendar-activity"
-                            data-activity-id="${escapeViewerHTML(
-                                activity.id
-                            )}"
-                        >
-                            ${
-                                time
-                                    ? `<span class="calendar-activity-time">${escapeViewerHTML(time)}</span>`
-                                    : ""
-                            }
-
-                            <span class="calendar-activity-title">
-                                ${escapeViewerHTML(
-                                    activity.title
-                                )}
-                            </span>
-
-                            ${
-                                teamCode
-                                    ? `<span class="calendar-activity-team">${escapeViewerHTML(teamCode)}</span>`
-                                    : ""
-                            }
-                        </button>
-                    `;
-                })
-                .join("");
-
-
-        const firstActivityId =
-            dayActivities.length
-                ? dayActivities[0].id
-                : "";
-
-
-        cells.push(`
-            <div
-                class="calendar-day ${
-                    dateString === today
-                        ? "calendar-day-today"
-                        : ""
-                } ${
-                    dayActivities.length
-                        ? "calendar-day-has-activity"
-                        : ""
-                }"
-                ${
-                    firstActivityId
-                        ? `data-activity-id="${escapeViewerHTML(firstActivityId)}"`
-                        : ""
-                }
-                ${
-                    firstActivityId
-                        ? 'role="button" tabindex="0"'
-                        : ""
-                }
-            >
-
-                <div class="calendar-day-number">
-                    ${day}
-                </div>
-
-                <div class="calendar-day-activities">
-                    ${activityHTML}
-                </div>
-
-            </div>
-        `);
-    }
-
-
-    viewerCalendarGrid.innerHTML =
-        cells.join("");
-}
-
-
-// ============================================
-// VIEWER CALENDAR NAVIGATION
-// ============================================
-
-viewerPreviousMonthBtn?.addEventListener(
-    "click",
-    async () => {
-
-        viewerCalendarCurrentDate =
-            new Date(
-                viewerCalendarCurrentDate
-                    .getFullYear(),
-                viewerCalendarCurrentDate
-                    .getMonth() - 1,
-                1
-            );
-
-
-        await loadViewerCalendarActivities();
-    }
-);
-
-
-viewerNextMonthBtn?.addEventListener(
-    "click",
-    async () => {
-
-        viewerCalendarCurrentDate =
-            new Date(
-                viewerCalendarCurrentDate
-                    .getFullYear(),
-                viewerCalendarCurrentDate
-                    .getMonth() + 1,
-                1
-            );
-
-
-        await loadViewerCalendarActivities();
-    }
-);
-
-
-// ============================================
-// VIEW ACTIVITY DETAILS
-// ============================================
-
-function openViewerActivityModal(activity) {
-
-    if (!activity) {
-        return;
-    }
-
-
-    viewerActivityTitle.textContent =
-        activity.title ||
-        "Activity";
-
-    viewerActivityDate.textContent =
-        activity.activity_date ||
-        "-";
-
-
-    const startTime =
-        formatViewerActivityTime(
-            activity.start_time
-        );
-
-    const endTime =
-        formatViewerActivityTime(
-            activity.end_time
-        );
-
-
-    viewerActivityTime.textContent =
-        startTime && endTime
-            ? `${startTime} - ${endTime}`
-            : startTime ||
-              endTime ||
-              "No time specified";
-
-
-    viewerActivitySection.textContent =
-        activity.teams?.code
-            ? `${activity.teams.code} - ${activity.teams.name || ""}`
-            : "All PMED / General";
-
-
-    viewerActivityDescription.textContent =
-        activity.description ||
-        "No description provided.";
-
-
-    viewerActivityModal?.classList.add(
-        "show"
-    );
-
-    document.body.style.overflow =
-        "hidden";
-}
-
-
-function closeViewerActivityModalWindow() {
-
-    viewerActivityModal?.classList.remove(
-        "show"
-    );
-
-    document.body.style.overflow =
-        "";
-}
-
-
-viewerCalendarGrid?.addEventListener(
-    "click",
-    event => {
-
-        const activityTarget =
-            event.target.closest(
-                "[data-activity-id]"
-            );
-
-
-        if (!activityTarget) {
-            return;
-        }
-
-
-        event.preventDefault();
-        event.stopPropagation();
-
-
-        const activity =
-            viewerCalendarActivities.find(
-                item =>
-                    String(item.id) ===
-                    String(
-                        activityTarget.dataset
-                            .activityId
-                    )
-            );
-
-
-        openViewerActivityModal(
-            activity
-        );
-    }
-);
-
-
-// Keyboard support for date cells that contain activities.
-viewerCalendarGrid?.addEventListener(
-    "keydown",
-    event => {
-
-        if (
-            event.key !== "Enter" &&
-            event.key !== " "
-        ) {
-            return;
-        }
-
-
-        const activityTarget =
-            event.target.closest(
-                ".calendar-day-has-activity[data-activity-id]"
-            );
-
-
-        if (!activityTarget) {
-            return;
-        }
-
-
-        event.preventDefault();
-
-
-        const activity =
-            viewerCalendarActivities.find(
-                item =>
-                    String(item.id) ===
-                    String(
-                        activityTarget.dataset
-                            .activityId
-                    )
-            );
-
-
-        openViewerActivityModal(
-            activity
-        );
-    }
-);
-
-
-viewerCloseActivityModal?.addEventListener(
-    "click",
-    closeViewerActivityModalWindow
-);
-
-
-viewerCloseActivityButton?.addEventListener(
-    "click",
-    closeViewerActivityModalWindow
-);
-
-
-viewerActivityModal?.addEventListener(
-    "click",
-    event => {
-
-        if (
-            event.target ===
-            viewerActivityModal
-        ) {
-
-            closeViewerActivityModalWindow();
-        }
-    }
-);
 
 
 // ============================================
 // ESCAPE HTML
 // ============================================
 
-function escapeViewerHTML(value) {
+function escapeViewerTeamHTML(value) {
 
     if (
         value === null ||
@@ -1125,28 +997,23 @@ function escapeViewerHTML(value) {
 // START
 // ============================================
 
-loadViewerDashboard();
+// Show section code instantly from the URL.
+if (
+    viewerTeamCode &&
+    viewerSelectedTeam
+) {
 
-loadViewerCalendarActivities();
+    viewerTeamCode.textContent =
+        String(viewerSelectedTeam)
+            .toUpperCase() === "DIVISION"
+            ? "Division"
+            : String(viewerSelectedTeam)
+                .toUpperCase();
+}
 
 
+// Then enrich it from cached team information.
+showCachedViewerTeamInformation();
 
-// ============================================
-// CLOSE VIEWER ACTIVITY MODAL WITH ESCAPE
-// ============================================
-
-document.addEventListener(
-    "keydown",
-    event => {
-
-        if (
-            event.key === "Escape" &&
-            viewerActivityModal?.classList.contains(
-                "show"
-            )
-        ) {
-
-            closeViewerActivityModalWindow();
-        }
-    }
-);
+// Then load/cache assignments
+loadViewerTeam();

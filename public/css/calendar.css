@@ -477,463 +477,212 @@
 }
 
 /* =========================================
-   ADMIN + VIEWER CALENDAR
-   COMPACT 80%-STYLE LAYOUT AT 100% ZOOM
+   VIEWER ACTIVITY DETAILS
+   Match Admin Edit Activity modal
 ========================================= */
 
-@media (min-width: 901px) {
-
-    /* =====================================
-       SHARED CALENDAR CARD
-    ===================================== */
-
-    .calendar-card {
-        margin-top: 16px;
-        margin-bottom: 24px;
-    }
-
-    .calendar-card-header {
-        margin-bottom: 12px;
-    }
-
-    .calendar-card-header h2 {
-        margin-bottom: 3px;
-        font-size: 18px;
-    }
-
-    .calendar-card-header p {
-        font-size: 11px;
-    }
-
-    .calendar-add-button {
-        min-height: 34px;
-        padding: 0 13px;
-        border-radius: 8px;
-        font-size: 12px;
-    }
-
-
-    /* =====================================
-       TOOLBAR
-    ===================================== */
-
-    .calendar-toolbar {
-        gap: 12px;
-        margin-bottom: 10px;
-    }
-
-    .calendar-toolbar h3 {
-        min-width: 150px;
-        font-size: 14px;
-    }
-
-    .calendar-nav-button {
-        width: 30px;
-        height: 30px;
-        border-radius: 8px;
-        font-size: 18px;
-    }
-
-
-    /* =====================================
-       WEEKDAYS
-    ===================================== */
-
-    .calendar-weekdays span {
-        padding: 6px 4px;
-        font-size: 10px;
-    }
-
-
-    /* =====================================
-       DATE CELLS
-    ===================================== */
-
-    .calendar-day {
-        min-height: 72px;
-        padding: 6px;
-    }
-
-    .calendar-day-number {
-        width: 22px;
-        height: 22px;
-        margin-bottom: 4px;
-        font-size: 10px;
-    }
-
-    .calendar-day-activities {
-        gap: 1px;
-    }
-
-
-    /* =====================================
-       ACTIVITY TEXT
-       No rounded pill / badge
-    ===================================== */
-
-    .calendar-activity {
-        appearance: none;
-        -webkit-appearance: none;
-
-        width: 100%;
-        min-width: 0;
-
-        display: flex;
-        align-items: center;
-        gap: 4px;
-
-        margin: 0;
-        padding: 1px 0;
-
-        border: 0;
-        border-radius: 0;
-
-        background: transparent;
-
-        box-shadow: none;
-
-        color: var(--green-dark);
-
-        font-family: inherit;
-        font-size: 9px;
-        line-height: 1.25;
-
-        text-align: left;
-
-        cursor: pointer;
-
-        overflow: hidden;
-    }
-
-    .calendar-activity:hover,
-    .calendar-activity:focus,
-    .calendar-activity:focus-visible {
-        background: transparent;
-        border: 0;
-        outline: none;
-        box-shadow: none;
-        color: var(--green-dark);
-    }
-
-    .calendar-activity-time {
-        flex: 0 0 auto;
-
-        color: #1f7a45;
-
-        font-size: 8px;
-        font-weight: 800;
-    }
-
-    .calendar-activity-title {
-        flex: 1 1 auto;
-
-        min-width: 0;
-
-        color: var(--green-dark);
-
-        font-weight: 700;
-
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    .calendar-activity-team {
-        flex: 0 0 auto;
-
-        color: #667085;
-
-        font-size: 8px;
-        font-weight: 700;
-    }
-
-
-    /* =====================================
-       WHOLE DATE CLICKABLE VISUAL
-    ===================================== */
-
-    .calendar-day[data-date],
-    .calendar-day-has-activity {
-        cursor: pointer;
-    }
-
-    .calendar-day[data-date]:hover,
-    .calendar-day-has-activity:hover {
-        background: #f4faf6;
-
-        box-shadow:
-            inset 0 0 0 1px #c9dfd0;
-    }
-
-    .calendar-day-empty,
-    .calendar-day-empty:hover {
-        background: #f8faf9;
-
-        cursor: default;
-
-        box-shadow: none;
-    }
-
-    .calendar-day-has-activity
-    .calendar-day-number {
-        color: var(--green-dark);
-        font-weight: 800;
-    }
-
-
-    /* =====================================
-       ADMIN ADD / EDIT ACTIVITY MODAL
-       Compact like preferred 80% zoom
-    ===================================== */
-
-    #activityModal
-    .calendar-modal-card {
-        width:
-            min(
-                720px,
-                calc(100vw - 40px)
-            );
-
-        max-width: 720px;
-
-        padding:
-            22px
-            24px;
-    }
-
-    #activityModal .modal-header {
-        margin-bottom: 18px;
-    }
-
-    #activityModal .modal-header h2 {
-        font-size: 22px;
-    }
-
-    #activityModal .modal-header p {
-        font-size: 11px;
-    }
-
-    #activityModal
-    .calendar-form-grid {
-        gap:
-            13px
-            15px;
-    }
-
-    #activityModal
-    .calendar-modal-card
-    .form-group label {
-        margin-bottom: 6px;
-
-        font-size: 11px;
-    }
-
-    #activityModal
-    .calendar-modal-card
-    .form-group input,
-    #activityModal
-    .calendar-modal-card
-    .form-group select {
-        height: 42px;
-
-        padding:
-            0
-            13px;
-
-        font-size: 12px;
-    }
-
-    #activityModal
-    .calendar-modal-card
-    .form-group textarea {
-        min-height: 92px;
-
-        padding:
-            11px
-            13px;
-
-        font-size: 12px;
-    }
-
-    #activityModal
-    .calendar-modal-actions {
-        margin-top: 18px;
-    }
-
-    #activityModal
-    .delete-calendar-button,
-    #activityModal
-    .cancel-button,
-    #activityModal
-    .save-button {
-        min-height: 38px;
-
-        padding:
-            0
-            14px;
-
-        font-size: 12px;
-    }
-
-
-    /* =====================================
-       VIEWER ACTIVITY DETAILS MODAL
-       Smaller than Admin modal
-    ===================================== */
-
-    #viewerActivityModal
-    .calendar-modal-card {
-        width:
-            min(
-                560px,
-                calc(100vw - 40px)
-            );
-
-        max-width: 560px;
-
-        padding:
-            20px
-            22px;
-    }
-
-    #viewerActivityModal
-    .modal-header {
-        margin-bottom: 16px;
-    }
-
-    #viewerActivityModal
-    .modal-header h2 {
-        font-size: 21px;
-    }
-
-    #viewerActivityModal
-    .modal-header p {
-        font-size: 11px;
-    }
-
-    #viewerActivityModal
-    .viewer-activity-details {
-        width: 100%;
-
-        display: grid;
-
-        grid-template-columns:
-            minmax(0, 1fr)
-            minmax(0, 1fr);
-
-        gap:
-            11px
-            13px;
-    }
-
-    #viewerActivityModal
-    .viewer-activity-detail {
-        width: 100%;
-
-        min-width: 0;
-        min-height: 58px;
-
-        box-sizing: border-box;
-
-        padding:
-            9px
-            12px;
-
-        display: flex;
-
-        flex-direction: column;
-
-        justify-content: center;
-
-        border:
-            1px solid #d0d5dd;
-
-        border-radius: 9px;
-
-        background: #ffffff;
-
-        color: #1d2939;
-    }
-
-    #viewerActivityModal
-    .viewer-activity-detail:first-child {
-        grid-column:
-            1 / -1;
-    }
-
-    #viewerActivityModal
-    .viewer-activity-detail:nth-child(4) {
-        grid-column:
-            1 / -1;
-    }
-
-    #viewerActivityModal
-    .viewer-activity-detail:nth-child(5),
-    #viewerActivityModal
-    .viewer-activity-detail-full {
-        grid-column:
-            1 / -1;
-
-        min-height: 72px;
-
-        justify-content:
-            flex-start;
-
-        padding-top: 10px;
-    }
-
-    #viewerActivityModal
-    .viewer-activity-detail span {
-        display: block;
-
-        margin-bottom: 4px;
-
-        color: #344054;
-
-        font-size: 11px;
-        font-weight: 700;
-    }
-
-    #viewerActivityModal
-    .viewer-activity-detail strong,
-    #viewerActivityModal
-    .viewer-activity-detail p {
-        margin: 0;
-
-        color: #1d2939;
-
-        font-size: 12px;
-        font-weight: 500;
-
-        line-height: 1.4;
-    }
-
-    #viewerActivityModal
-    #viewerActivityDescription {
-        white-space: pre-wrap;
-    }
-
-    #viewerActivityModal
-    .modal-actions {
-        margin-top: 14px;
-    }
-
-    #viewerActivityModal
-    #viewerCloseActivityButton {
-        min-height: 36px;
-
-        padding:
-            0
-            14px;
-
-        font-size: 12px;
-    }
+/*
+   The viewer modal already uses:
+   .modal-card.calendar-modal-card
+
+   This keeps the exact same 850px modal width used
+   by the Admin Add/Edit Activity modal.
+*/
+
+#viewerActivityModal .calendar-modal-card {
+    width:
+        min(
+            850px,
+            calc(100vw - 40px)
+        );
+
+    max-width: 850px;
+
+    box-sizing: border-box;
 }
 
 
-/* =========================================
-   MOBILE / TABLET
-========================================= */
+/* Same spacing/structure feel as the admin form */
+
+#viewerActivityModal .viewer-activity-details {
+    width: 100%;
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1fr)
+        minmax(0, 1fr);
+
+    gap:
+        18px
+        20px;
+
+    margin-top: 0;
+}
+
+
+/*
+   Make each read-only detail look like the
+   Admin Edit Activity input/select fields.
+*/
+
+#viewerActivityModal .viewer-activity-detail {
+    width: 100%;
+
+    min-width: 0;
+
+    min-height: 82px;
+
+    box-sizing: border-box;
+
+    padding:
+        13px
+        16px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    border:
+        1px solid #d0d5dd;
+
+    border-radius: 10px;
+
+    background: #ffffff;
+
+    color: #1d2939;
+}
+
+
+#viewerActivityModal
+.viewer-activity-detail span {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: #344054;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    line-height: 1.3;
+}
+
+
+#viewerActivityModal
+.viewer-activity-detail strong,
+#viewerActivityModal
+.viewer-activity-detail p {
+    margin: 0;
+
+    color: #1d2939;
+
+    font-family: inherit;
+
+    font-size: 14px;
+
+    font-weight: 500;
+
+    line-height: 1.5;
+
+    overflow-wrap: anywhere;
+}
+
+
+/* Activity title takes full width like admin Activity Title */
+
+#viewerActivityModal
+.viewer-activity-detail:first-child {
+    grid-column:
+        1 / -1;
+}
+
+
+/* Description takes full width like admin Description */
+
+#viewerActivityModal
+.viewer-activity-detail-full {
+    grid-column:
+        1 / -1;
+
+    min-height: 120px;
+
+    justify-content: flex-start;
+
+    padding-top: 14px;
+}
+
+
+#viewerActivityModal
+#viewerActivityDescription {
+    white-space: pre-wrap;
+}
+
+
+/* Footer placement similar to admin modal */
+
+#viewerActivityModal .modal-actions {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    margin-top: 24px;
+}
+
+
+#viewerActivityModal
+#viewerCloseActivityButton {
+    min-height: 42px;
+
+    padding:
+        0
+        18px;
+
+    border:
+        1px solid #d0d5dd;
+
+    border-radius: 8px;
+
+    background: #ffffff;
+
+    color: #344054;
+
+    font-family: inherit;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease;
+}
+
+
+#viewerActivityModal
+#viewerCloseActivityButton:hover {
+    background:
+        var(--green-soft);
+
+    border-color:
+        var(--green);
+
+    color:
+        var(--green-dark);
+}
+
+
+/* Keep the same responsive behavior as admin calendar form */
 
 @media (max-width: 900px) {
 
@@ -942,14 +691,46 @@
         grid-template-columns: 1fr;
     }
 
+
     #viewerActivityModal
     .viewer-activity-detail:first-child,
-    #viewerActivityModal
-    .viewer-activity-detail:nth-child(4),
-    #viewerActivityModal
-    .viewer-activity-detail:nth-child(5),
     #viewerActivityModal
     .viewer-activity-detail-full {
         grid-column: auto;
     }
+}
+
+/* =========================================
+   TODAY DATE NUMBER - KEEP TEXT READABLE
+========================================= */
+
+/*
+   If today also contains an activity, the generic
+   "has activity" rule must not turn the date number
+   text green on the green circle.
+*/
+
+.calendar-day-today .calendar-day-number,
+.calendar-day-today.calendar-day-has-activity
+.calendar-day-number {
+    background:
+        var(--green) !important;
+
+    color:
+        #ffffff !important;
+}
+
+
+/* Viewer calendar explicit protection */
+.viewer-calendar-card
+.calendar-day-today
+.calendar-day-number,
+.viewer-calendar-card
+.calendar-day-today.calendar-day-has-activity
+.calendar-day-number {
+    background:
+        var(--green) !important;
+
+    color:
+        #ffffff !important;
 }
