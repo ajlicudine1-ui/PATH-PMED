@@ -564,7 +564,7 @@ td {
 /* Add to public/css/team.css */
 
 .grouped-person-cell {
-    vertical-align: middle;
+    vertical-align: top;
     font-weight: 600;
     background: #fbfdfb;
     border-right: 1px solid #e5e7eb;
