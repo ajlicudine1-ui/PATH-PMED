@@ -794,3 +794,178 @@ body {
         padding: 18px;
     }
 }
+
+/* =========================================
+   P.A.T.H GREEN THEME TOKENS
+========================================= */
+
+:root {
+    --path-green-950: #0b3d24;
+    --path-green-900: #14532d;
+    --path-green-800: #176b39;
+    --path-green-700: #1f7a45;
+    --path-green-600: #2f8a4b;
+    --path-green-200: #cfe3d5;
+    --path-green-100: #e6f4ea;
+    --path-green-50: #f3faf5;
+    --path-green-25: #f8fcf9;
+
+    --path-gold: #d6a928;
+
+    --path-text: #24352c;
+    --path-text-muted: #66756d;
+
+    --path-border: #d7e6dc;
+    --path-surface: #ffffff;
+    --path-background: #f3f8f5;
+}
+
+
+/* =========================================
+   VIEWER TEAM GREEN THEME OVERRIDES
+========================================= */
+
+.viewer-team-header h1,
+.viewer-team-toolbar h2,
+.viewer-dashboard-overview > .page-heading h1,
+.viewer-calendar-card h2,
+.viewer-recent-assignments h2 {
+    color:
+        var(--path-green-900);
+}
+
+.viewer-team-header h1::after {
+    background:
+        var(--path-green-700);
+}
+
+.viewer-team-header p,
+.viewer-team-toolbar p,
+.viewer-dashboard-overview > .page-heading p {
+    color:
+        var(--path-text-muted);
+}
+
+.viewer-team-card,
+.viewer-dashboard-overview > .page-heading,
+.viewer-dashboard-overview > .viewer-calendar-card,
+.viewer-recent-assignments {
+    border:
+        1px solid var(--path-border);
+
+    background:
+        linear-gradient(
+            180deg,
+            #ffffff 0%,
+            #fbfefc 100%
+        );
+
+    box-shadow:
+        0 8px 24px
+        rgba(20, 83, 45, 0.07);
+}
+
+.viewer-team-toolbar {
+    background:
+        linear-gradient(
+            180deg,
+            #ffffff 0%,
+            var(--path-green-25) 100%
+        );
+
+    border-bottom-color:
+        var(--path-border);
+}
+
+.viewer-search,
+.employment-status-filter {
+    background:
+        #ffffff;
+
+    border-color:
+        #c9ddd0;
+
+    color:
+        var(--path-text);
+}
+
+.viewer-search:hover,
+.employment-status-filter:hover {
+    border-color:
+        #aecaB8;
+}
+
+.viewer-search:focus,
+.employment-status-filter:focus {
+    border-color:
+        var(--path-green-700);
+
+    box-shadow:
+        0 0 0 3px
+        rgba(31, 122, 69, 0.10);
+}
+
+.viewer-table thead,
+.viewer-recent-assignments table thead {
+    background:
+        var(--path-green-900);
+}
+
+.viewer-table th,
+.viewer-recent-assignments table thead th {
+    color: #ffffff;
+
+    border-bottom-color:
+        var(--path-green-900);
+}
+
+.viewer-table td {
+    color:
+        #344b3e;
+
+    border-bottom-color:
+        var(--path-border);
+}
+
+.viewer-table tbody tr:hover {
+    background:
+        var(--path-green-25);
+}
+
+.viewer-grouped-person-cell,
+.viewer-dashboard-grouped-person-cell {
+    color:
+        var(--path-green-900);
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--path-green-100) 0%,
+            #f8fcf9 100%
+        ) !important;
+
+    border-left:
+        4px solid var(--path-green-700);
+
+    border-right:
+        1px solid var(--path-border);
+}
+
+.viewer-topbar {
+    background:
+        linear-gradient(
+            90deg,
+            #ffffff 0%,
+            var(--path-green-25) 100%
+        );
+
+    border-bottom-color:
+        var(--path-border);
+}
+
+.viewer-topbar-brand h2 {
+    color:
+        var(--path-green-900);
+}
+
+

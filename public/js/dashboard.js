@@ -330,32 +330,6 @@ dashboardEmploymentStatusFilter
 
 
 
-
-
-// ============================================
-// FORMAT FUNCTIONS / ACTIVITIES FOR DISPLAY
-// Preserves line breaks and blank lines,
-// while removing unwanted leading spaces/tabs.
-// ============================================
-
-function formatDashboardActivityDisplay(value) {
-
-    const normalized =
-        String(value || "")
-            .replace(/\r\n/g, "\n")
-            .split("\n")
-            .map(line => line.trimStart())
-            .join("\n")
-            .trim();
-
-
-    return escapeDashboardHTML(
-        normalized
-    )
-        .replace(/\n/g, "<br>");
-}
-
-
 // ============================================
 // RENDER ASSIGNMENTS
 // ============================================
@@ -499,7 +473,7 @@ function renderDashboardAssignments(records) {
                                     </td>
 
                                     <td>
-                                        ${formatDashboardActivityDisplay(
+                                        ${escapeDashboardHTML(
                                             record.functions_activities || ""
                                         )}
                                     </td>
@@ -1309,6 +1283,193 @@ function formatActivityTime(value) {
 }
 
 
+
+// ============================================
+// CALENDAR LOADING STATE
+// Keeps the calendar visible while activities load.
+// ============================================
+
+function ensureCalendarLoadingStyles() {
+
+    if (
+        document.getElementById(
+            "pathCalendarLoadingStyles"
+        )
+    ) {
+        return;
+    }
+
+
+    const style =
+        document.createElement(
+            "style"
+        );
+
+
+    style.id =
+        "pathCalendarLoadingStyles";
+
+
+    style.textContent = `
+        .calendar-grid.calendar-grid-loading {
+            position: relative;
+            min-height: 300px;
+        }
+
+        .calendar-loading-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 20;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background:
+                rgba(248, 252, 249, 0.76);
+
+            backdrop-filter:
+                blur(1px);
+
+            pointer-events: none;
+        }
+
+        .calendar-loading-box {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+
+            padding: 10px 16px;
+
+            background: #ffffff;
+
+            border:
+                1px solid #cfe3d5;
+
+            border-radius: 999px;
+
+            color: #14532d;
+
+            font-size: 12px;
+            font-weight: 700;
+
+            box-shadow:
+                0 6px 18px
+                rgba(20, 83, 45, 0.10);
+        }
+
+        .calendar-loading-spinner {
+            width: 16px;
+            height: 16px;
+
+            border:
+                2px solid #d8eadf;
+
+            border-top-color:
+                #1f7a45;
+
+            border-radius: 50%;
+
+            animation:
+                pathCalendarSpin
+                0.8s
+                linear
+                infinite;
+        }
+
+        @keyframes pathCalendarSpin {
+            to {
+                transform:
+                    rotate(360deg);
+            }
+        }
+    `;
+
+
+    document.head.appendChild(
+        style
+    );
+}
+
+
+function showCalendarLoadingState() {
+
+    if (!calendarGrid) {
+        return;
+    }
+
+
+    ensureCalendarLoadingStyles();
+
+
+    // Show the actual month grid immediately.
+    // Activities are filled in as soon as the API finishes.
+    calendarActivities = [];
+
+    renderCalendar();
+
+
+    calendarGrid
+        .classList
+        .add(
+            "calendar-grid-loading"
+        );
+
+
+    const overlay =
+        document.createElement(
+            "div"
+        );
+
+
+    overlay.className =
+        "calendar-loading-overlay";
+
+
+    overlay.innerHTML = `
+        <div class="calendar-loading-box">
+
+            <span
+                class="calendar-loading-spinner"
+                aria-hidden="true"
+            ></span>
+
+            <span>
+                Loading activities...
+            </span>
+
+        </div>
+    `;
+
+
+    calendarGrid.appendChild(
+        overlay
+    );
+}
+
+
+function hideCalendarLoadingState() {
+
+    if (!calendarGrid) {
+        return;
+    }
+
+
+    calendarGrid
+        .classList
+        .remove(
+            "calendar-grid-loading"
+        );
+
+
+    calendarGrid
+        .querySelector(
+            ".calendar-loading-overlay"
+        )
+        ?.remove();
+}
+
+
 // ============================================
 // LOAD CALENDAR ACTIVITIES
 // ============================================
@@ -1325,6 +1486,9 @@ async function loadCalendarActivities() {
         end
     } =
         getCalendarMonthRange();
+
+
+    showCalendarLoadingState();
 
 
     try {
@@ -1357,10 +1521,14 @@ async function loadCalendarActivities() {
                 : [];
 
 
+        hideCalendarLoadingState();
+
         renderCalendar();
 
 
     } catch (error) {
+
+        hideCalendarLoadingState();
 
         console.error(
             "Calendar load error:",
@@ -1379,6 +1547,137 @@ async function loadCalendarActivities() {
 }
 
 
+
+// ============================================
+// CALENDAR INTERACTION STYLES
+// Whole date cell is clickable.
+// ============================================
+
+function ensureCalendarInteractionStyles() {
+
+    if (
+        document.getElementById(
+            "pathCalendarInteractionStyles"
+        )
+    ) {
+        return;
+    }
+
+
+    const style =
+        document.createElement(
+            "style"
+        );
+
+
+    style.id =
+        "pathCalendarInteractionStyles";
+
+
+    style.textContent = `
+        .calendar-day[data-date] {
+            cursor: pointer;
+            transition:
+                background 0.16s ease,
+                box-shadow 0.16s ease,
+                transform 0.16s ease;
+        }
+
+        .calendar-day[data-date]:hover {
+            background: #f3faf5;
+            box-shadow:
+                inset 0 0 0 1px
+                #b9d7c3;
+        }
+
+        .calendar-day.calendar-day-has-activity {
+            background:
+                linear-gradient(
+                    180deg,
+                    #ffffff 0%,
+                    #f7fcf8 100%
+                );
+        }
+
+        .calendar-day.calendar-day-has-activity:hover {
+            background:
+                linear-gradient(
+                    180deg,
+                    #eef8f1 0%,
+                    #f7fcf8 100%
+                );
+
+            box-shadow:
+                inset 0 0 0 2px
+                rgba(31, 122, 69, 0.18);
+        }
+
+        .calendar-day[data-date]:focus-visible {
+            outline:
+                2px solid #1f7a45;
+
+            outline-offset:
+                -2px;
+        }
+
+        .calendar-activity {
+            width: 100%;
+            border:
+                1px solid #d5e7db;
+
+            border-radius: 7px;
+
+            background:
+                #edf7f0;
+
+            color:
+                #14532d;
+
+            cursor: pointer;
+
+            text-align: left;
+
+            transition:
+                background 0.16s ease,
+                border-color 0.16s ease,
+                box-shadow 0.16s ease;
+        }
+
+        .calendar-activity:hover {
+            background:
+                #dff1e5;
+
+            border-color:
+                #b6d6c0;
+
+            box-shadow:
+                0 2px 7px
+                rgba(20, 83, 45, 0.08);
+        }
+
+        .calendar-activity-title {
+            font-weight: 700;
+        }
+
+        .calendar-activity-time {
+            color: #2f7f49;
+            font-weight: 700;
+        }
+
+        .calendar-day-has-activity
+        .calendar-day-number {
+            color: #14532d;
+            font-weight: 800;
+        }
+    `;
+
+
+    document.head.appendChild(
+        style
+    );
+}
+
+
 // ============================================
 // RENDER CALENDAR
 // ============================================
@@ -1391,6 +1690,9 @@ function renderCalendar() {
     ) {
         return;
     }
+
+
+    ensureCalendarInteractionStyles();
 
 
     const year =
@@ -1533,14 +1835,33 @@ function renderCalendar() {
                 .join("");
 
 
+        const firstActivityId =
+            dayActivities.length
+                ? dayActivities[0].id
+                : "";
+
+
         cells.push(`
             <div
                 class="calendar-day ${
                     dateString === today
                         ? "calendar-day-today"
                         : ""
+                } ${
+                    dayActivities.length
+                        ? "calendar-day-has-activity"
+                        : ""
                 }"
                 data-date="${dateString}"
+                ${
+                    firstActivityId
+                        ? `data-activity-id="${escapeDashboardHTML(
+                            firstActivityId
+                        )}"`
+                        : ""
+                }
+                role="button"
+                tabindex="0"
             >
 
                 <div class="calendar-day-number">
@@ -1870,28 +2191,46 @@ calendarGrid?.addEventListener(
     "click",
     event => {
 
-        const clickedActivity =
+        const dayCell =
             event.target.closest(
-                "[data-activity-id]"
+                ".calendar-day[data-date]"
             );
 
 
-        if (clickedActivity) {
+        if (!dayCell) {
+            return;
+        }
 
-            event.preventDefault();
-            event.stopPropagation();
+
+        event.preventDefault();
 
 
-            const id =
-                clickedActivity.dataset
-                    .activityId;
+        const directActivity =
+            event.target.closest(
+                ".calendar-activity[data-activity-id]"
+            );
 
+
+        const activityId =
+            directActivity
+                ?.dataset
+                ?.activityId ||
+            dayCell
+                .dataset
+                .activityId ||
+            "";
+
+
+        // Occupied date:
+        // clicking anywhere in the whole date cell
+        // opens the first activity for editing.
+        if (activityId) {
 
             const activity =
                 calendarActivities.find(
                     item =>
                         String(item.id) ===
-                        String(id)
+                        String(activityId)
                 );
 
 
@@ -1899,7 +2238,7 @@ calendarGrid?.addEventListener(
 
                 console.warn(
                     "Calendar activity not found:",
-                    id
+                    activityId
                 );
 
                 return;
@@ -1911,8 +2250,7 @@ calendarGrid?.addEventListener(
             );
 
 
-            // Load section options in the background.
-            // Keep the modal in Edit mode while loading.
+            // The Edit modal includes Delete Activity.
             loadActivityTeamOptions()
                 .then(() => {
 
@@ -1936,6 +2274,32 @@ calendarGrid?.addEventListener(
         }
 
 
+        // Empty date:
+        // clicking anywhere adds a new activity
+        // for that date.
+        openActivityModalForAdd(
+            dayCell.dataset.date
+        );
+
+
+        loadActivityTeamOptions();
+    }
+);
+
+
+// Keyboard support for every date cell.
+calendarGrid?.addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            event.key !== "Enter" &&
+            event.key !== " "
+        ) {
+            return;
+        }
+
+
         const dayCell =
             event.target.closest(
                 ".calendar-day[data-date]"
@@ -1947,8 +2311,56 @@ calendarGrid?.addEventListener(
         }
 
 
-        // Clicking empty calendar space creates a new activity.
-        // Clicking an existing activity never reaches this block.
+        event.preventDefault();
+
+
+        const activityId =
+            dayCell.dataset
+                .activityId ||
+            "";
+
+
+        if (activityId) {
+
+            const activity =
+                calendarActivities.find(
+                    item =>
+                        String(item.id) ===
+                        String(activityId)
+                );
+
+
+            if (activity) {
+
+                openActivityModalForEdit(
+                    activity
+                );
+
+
+                loadActivityTeamOptions()
+                    .then(() => {
+
+                        if (
+                            activityTeamInput &&
+                            activity.team_id !==
+                                null &&
+                            activity.team_id !==
+                                undefined
+                        ) {
+
+                            activityTeamInput.value =
+                                String(
+                                    activity.team_id
+                                );
+                        }
+                    });
+            }
+
+
+            return;
+        }
+
+
         openActivityModalForAdd(
             dayCell.dataset.date
         );

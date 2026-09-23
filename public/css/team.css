@@ -1151,3 +1151,244 @@ td {
     }
 }
 
+/* =========================================
+   P.A.T.H GREEN THEME TOKENS
+========================================= */
+
+:root {
+    --path-green-950: #0b3d24;
+    --path-green-900: #14532d;
+    --path-green-800: #176b39;
+    --path-green-700: #1f7a45;
+    --path-green-600: #2f8a4b;
+    --path-green-200: #cfe3d5;
+    --path-green-100: #e6f4ea;
+    --path-green-50: #f3faf5;
+    --path-green-25: #f8fcf9;
+
+    --path-gold: #d6a928;
+
+    --path-text: #24352c;
+    --path-text-muted: #66756d;
+
+    --path-border: #d7e6dc;
+    --path-surface: #ffffff;
+    --path-background: #f3f8f5;
+}
+
+
+/* =========================================
+   TEAM PAGE GREEN THEME OVERRIDES
+========================================= */
+
+.team-page-header h1,
+.team-toolbar h2,
+.modal-header h2,
+.reorder-modal-header h2 {
+    color:
+        var(--path-green-900);
+}
+
+.team-page-header p,
+.team-toolbar p,
+.modal-header p,
+.reorder-modal-header p {
+    color:
+        var(--path-text-muted);
+}
+
+.team-card {
+    border:
+        1px solid var(--path-border);
+
+    background:
+        linear-gradient(
+            180deg,
+            #ffffff 0%,
+            #fbfefc 100%
+        );
+
+    box-shadow:
+        0 8px 24px
+        rgba(20, 83, 45, 0.07);
+}
+
+.team-card thead {
+    background:
+        var(--path-green-900);
+}
+
+.team-card thead th {
+    color: #ffffff;
+
+    border-bottom-color:
+        var(--path-green-900);
+}
+
+.team-card tbody td {
+    border-bottom-color:
+        var(--path-border);
+}
+
+.team-card tbody tr:hover td {
+    background:
+        var(--path-green-25);
+}
+
+.grouped-person-cell {
+    background:
+        linear-gradient(
+            90deg,
+            var(--path-green-100) 0%,
+            #f8fcf9 100%
+        ) !important;
+
+    color:
+        var(--path-green-900);
+
+    border-left:
+        4px solid var(--path-green-700);
+
+    border-right:
+        1px solid var(--path-border);
+}
+
+.add-button,
+.save-button,
+.reorder-save-button {
+    background:
+        var(--path-green-700);
+
+    border-color:
+        var(--path-green-700);
+
+    color: #ffffff;
+}
+
+.add-button:hover,
+.save-button:hover,
+.reorder-save-button:hover {
+    background:
+        var(--path-green-900);
+
+    border-color:
+        var(--path-green-900);
+}
+
+.action-button,
+.reorder-personnel-button {
+    background: #ffffff;
+
+    border-color:
+        #aecaB8;
+
+    color:
+        var(--path-green-900);
+}
+
+.action-button:hover,
+.reorder-personnel-button:hover:not(:disabled) {
+    background:
+        var(--path-green-50);
+
+    border-color:
+        var(--path-green-700);
+}
+
+.actions-menu {
+    border-color:
+        var(--path-border);
+
+    box-shadow:
+        0 12px 30px
+        rgba(20, 83, 45, 0.12);
+}
+
+.actions-menu-item:hover {
+    background:
+        var(--path-green-50);
+
+    color:
+        var(--path-green-900);
+}
+
+.team-toolbar-controls .employment-status-filter,
+.team-toolbar-controls #searchInput,
+.form-group input,
+.form-group select,
+.form-group textarea {
+    border-color:
+        #c9ddd0;
+
+    background:
+        #ffffff;
+}
+
+.team-toolbar-controls .employment-status-filter:focus,
+.team-toolbar-controls #searchInput:focus,
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color:
+        var(--path-green-700);
+
+    box-shadow:
+        0 0 0 3px
+        rgba(31, 122, 69, 0.10);
+}
+
+.modal-card,
+.reorder-modal-card {
+    border:
+        1px solid var(--path-border);
+
+    box-shadow:
+        0 24px 60px
+        rgba(20, 83, 45, 0.16);
+}
+
+.reorder-personnel-list {
+    background:
+        var(--path-green-25);
+}
+
+.reorder-personnel-item {
+    border-color:
+        #d8e7dd;
+
+    box-shadow:
+        0 2px 8px
+        rgba(20, 83, 45, 0.05);
+}
+
+.reorder-personnel-item:hover {
+    border-color:
+        #b7d2bf;
+}
+
+.reorder-position {
+    background:
+        var(--path-green-100);
+
+    color:
+        var(--path-green-900);
+}
+
+.viewer-topbar {
+    background:
+        linear-gradient(
+            90deg,
+            #ffffff 0%,
+            var(--path-green-25) 100%
+        );
+
+    border-bottom-color:
+        var(--path-border);
+}
+
+.viewer-topbar-brand h2 {
+    color:
+        var(--path-green-900);
+}
+
+
