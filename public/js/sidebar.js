@@ -421,6 +421,117 @@ function escapeSidebarHTML(value) {
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
 }
+// ============================================
+// KEEP SIDEBAR SCROLL POSITION
+// ============================================
+
+const SIDEBAR_SCROLL_KEY =
+    "path_sidebar_scroll_position";
+
+
+function restoreSidebarScrollPosition() {
+
+    const sidebar =
+        document.querySelector(
+            ".sidebar"
+        );
+
+    if (!sidebar) {
+        return;
+    }
+
+
+    const savedPosition =
+        Number(
+            sessionStorage.getItem(
+                SIDEBAR_SCROLL_KEY
+            )
+        ) || 0;
+
+
+    requestAnimationFrame(() => {
+
+        sidebar.scrollTop =
+            savedPosition;
+
+    });
+}
+
+
+function saveSidebarScrollPosition() {
+
+    const sidebar =
+        document.querySelector(
+            ".sidebar"
+        );
+
+    if (!sidebar) {
+        return;
+    }
+
+
+    sessionStorage.setItem(
+        SIDEBAR_SCROLL_KEY,
+        String(
+            sidebar.scrollTop
+        )
+    );
+}
+
+
+// Save whenever the sidebar is scrolled
+document.addEventListener(
+    "scroll",
+    event => {
+
+        if (
+            event.target
+                ?.classList
+                ?.contains("sidebar")
+        ) {
+
+            saveSidebarScrollPosition();
+        }
+
+    },
+    true
+);
+
+
+// Save immediately before clicking
+// another sidebar page.
+document.addEventListener(
+    "click",
+    event => {
+
+        const sidebarLink =
+            event.target.closest(
+                ".sidebar a"
+            );
+
+
+        if (!sidebarLink) {
+            return;
+        }
+
+
+        saveSidebarScrollPosition();
+
+    }
+);
+
+
+// Extra protection before page navigation/reload
+window.addEventListener(
+    "pagehide",
+    saveSidebarScrollPosition
+);
+
+
+// Restore after sidebar exists
+requestAnimationFrame(
+    restoreSidebarScrollPosition
+);
 
 
 // ============================================
@@ -428,3 +539,5 @@ function escapeSidebarHTML(value) {
 // ============================================
 
 loadAdminSidebar();
+
+

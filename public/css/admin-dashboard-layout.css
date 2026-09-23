@@ -1,7 +1,34 @@
 /* =========================================
-   P.A.T.H - ADMIN DASHBOARD COMPACT LAYOUT
-   Cards + calendar balanced for one desktop screen
+   P.A.T.H - ADMIN DASHBOARD GREEN THEME
+   Compact + professional government style
 ========================================= */
+
+:root {
+    --path-green-darkest: #0b3d24;
+    --path-green-dark: #14532d;
+    --path-green: #1f7a45;
+    --path-green-medium: #2f8a4b;
+
+    --path-green-soft: #eef7f1;
+    --path-green-pale: #f7fbf8;
+    --path-green-border: #d6e6dc;
+
+    --path-gold: #d6a928;
+
+    --path-text: #24352c;
+    --path-text-muted: #66756d;
+
+    --path-white: #ffffff;
+}
+
+
+/* =========================================
+   PAGE
+========================================= */
+
+.admin-page {
+    background: #f3f8f5;
+}
 
 .admin-page .page-content {
     padding-top: 18px;
@@ -26,10 +53,16 @@
 
 .admin-page .page-heading h1 {
     margin-bottom: 5px;
+
+    color: var(--path-green-dark);
+
     font-size: 30px;
+    font-weight: 750;
 }
 
 .admin-page .page-heading p {
+    color: var(--path-text-muted);
+
     font-size: 14px;
     line-height: 1.35;
 }
@@ -40,14 +73,54 @@
 ========================================= */
 
 .admin-page .dashboard-actions {
+    display: flex;
     gap: 9px;
 }
 
 .admin-page .manage-section-button,
 .admin-page .add-section-button {
     padding: 10px 16px;
-    font-size: 13px;
+
     border-radius: 9px;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    transition: 0.2s ease;
+}
+
+
+/* Manage Sections */
+
+.admin-page .manage-section-button {
+    background: var(--path-white);
+
+    color: var(--path-green-dark);
+
+    border: 1px solid #b9d2c1;
+}
+
+.admin-page .manage-section-button:hover {
+    background: var(--path-green-soft);
+
+    border-color: var(--path-green);
+}
+
+
+/* Add Section */
+
+.admin-page .add-section-button {
+    background: var(--path-green);
+
+    color: #ffffff;
+
+    border: 1px solid var(--path-green);
+}
+
+.admin-page .add-section-button:hover {
+    background: var(--path-green-dark);
+
+    border-color: var(--path-green-dark);
 }
 
 
@@ -56,34 +129,72 @@
 ========================================= */
 
 .admin-page .stats-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
     gap: 18px;
+
     margin-bottom: 18px;
 }
 
 .admin-page .stat-card {
     min-height: 92px;
+
     padding: 17px 20px;
 
     display: flex;
     flex-direction: row;
+
     align-items: center;
     justify-content: space-between;
+
+    background:
+        linear-gradient(
+            135deg,
+            #ffffff 0%,
+            #f3faf5 100%
+        );
+
+    border:
+        1px solid var(--path-green-border);
+
+    border-left:
+        4px solid var(--path-green);
 
     border-radius: 12px;
 
     box-shadow:
-        0 4px 14px rgba(30, 41, 59, 0.05);
+        0 5px 16px rgba(20, 83, 45, 0.07);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.admin-page .stat-card:hover {
+    transform:
+        translateY(-2px);
+
+    box-shadow:
+        0 8px 22px rgba(20, 83, 45, 0.10);
 }
 
 .admin-page .stat-card span {
     margin-bottom: 0;
+
+    color: var(--path-text-muted);
+
     font-size: 14px;
+    font-weight: 600;
 }
 
 .admin-page .stat-card strong {
     margin-left: 14px;
+
+    color: var(--path-green-dark);
+
     font-size: 34px;
+    font-weight: 800;
 }
 
 
@@ -97,7 +208,15 @@
 
     padding: 18px 20px;
 
+    background: #ffffff;
+
+    border:
+        1px solid var(--path-green-border);
+
     border-radius: 14px;
+
+    box-shadow:
+        0 5px 18px rgba(20, 83, 45, 0.06);
 }
 
 .admin-page .calendar-card-header {
@@ -106,17 +225,41 @@
 
 .admin-page .calendar-card-header h2 {
     margin-bottom: 3px;
+
+    color: var(--path-green-dark);
+
     font-size: 20px;
+    font-weight: 700;
 }
 
 .admin-page .calendar-card-header p {
+    color: var(--path-text-muted);
+
     font-size: 12px;
 }
 
 .admin-page .calendar-add-button {
     padding: 9px 15px;
-    font-size: 13px;
+
+    background: var(--path-green);
+
+    color: #ffffff;
+
+    border:
+        1px solid var(--path-green);
+
     border-radius: 9px;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    transition: 0.2s ease;
+}
+
+.admin-page .calendar-add-button:hover {
+    background: var(--path-green-dark);
+
+    border-color: var(--path-green-dark);
 }
 
 
@@ -126,18 +269,64 @@
 
 .admin-page .calendar-toolbar {
     gap: 12px;
+
     margin: 7px 0 9px;
 }
 
 .admin-page .calendar-toolbar h3 {
     min-width: 160px;
+
+    color: var(--path-green-dark);
+
     font-size: 15px;
+    font-weight: 700;
 }
 
 .admin-page .calendar-nav-button {
     width: 32px;
     height: 32px;
+
+    background: var(--path-green-soft);
+
+    color: var(--path-green-dark);
+
+    border:
+        1px solid var(--path-green-border);
+
+    border-radius: 8px;
+
     font-size: 20px;
+
+    transition: 0.2s ease;
+}
+
+.admin-page .calendar-nav-button:hover {
+    background: var(--path-green);
+
+    color: #ffffff;
+
+    border-color: var(--path-green);
+}
+
+
+/* =========================================
+   CALENDAR WEEKDAYS
+========================================= */
+
+.admin-page .calendar-weekdays {
+    background: var(--path-green-dark);
+
+    border-radius:
+        9px 9px 0 0;
+}
+
+.admin-page .calendar-weekdays span {
+    padding: 7px 4px;
+
+    color: #ffffff;
+
+    font-size: 11px;
+    font-weight: 600;
 }
 
 
@@ -145,21 +334,53 @@
    CALENDAR GRID
 ========================================= */
 
-.admin-page .calendar-weekdays span {
-    padding: 7px 4px;
-    font-size: 11px;
+.admin-page .calendar-grid {
+    border-color:
+        var(--path-green-border);
 }
 
 .admin-page .calendar-day {
     min-height: 58px;
+
     padding: 5px;
+
+    background: #ffffff;
+
+    border-color:
+        var(--path-green-border);
+
+    transition: 0.15s ease;
+}
+
+.admin-page .calendar-day:hover {
+    background:
+        var(--path-green-pale);
+}
+
+.admin-page .calendar-day-today {
+    background:
+        #eef8f1;
 }
 
 .admin-page .calendar-day-number {
     width: 21px;
     height: 21px;
+
     margin-bottom: 3px;
+
+    color: var(--path-green-dark);
+
     font-size: 10px;
+    font-weight: 700;
+}
+
+.admin-page .calendar-day-today
+.calendar-day-number {
+    background: var(--path-green);
+
+    color: #ffffff;
+
+    border-radius: 50%;
 }
 
 .admin-page .calendar-day-activities {
@@ -168,11 +389,17 @@
 
 .admin-page .calendar-activity {
     padding: 3px 5px;
+
+    color: var(--path-green-dark);
+
     font-size: 9px;
+    font-weight: 600;
 }
 
 .admin-page .calendar-activity-time,
 .admin-page .calendar-activity-team {
+    color: #547260;
+
     font-size: 8px;
 }
 
@@ -183,10 +410,110 @@
 
 .admin-page #recentAssignmentsView {
     margin-top: 0;
+
+    background: #ffffff;
+
+    border:
+        1px solid var(--path-green-border);
+
+    border-radius: 14px;
+
+    box-shadow:
+        0 5px 18px rgba(20, 83, 45, 0.06);
 }
 
-.admin-page #recentAssignmentsView .card-header {
+.admin-page #recentAssignmentsView
+.card-header {
     margin-bottom: 18px;
+}
+
+.admin-page #recentAssignmentsView
+.card-header h2 {
+    color: var(--path-green-dark);
+}
+
+
+/* =========================================
+   RECENT ASSIGNMENTS TABLE
+========================================= */
+
+.admin-page #recentAssignmentsView
+table thead {
+    background: var(--path-green-dark);
+}
+
+.admin-page #recentAssignmentsView
+table thead th {
+    color: #ffffff;
+
+    border-color:
+        rgba(255, 255, 255, 0.12);
+
+    font-weight: 600;
+}
+
+.admin-page #recentAssignmentsView
+table tbody td {
+    border-color:
+        var(--path-green-border);
+}
+
+.admin-page #recentAssignmentsView
+table tbody tr:hover td {
+    background:
+        var(--path-green-pale);
+}
+
+
+/* Responsible Person */
+
+.admin-page
+.dashboard-grouped-person-cell {
+    background:
+        linear-gradient(
+            90deg,
+            #edf7f0 0%,
+            #f7fbf8 100%
+        );
+
+    color: var(--path-green-dark);
+
+    font-weight: 700;
+
+    border-left:
+        4px solid var(--path-green);
+
+    border-right:
+        1px solid var(--path-green-border);
+}
+
+
+/* =========================================
+   EMPLOYMENT STATUS FILTER
+========================================= */
+
+.admin-page
+#dashboardEmploymentStatusFilter {
+    border:
+        1px solid #c9ddd0;
+
+    background: #ffffff;
+
+    color: var(--path-text);
+
+    transition: 0.2s ease;
+}
+
+.admin-page
+#dashboardEmploymentStatusFilter:focus {
+    border-color:
+        var(--path-green);
+
+    box-shadow:
+        0 0 0 3px
+        rgba(31, 122, 69, 0.10);
+
+    outline: none;
 }
 
 
@@ -197,7 +524,8 @@
 @media (max-width: 1050px) {
 
     .admin-page .stats-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
     }
 
     .admin-page .calendar-card {
@@ -215,11 +543,13 @@
 
     .admin-page .dashboard-heading {
         flex-direction: column;
+
         align-items: flex-start;
     }
 
     .admin-page .dashboard-actions {
         width: 100%;
+
         flex-direction: column;
     }
 

@@ -721,7 +721,7 @@ td {
 
 
 
-/* =========================================
+/* =========================================a
    FUNCTIONS / ACTIVITIES FORMATTING
    Preserve line breaks and blank lines
    entered in the textarea.
@@ -732,3 +732,422 @@ td {
     overflow-wrap: break-word;
     word-break: normal;
 }
+
+/* =========================================
+   REORDER PERSONNEL
+   Admin-only control
+========================================= */
+
+.team-page-header {
+    gap: 12px;
+}
+
+.reorder-personnel-button {
+    margin-left: auto;
+
+    padding: 11px 18px;
+
+    border:
+        1px solid var(--green);
+
+    border-radius: 9px;
+
+    background: #ffffff;
+
+    color: var(--green-dark);
+
+    font-size: 13px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+}
+
+.reorder-personnel-button:hover:not(:disabled) {
+    background: var(--green-soft);
+
+    border-color: var(--green);
+
+    color: var(--green-dark);
+
+    box-shadow:
+        0 4px 12px
+        rgba(20, 83, 45, 0.08);
+
+    transform:
+        translateY(-1px);
+}
+
+.reorder-personnel-button:disabled {
+    opacity: 0.55;
+
+    cursor: not-allowed;
+
+    transform: none;
+
+    box-shadow: none;
+}
+
+
+/* =========================================
+   REORDER MODAL
+========================================= */
+
+.reorder-modal-overlay {
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 1000000;
+
+    display: none;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 24px;
+
+    background:
+        rgba(15, 23, 42, 0.40);
+
+    backdrop-filter:
+        blur(2px);
+}
+
+.reorder-modal-overlay.show {
+    display: flex;
+}
+
+.reorder-modal-card {
+    width:
+        min(
+            100%,
+            560px
+        );
+
+    max-height:
+        min(
+            82vh,
+            720px
+        );
+
+    display: flex;
+    flex-direction: column;
+
+    overflow: hidden;
+
+    background: #ffffff;
+
+    border:
+        1px solid #d6e6dc;
+
+    border-radius: 16px;
+
+    box-shadow:
+        0 24px 60px
+        rgba(15, 23, 42, 0.20);
+}
+
+.reorder-modal-header {
+    display: flex;
+
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    padding:
+        20px
+        22px
+        16px;
+
+    border-bottom:
+        1px solid #e3ece6;
+}
+
+.reorder-modal-header h2 {
+    margin: 0;
+
+    color: var(--green-dark);
+
+    font-size: 20px;
+}
+
+.reorder-modal-header p {
+    margin-top: 5px;
+
+    color: #667085;
+
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.reorder-modal-close {
+    width: 34px;
+    height: 34px;
+
+    flex-shrink: 0;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: transparent;
+
+    color: #667085;
+
+    font-size: 25px;
+    line-height: 1;
+
+    cursor: pointer;
+}
+
+.reorder-modal-close:hover {
+    background: var(--green-soft);
+
+    color: var(--green-dark);
+}
+
+
+/* =========================================
+   DRAGGABLE PERSONNEL LIST
+========================================= */
+
+.reorder-personnel-list {
+    padding: 14px;
+
+    overflow-y: auto;
+
+    background: #f8fbf9;
+}
+
+.reorder-personnel-item {
+    min-height: 54px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    margin-bottom: 8px;
+
+    padding:
+        10px
+        13px;
+
+    background: #ffffff;
+
+    border:
+        1px solid #dce8e0;
+
+    border-radius: 10px;
+
+    box-shadow:
+        0 2px 8px
+        rgba(20, 83, 45, 0.04);
+
+    cursor: grab;
+
+    user-select: none;
+
+    transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease,
+        transform 0.15s ease,
+        opacity 0.15s ease;
+}
+
+.reorder-personnel-item:last-child {
+    margin-bottom: 0;
+}
+
+.reorder-personnel-item:hover {
+    border-color: #b9d2c1;
+
+    box-shadow:
+        0 4px 12px
+        rgba(20, 83, 45, 0.08);
+}
+
+.reorder-personnel-item.dragging {
+    opacity: 0.48;
+
+    cursor: grabbing;
+
+    border-color: var(--green);
+
+    box-shadow:
+        0 8px 20px
+        rgba(20, 83, 45, 0.14);
+}
+
+.reorder-drag-handle {
+    width: 26px;
+
+    flex-shrink: 0;
+
+    color: #6d8374;
+
+    font-size: 21px;
+    line-height: 1;
+
+    text-align: center;
+}
+
+.reorder-position {
+    width: 28px;
+    height: 28px;
+
+    flex-shrink: 0;
+
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: var(--green-soft);
+
+    color: var(--green-dark);
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.reorder-person-name {
+    min-width: 0;
+
+    color: #25362c;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    overflow-wrap: anywhere;
+}
+
+.reorder-empty-state {
+    padding: 34px 18px;
+
+    color: #667085;
+
+    text-align: center;
+
+    font-size: 14px;
+}
+
+
+/* =========================================
+   REORDER MODAL ACTIONS
+========================================= */
+
+.reorder-modal-actions {
+    display: flex;
+
+    align-items: center;
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    padding:
+        16px
+        22px;
+
+    border-top:
+        1px solid #e3ece6;
+
+    background: #ffffff;
+}
+
+.reorder-cancel-button,
+.reorder-save-button {
+    padding:
+        10px
+        16px;
+
+    border-radius: 8px;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.reorder-cancel-button {
+    background: #ffffff;
+
+    color: #475467;
+
+    border:
+        1px solid #d0d5dd;
+}
+
+.reorder-cancel-button:hover {
+    background: #f8fafc;
+}
+
+.reorder-save-button {
+    background: var(--green);
+
+    color: #ffffff;
+
+    border:
+        1px solid var(--green);
+}
+
+.reorder-save-button:hover {
+    background: var(--green-dark);
+
+    border-color: var(--green-dark);
+}
+
+.reorder-save-button:disabled {
+    opacity: 0.6;
+
+    cursor: not-allowed;
+}
+
+
+/* =========================================
+   REORDER RESPONSIVE
+========================================= */
+
+@media (max-width: 900px) {
+
+    .reorder-personnel-button {
+        margin-left: 0;
+    }
+}
+
+
+@media (max-width: 600px) {
+
+    .reorder-modal-overlay {
+        padding: 12px;
+    }
+
+    .reorder-modal-card {
+        max-height: 90vh;
+    }
+
+    .reorder-modal-actions {
+        flex-direction: column-reverse;
+    }
+
+    .reorder-cancel-button,
+    .reorder-save-button {
+        width: 100%;
+    }
+}
+

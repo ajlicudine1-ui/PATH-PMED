@@ -972,3 +972,350 @@ button {
         margin-left: auto !important;
     }
 }
+
+/* =========================================
+   P.A.T.H - GLOBAL GREEN THEME OVERRIDES
+   Professional DA-style green treatment
+========================================= */
+
+:root {
+    --green-darkest: #0b3d24;
+    --green-dark: #14532d;
+    --green: #1f7a45;
+    --green-medium: #2f8a4b;
+    --green-soft: #eef7f1;
+    --green-pale: #f7fbf8;
+
+    --gold: #d6a928;
+    --gold-soft: #fff7d6;
+
+    --text-dark: #24352c;
+    --text-muted: #66756d;
+
+    --border: #d6e6dc;
+    --background: #f3f8f5;
+    --white: #ffffff;
+}
+
+
+/* =========================================
+   BODY / MAIN APP
+========================================= */
+
+body {
+    color: var(--text-dark);
+    background: var(--background);
+}
+
+.main-content {
+    background:
+        linear-gradient(
+            180deg,
+            #f7fbf8 0%,
+            #f3f8f5 100%
+        );
+}
+
+
+/* =========================================
+   SIDEBAR
+========================================= */
+
+.sidebar {
+    background:
+        linear-gradient(
+            180deg,
+            #ffffff 0%,
+            #f7fbf8 100%
+        );
+
+    border-right:
+        1px solid var(--border);
+
+    box-shadow:
+        4px 0 18px rgba(20, 83, 45, 0.04);
+}
+
+.sidebar-brand {
+    border-bottom:
+        1px solid var(--border);
+}
+
+.brand-text h1 {
+    color: var(--green-dark);
+}
+
+.brand-text p {
+    color: var(--text-muted);
+}
+
+
+/* =========================================
+   SIDEBAR NAVIGATION
+========================================= */
+
+.nav-item {
+    border:
+        1px solid transparent;
+}
+
+.nav-item:hover {
+    background: var(--green-pale);
+
+    border-color:
+        #e2eee6;
+}
+
+.nav-item.active {
+    background:
+        linear-gradient(
+            90deg,
+            #e8f5ec 0%,
+            #f2f9f4 100%
+        );
+
+    border-color:
+        #d4e7da;
+
+    box-shadow:
+        inset 4px 0 0 var(--green);
+}
+
+.nav-icon {
+    background: #f1f7f3;
+}
+
+.nav-item:hover .nav-icon {
+    background: #e5f2e9;
+}
+
+.nav-item.active .nav-icon {
+    background: #d9ecdf;
+}
+
+.nav-text strong {
+    color: #30453a;
+}
+
+.nav-item.active .nav-text strong {
+    color: var(--green-dark);
+}
+
+.nav-text span {
+    color: #74877c;
+}
+
+
+/* =========================================
+   TOP BAR
+========================================= */
+
+.topbar,
+.viewer-topbar {
+    background:
+        linear-gradient(
+            90deg,
+            #ffffff 0%,
+            #f8fcf9 100%
+        );
+
+    border-bottom:
+        1px solid var(--border);
+
+    box-shadow:
+        0 3px 14px rgba(20, 83, 45, 0.04);
+}
+
+.topbar h2,
+.viewer-topbar-brand h2 {
+    color: var(--green-dark);
+}
+
+.topbar p,
+.viewer-topbar-brand p {
+    color: var(--text-muted);
+}
+
+
+/* =========================================
+   LOGOUT BUTTON
+========================================= */
+
+.logout-button {
+    border:
+        1px solid #b9d2c1;
+
+    background: #ffffff;
+
+    color: var(--green-dark);
+
+    box-shadow:
+        0 2px 8px rgba(20, 83, 45, 0.04);
+}
+
+.logout-button:hover {
+    background: var(--green-soft);
+
+    border-color: var(--green);
+
+    color: var(--green-dark);
+
+    box-shadow:
+        0 5px 14px rgba(20, 83, 45, 0.10);
+}
+
+
+/* =========================================
+   GLOBAL FORM CONTROLS
+========================================= */
+
+input,
+textarea,
+select {
+    border-color: #cbded1;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--green);
+
+    outline: none;
+
+    box-shadow:
+        0 0 0 3px rgba(31, 122, 69, 0.10);
+}
+
+
+/* =========================================
+   GENERAL BUTTON GREEN TREATMENT
+========================================= */
+
+button {
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+/* =========================================
+   COMMON CARDS
+========================================= */
+
+.content-card,
+.team-card,
+.calendar-card,
+.stat-card {
+    border-color: var(--border);
+
+    box-shadow:
+        0 5px 18px rgba(20, 83, 45, 0.06);
+}
+
+
+/* =========================================
+   COMMON TABLES
+========================================= */
+
+table {
+    border-color: var(--border);
+}
+
+table thead {
+    background: var(--green-dark);
+}
+
+table thead th {
+    color: #ffffff;
+
+    border-color:
+        rgba(255, 255, 255, 0.12);
+
+    font-weight: 600;
+}
+
+table tbody td {
+    border-color: var(--border);
+}
+
+table tbody tr:hover td {
+    background: var(--green-pale);
+}
+
+
+/* =========================================
+   RESPONSIBLE PERSON CELLS
+========================================= */
+
+.grouped-person-cell,
+.viewer-grouped-person-cell,
+.dashboard-grouped-person-cell,
+.viewer-dashboard-grouped-person-cell {
+    background:
+        linear-gradient(
+            90deg,
+            #edf7f0 0%,
+            #f8fcf9 100%
+        ) !important;
+
+    color: var(--green-dark) !important;
+
+    font-weight: 700;
+
+    border-left:
+        4px solid var(--green) !important;
+
+    border-right:
+        1px solid var(--border) !important;
+}
+
+
+/* =========================================
+   COMMON DROPDOWN MENUS
+========================================= */
+
+.actions-menu {
+    border-color: var(--border);
+
+    box-shadow:
+        0 12px 30px rgba(20, 83, 45, 0.12);
+}
+
+.actions-menu-item:hover {
+    background: var(--green-soft);
+
+    color: var(--green-dark);
+}
+
+
+/* =========================================
+   SCROLLBAR
+========================================= */
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: #b9d0c0;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: #92b29d;
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 700px) {
+
+    .sidebar {
+        border-bottom:
+            1px solid var(--border);
+
+        box-shadow:
+            0 4px 14px rgba(20, 83, 45, 0.04);
+    }
+}
+

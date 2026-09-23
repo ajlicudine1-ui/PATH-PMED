@@ -1,4 +1,4 @@
-// ============================================
+    // ============================================
 // PATH - PMED Assignment and Team Hub
 // TEAM PAGE SCRIPT
 // ============================================
@@ -170,11 +170,15 @@ const functionsActivitiesInput =
 
 let assignments = [];
 
+let assignmentsLoaded = false;
+
 let modalMode = "add";
 
 let selectedAssignmentId = null;
 
-let responsiblePersonOrder = new Map();
+let personnelSequenceMap = new Map();
+
+let reorderDraggedItem = null;
 
 
 // ============================================
@@ -590,6 +594,11 @@ async function loadAssignments() {
         return;
     }
 
+    assignmentsLoaded =
+        false;
+
+    updateReorderPersonnelButtonState();
+
     tableBody.innerHTML = `
         <tr>
             <td
@@ -624,11 +633,21 @@ async function loadAssignments() {
                 ? result
                 : [];
 
-        await syncResponsiblePersonOrder();
+        await loadPersonnelSequence();
+
+        assignmentsLoaded =
+            true;
+
+        updateReorderPersonnelButtonState();
 
         applyAssignmentFilters();
 
     } catch (error) {
+
+        assignmentsLoaded =
+            false;
+
+        updateReorderPersonnelButtonState();
 
         console.error(
             "Load assignments error:",
@@ -669,85 +688,25 @@ function normalizeActivityDisplay(value) {
 
 
 // ============================================
-// RESPONSIBLE PERSON STABLE DISPLAY ORDER
-// Existing order is preserved. New people are
-// appended to the bottom only.
+// PERSONNEL DISPLAY SEQUENCE
 // ============================================
 
-function getUniquePersonnelIdsInCurrentOrder(records) {
+async function loadPersonnelSequence() {
 
-    const seen =
-        new Set();
+    personnelSequenceMap =
+        new Map();
 
-    const ids = [];
-
-    records.forEach(record => {
-
-        const personnelId =
-            record.personnel?.id ||
-            record.personnel_id;
-
-        if (
-            personnelId === null ||
-            personnelId === undefined
-        ) {
-            return;
-        }
-
-        const key =
-            String(personnelId);
-
-        if (seen.has(key)) {
-            return;
-        }
-
-        seen.add(key);
-
-        ids.push(personnelId);
-    });
-
-    return ids;
-}
-
-
-async function syncResponsiblePersonOrder() {
-
-    if (
-        !teamCode ||
-        !Array.isArray(assignments)
-    ) {
-        return;
-    }
-
-    const personnelIds =
-        getUniquePersonnelIdsInCurrentOrder(
-            assignments
-        );
-
-    if (!personnelIds.length) {
-
-        responsiblePersonOrder =
-            new Map();
-
+    if (!teamCode) {
         return;
     }
 
     try {
 
-        const headers =
-            await getAdminAuthHeaders();
-
         const response =
             await fetch(
-                "/api/personnel-sequence",
+                `/api/personnel-sequence?team=${encodeURIComponent(teamCode)}`,
                 {
-                    method: "PUT",
-                    headers,
-                    body:
-                        JSON.stringify({
-                            teamCode,
-                            personnelIds
-                        })
+                    cache: "no-store"
                 }
             );
 
@@ -758,46 +717,57 @@ async function syncResponsiblePersonOrder() {
 
             throw new Error(
                 result.error ||
-                "Unable to load responsible person order."
+                "Unable to load personnel sequence."
             );
         }
 
-        responsiblePersonOrder =
-            new Map(
-                (Array.isArray(result.order)
-                    ? result.order
-                    : []
-                ).map(item => [
-                    String(item.personnel_id),
-                    Number(item.display_order)
-                ])
+        const rows =
+            Array.isArray(result)
+                ? result
+                : [];
+
+        rows.forEach(row => {
+
+            personnelSequenceMap.set(
+                String(row.personnel_id),
+                Number(row.display_order)
             );
+        });
 
     } catch (error) {
 
         console.error(
-            "Responsible person order error:",
+            "Personnel sequence error:",
             error
         );
-
-        // Keep the current display order if order sync fails.
-        responsiblePersonOrder =
-            new Map();
     }
 }
 
 
-function sortAssignmentsByResponsiblePersonOrder(
-    records
-) {
+function getPersonnelSequence(record) {
 
-    if (!responsiblePersonOrder.size) {
+    const personnelId =
+        record?.personnel?.id ||
+        record?.personnel_id;
 
-        // Important:
-        // Do not rearrange existing data if there
-        // is no saved order yet.
-        return [...records];
+    if (
+        personnelId !== null &&
+        personnelId !== undefined &&
+        personnelSequenceMap.has(
+            String(personnelId)
+        )
+    ) {
+
+        return personnelSequenceMap.get(
+            String(personnelId)
+        );
     }
+
+    return Number.MAX_SAFE_INTEGER;
+}
+
+
+function sortAssignmentsByPersonnelSequence(records) {
 
     const originalPersonPosition =
         new Map();
@@ -805,19 +775,21 @@ function sortAssignmentsByResponsiblePersonOrder(
     records.forEach((record, index) => {
 
         const personnelId =
-            record.personnel?.id ||
-            record.personnel_id;
-
-        const key =
-            String(personnelId ?? "");
+            String(
+                record?.personnel?.id ||
+                record?.personnel_id ||
+                ""
+            );
 
         if (
-            key &&
-            !originalPersonPosition.has(key)
+            personnelId &&
+            !originalPersonPosition.has(
+                personnelId
+            )
         ) {
 
             originalPersonPosition.set(
-                key,
+                personnelId,
                 index
             );
         }
@@ -826,34 +798,29 @@ function sortAssignmentsByResponsiblePersonOrder(
     return [...records].sort(
         (a, b) => {
 
+            const aOrder =
+                getPersonnelSequence(a);
+
+            const bOrder =
+                getPersonnelSequence(b);
+
+            if (aOrder !== bOrder) {
+                return aOrder - bOrder;
+            }
+
             const aId =
                 String(
-                    a.personnel?.id ||
-                    a.personnel_id ||
+                    a?.personnel?.id ||
+                    a?.personnel_id ||
                     ""
                 );
 
             const bId =
                 String(
-                    b.personnel?.id ||
-                    b.personnel_id ||
+                    b?.personnel?.id ||
+                    b?.personnel_id ||
                     ""
                 );
-
-            const aOrder =
-                responsiblePersonOrder.has(aId)
-                    ? responsiblePersonOrder.get(aId)
-                    : Number.MAX_SAFE_INTEGER;
-
-            const bOrder =
-                responsiblePersonOrder.has(bId)
-                    ? responsiblePersonOrder.get(bId)
-                    : Number.MAX_SAFE_INTEGER;
-
-            if (aOrder !== bOrder) {
-
-                return aOrder - bOrder;
-            }
 
             return (
                 (originalPersonPosition.get(aId) ?? 0) -
@@ -861,6 +828,614 @@ function sortAssignmentsByResponsiblePersonOrder(
             );
         }
     );
+}
+
+
+// ============================================
+// REORDER PERSONNEL MODAL
+// ADMIN ONLY
+// ============================================
+
+function ensureReorderPersonnelUI() {
+
+    if (
+        !addAssignmentBtn ||
+        document.getElementById(
+            "reorderPersonnelBtn"
+        )
+    ) {
+        return;
+    }
+
+
+    const reorderButton =
+        document.createElement(
+            "button"
+        );
+
+    reorderButton.type =
+        "button";
+
+    reorderButton.id =
+        "reorderPersonnelBtn";
+
+    reorderButton.className =
+        "reorder-personnel-button";
+
+    reorderButton.textContent =
+        "Reorder Personnel";
+
+    reorderButton.disabled =
+        true;
+
+    reorderButton.title =
+        "Loading personnel...";
+
+
+    addAssignmentBtn.parentElement
+        ?.insertBefore(
+            reorderButton,
+            addAssignmentBtn
+        );
+
+
+    const overlay =
+        document.createElement(
+            "div"
+        );
+
+    overlay.className =
+        "reorder-modal-overlay";
+
+    overlay.id =
+        "reorderPersonnelModal";
+
+    overlay.innerHTML = `
+        <section
+            class="reorder-modal-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="reorderPersonnelTitle"
+        >
+
+            <div class="reorder-modal-header">
+
+                <div>
+                    <h2 id="reorderPersonnelTitle">
+                        Reorder Personnel
+                    </h2>
+
+                    <p>
+                        Drag responsible persons into the preferred display order.
+                    </p>
+                </div>
+
+                <button
+                    type="button"
+                    class="reorder-modal-close"
+                    id="closeReorderPersonnel"
+                    aria-label="Close"
+                >
+                    &times;
+                </button>
+
+            </div>
+
+            <div
+                class="reorder-personnel-list"
+                id="reorderPersonnelList"
+            ></div>
+
+            <div class="reorder-modal-actions">
+
+                <button
+                    type="button"
+                    class="reorder-cancel-button"
+                    id="cancelReorderPersonnel"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="button"
+                    class="reorder-save-button"
+                    id="saveReorderPersonnel"
+                >
+                    Save Order
+                </button>
+
+            </div>
+
+        </section>
+    `;
+
+
+    document.body.appendChild(
+        overlay
+    );
+
+
+    reorderButton.addEventListener(
+        "click",
+        openReorderPersonnelModal
+    );
+
+
+    document
+        .getElementById(
+            "closeReorderPersonnel"
+        )
+        ?.addEventListener(
+            "click",
+            closeReorderPersonnelModal
+        );
+
+
+    document
+        .getElementById(
+            "cancelReorderPersonnel"
+        )
+        ?.addEventListener(
+            "click",
+            closeReorderPersonnelModal
+        );
+
+
+    document
+        .getElementById(
+            "saveReorderPersonnel"
+        )
+        ?.addEventListener(
+            "click",
+            saveReorderPersonnelOrder
+        );
+
+
+    overlay.addEventListener(
+        "click",
+        event => {
+
+            if (event.target === overlay) {
+
+                closeReorderPersonnelModal();
+            }
+        }
+    );
+
+    updateReorderPersonnelButtonState();
+}
+
+
+function getOrderedPersonnelGroups() {
+
+    const orderedAssignments =
+        sortAssignmentsByPersonnelSequence(
+            assignments
+        );
+
+    return groupAssignmentsByPerson(
+        orderedAssignments
+    )
+        .map(group => {
+
+            const firstRecord =
+                group.records[0] || {};
+
+            return {
+                personnelId:
+                    firstRecord.personnel?.id ||
+                    firstRecord.personnel_id ||
+                    "",
+
+                fullName:
+                    group.fullName
+            };
+        })
+        .filter(
+            group =>
+                group.personnelId
+        );
+}
+
+
+function renderReorderPersonnelList() {
+
+    const list =
+        document.getElementById(
+            "reorderPersonnelList"
+        );
+
+    if (!list) {
+        return;
+    }
+
+
+    const groups =
+        getOrderedPersonnelGroups();
+
+
+    if (!groups.length) {
+
+        list.innerHTML = `
+            <div class="reorder-empty-state">
+                No personnel found in this section.
+            </div>
+        `;
+
+        return;
+    }
+
+
+    list.innerHTML =
+        groups
+            .map(
+                (group, index) => `
+                    <div
+                        class="reorder-personnel-item"
+                        draggable="true"
+                        data-personnel-id="${escapeHTML(
+                            group.personnelId
+                        )}"
+                    >
+
+                        <span
+                            class="reorder-drag-handle"
+                            aria-hidden="true"
+                        >
+                            ⠿
+                        </span>
+
+                        <span class="reorder-position">
+                            ${index + 1}
+                        </span>
+
+                        <span class="reorder-person-name">
+                            ${escapeHTML(
+                                group.fullName
+                            )}
+                        </span>
+
+                    </div>
+                `
+            )
+            .join("");
+
+
+    list
+        .querySelectorAll(
+            ".reorder-personnel-item"
+        )
+        .forEach(item => {
+
+            item.addEventListener(
+                "dragstart",
+                handleReorderDragStart
+            );
+
+            item.addEventListener(
+                "dragend",
+                handleReorderDragEnd
+            );
+
+            item.addEventListener(
+                "dragover",
+                handleReorderDragOver
+            );
+
+            item.addEventListener(
+                "drop",
+                handleReorderDrop
+            );
+        });
+}
+
+
+function updateReorderPersonnelButtonState() {
+
+    const reorderButton =
+        document.getElementById(
+            "reorderPersonnelBtn"
+        );
+
+    if (!reorderButton) {
+        return;
+    }
+
+    reorderButton.disabled =
+        !assignmentsLoaded;
+
+    reorderButton.title =
+        assignmentsLoaded
+            ? "Reorder personnel"
+            : "Loading personnel...";
+}
+
+
+function openReorderPersonnelModal() {
+
+    if (!assignmentsLoaded) {
+        return;
+    }
+
+    ensureReorderPersonnelUI();
+
+    renderReorderPersonnelList();
+
+    const modal =
+        document.getElementById(
+            "reorderPersonnelModal"
+        );
+
+    modal?.classList.add(
+        "show"
+    );
+
+    document.body.style.overflow =
+        "hidden";
+}
+
+
+function closeReorderPersonnelModal() {
+
+    const modal =
+        document.getElementById(
+            "reorderPersonnelModal"
+        );
+
+    modal?.classList.remove(
+        "show"
+    );
+
+    document.body.style.overflow =
+        "";
+
+    reorderDraggedItem =
+        null;
+}
+
+
+function updateReorderPositionNumbers() {
+
+    document
+        .querySelectorAll(
+            "#reorderPersonnelList .reorder-personnel-item"
+        )
+        .forEach(
+            (item, index) => {
+
+                const position =
+                    item.querySelector(
+                        ".reorder-position"
+                    );
+
+                if (position) {
+
+                    position.textContent =
+                        String(index + 1);
+                }
+            }
+        );
+}
+
+
+function handleReorderDragStart(event) {
+
+    reorderDraggedItem =
+        event.currentTarget;
+
+    event.currentTarget
+        .classList
+        .add(
+            "dragging"
+        );
+
+    event.dataTransfer.effectAllowed =
+        "move";
+
+    event.dataTransfer.setData(
+        "text/plain",
+        event.currentTarget
+            .dataset
+            .personnelId || ""
+    );
+}
+
+
+function handleReorderDragEnd(event) {
+
+    event.currentTarget
+        .classList
+        .remove(
+            "dragging"
+        );
+
+    document
+        .querySelectorAll(
+            ".reorder-personnel-item.drag-over"
+        )
+        .forEach(item => {
+
+            item.classList.remove(
+                "drag-over"
+            );
+        });
+
+    reorderDraggedItem =
+        null;
+
+    updateReorderPositionNumbers();
+}
+
+
+function handleReorderDragOver(event) {
+
+    event.preventDefault();
+
+    if (
+        !reorderDraggedItem ||
+        reorderDraggedItem ===
+            event.currentTarget
+    ) {
+        return;
+    }
+
+
+    const currentItem =
+        event.currentTarget;
+
+    const rect =
+        currentItem
+            .getBoundingClientRect();
+
+    const placeAfter =
+        event.clientY >
+        rect.top +
+        rect.height / 2;
+
+
+    const list =
+        currentItem.parentElement;
+
+    if (!list) {
+        return;
+    }
+
+
+    if (placeAfter) {
+
+        list.insertBefore(
+            reorderDraggedItem,
+            currentItem.nextSibling
+        );
+
+    } else {
+
+        list.insertBefore(
+            reorderDraggedItem,
+            currentItem
+        );
+    }
+
+
+    updateReorderPositionNumbers();
+}
+
+
+function handleReorderDrop(event) {
+
+    event.preventDefault();
+
+    updateReorderPositionNumbers();
+}
+
+
+async function saveReorderPersonnelOrder() {
+
+    const saveButton =
+        document.getElementById(
+            "saveReorderPersonnel"
+        );
+
+    const items =
+        Array.from(
+            document.querySelectorAll(
+                "#reorderPersonnelList .reorder-personnel-item"
+            )
+        );
+
+
+    const personnelIds =
+        items
+            .map(
+                item =>
+                    item.dataset.personnelId
+            )
+            .filter(Boolean);
+
+
+    if (!personnelIds.length) {
+
+        closeReorderPersonnelModal();
+
+        return;
+    }
+
+
+    try {
+
+        if (saveButton) {
+
+            saveButton.disabled =
+                true;
+
+            saveButton.textContent =
+                "Saving...";
+        }
+
+
+        const headers =
+            await getAdminAuthHeaders();
+
+
+        const response =
+            await fetch(
+                "/api/personnel-sequence",
+                {
+                    method: "PUT",
+
+                    headers,
+
+                    body:
+                        JSON.stringify({
+                            teamCode,
+                            personnelIds
+                        })
+                }
+            );
+
+
+        const result =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                result.error ||
+                "Unable to save personnel order."
+            );
+        }
+
+
+        await loadPersonnelSequence();
+
+        closeReorderPersonnelModal();
+
+        applyAssignmentFilters();
+
+
+    } catch (error) {
+
+        console.error(
+            "Save personnel order error:",
+            error
+        );
+
+        alert(
+            error.message
+        );
+
+    } finally {
+
+        if (saveButton) {
+
+            saveButton.disabled =
+                false;
+
+            saveButton.textContent =
+                "Save Order";
+        }
+    }
 }
 
 
@@ -938,7 +1513,7 @@ function renderAssignments(records) {
     }
 
     const orderedRecords =
-        sortAssignmentsByResponsiblePersonOrder(
+        sortAssignmentsByPersonnelSequence(
             records
         );
 
@@ -1492,7 +2067,10 @@ document.addEventListener(
         if (
             event.key === "Escape"
         ) {
+
             closeAllActionMenus();
+
+            closeReorderPersonnelModal();
         }
     }
 );
@@ -2037,5 +2615,7 @@ function escapeHTML(value) {
 // ============================================
 // START PAGE
 // ============================================
+
+ensureReorderPersonnelUI();
 
 loadTeam();

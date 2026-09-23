@@ -18,9 +18,11 @@ async function getTeamByCode(teamCode) {
             .trim()
             .toUpperCase();
 
+
     if (!cleanCode) {
         return null;
     }
+
 
     const {
         data,
@@ -37,15 +39,89 @@ async function getTeamByCode(teamCode) {
             )
             .single();
 
+
     if (error) {
         throw error;
     }
+
 
     return data;
 }
 
 
-async function getSavedOrder(teamId) {
+async function getAssignedPersonnelIds(
+    teamId
+) {
+
+    const {
+        data,
+        error
+    } =
+        await supabaseAdmin
+            .from("assignments")
+            .select(
+                "id, personnel_id"
+            )
+            .eq(
+                "team_id",
+                teamId
+            )
+            .order(
+                "id",
+                {
+                    ascending: false
+                }
+            );
+
+
+    if (error) {
+        throw error;
+    }
+
+
+    const seen =
+        new Set();
+
+    const ids =
+        [];
+
+
+    (data || []).forEach(row => {
+
+        if (
+            row.personnel_id === null ||
+            row.personnel_id === undefined
+        ) {
+            return;
+        }
+
+
+        const key =
+            String(
+                row.personnel_id
+            );
+
+
+        if (seen.has(key)) {
+            return;
+        }
+
+
+        seen.add(key);
+
+        ids.push(
+            row.personnel_id
+        );
+    });
+
+
+    return ids;
+}
+
+
+async function getSavedSequence(
+    teamId
+) {
 
     const {
         data,
@@ -69,11 +145,118 @@ async function getSavedOrder(teamId) {
                 }
             );
 
+
     if (error) {
         throw error;
     }
 
+
     return data || [];
+}
+
+
+async function ensureSequence(
+    teamId
+) {
+
+    const assignedPersonnelIds =
+        await getAssignedPersonnelIds(
+            teamId
+        );
+
+
+    if (!assignedPersonnelIds.length) {
+
+        return [];
+    }
+
+
+    const existing =
+        await getSavedSequence(
+            teamId
+        );
+
+
+    const existingIds =
+        new Set(
+            existing.map(
+                row =>
+                    String(
+                        row.personnel_id
+                    )
+            )
+        );
+
+
+    let nextOrder =
+        existing.reduce(
+            (maximum, row) =>
+                Math.max(
+                    maximum,
+                    Number(
+                        row.display_order
+                    ) || 0
+                ),
+            0
+        ) + 1;
+
+
+    const missingRows =
+        [];
+
+
+    assignedPersonnelIds.forEach(
+        personnelId => {
+
+            if (
+                existingIds.has(
+                    String(personnelId)
+                )
+            ) {
+                return;
+            }
+
+
+            missingRows.push({
+                team_id:
+                    teamId,
+
+                personnel_id:
+                    personnelId,
+
+                display_order:
+                    nextOrder
+            });
+
+
+            nextOrder += 1;
+        }
+    );
+
+
+    if (missingRows.length) {
+
+        const {
+            error: insertError
+        } =
+            await supabaseAdmin
+                .from(
+                    "personnel_sequence"
+                )
+                .insert(
+                    missingRows
+                );
+
+
+        if (insertError) {
+            throw insertError;
+        }
+    }
+
+
+    return getSavedSequence(
+        teamId
+    );
 }
 
 
@@ -81,10 +264,14 @@ async function getSavedOrder(teamId) {
 // HANDLER
 // ==========================================
 
-export default async function handler(req, res) {
+export default async function handler(
+    req,
+    res
+) {
 
     // ==========================================
-    // GET ORDER - PUBLIC/VIEWER
+    // GET DISPLAY ORDER
+    // Public/read-only so viewer can follow it.
     // ==========================================
     if (req.method === "GET") {
 
@@ -92,6 +279,7 @@ export default async function handler(req, res) {
 
             const teamCode =
                 req.query.team;
+
 
             if (!teamCode) {
 
@@ -103,10 +291,12 @@ export default async function handler(req, res) {
                     });
             }
 
+
             const team =
                 await getTeamByCode(
                     teamCode
                 );
+
 
             if (!team) {
 
@@ -118,14 +308,17 @@ export default async function handler(req, res) {
                     });
             }
 
-            const order =
-                await getSavedOrder(
+
+            const rows =
+                await ensureSequence(
                     team.id
                 );
 
+
             return res
                 .status(200)
-                .json(order);
+                .json(rows);
+
 
         } catch (error) {
 
@@ -133,6 +326,7 @@ export default async function handler(req, res) {
                 "GET personnel sequence error:",
                 error
             );
+
 
             return res
                 .status(500)
@@ -145,11 +339,8 @@ export default async function handler(req, res) {
 
 
     // ==========================================
-    // SYNC ORDER - ADMIN ONLY
-    //
-    // Existing saved positions NEVER change.
-    // Personnel not yet saved are appended to
-    // the bottom in the order supplied by admin.
+    // SAVE DISPLAY ORDER
+    // ADMIN ONLY
     // ==========================================
     if (req.method === "PUT") {
 
@@ -157,6 +348,7 @@ export default async function handler(req, res) {
 
             const auth =
                 await requireAuth(req);
+
 
             if (auth.error) {
 
@@ -168,15 +360,20 @@ export default async function handler(req, res) {
                     });
             }
 
+
             const {
                 teamCode,
                 personnelIds
             } =
                 req.body || {};
 
+
             if (
                 !teamCode ||
-                !Array.isArray(personnelIds)
+                !Array.isArray(
+                    personnelIds
+                ) ||
+                !personnelIds.length
             ) {
 
                 return res
@@ -187,10 +384,12 @@ export default async function handler(req, res) {
                     });
             }
 
+
             const team =
                 await getTeamByCode(
                     teamCode
                 );
+
 
             if (!team) {
 
@@ -202,75 +401,106 @@ export default async function handler(req, res) {
                     });
             }
 
-            const uniquePersonnelIds = [];
+
+            const assignedIds =
+                await getAssignedPersonnelIds(
+                    team.id
+                );
+
+
+            const assignedSet =
+                new Set(
+                    assignedIds.map(
+                        id =>
+                            String(id)
+                    )
+                );
+
+
+            const uniqueIds =
+                [];
+
 
             const seen =
                 new Set();
 
-            personnelIds.forEach(value => {
 
-                if (
-                    value === null ||
-                    value === undefined
-                ) {
-                    return;
-                }
-
-                const key =
-                    String(value);
-
-                if (seen.has(key)) {
-                    return;
-                }
-
-                seen.add(key);
-
-                uniquePersonnelIds.push(
-                    value
-                );
-            });
-
-            const existingOrder =
-                await getSavedOrder(
-                    team.id
-                );
-
-            const existingPersonnelIds =
-                new Set(
-                    existingOrder.map(
-                        item =>
-                            String(
-                                item.personnel_id
-                            )
-                    )
-                );
-
-            let nextOrder =
-                existingOrder.reduce(
-                    (highest, item) =>
-                        Math.max(
-                            highest,
-                            Number(
-                                item.display_order
-                            ) || 0
-                        ),
-                    0
-                ) + 1;
-
-            const rowsToInsert = [];
-
-            uniquePersonnelIds.forEach(
+            personnelIds.forEach(
                 personnelId => {
 
+                    const key =
+                        String(
+                            personnelId
+                        );
+
+
                     if (
-                        existingPersonnelIds.has(
-                            String(personnelId)
-                        )
+                        seen.has(key) ||
+                        !assignedSet.has(key)
                     ) {
                         return;
                     }
 
-                    rowsToInsert.push({
+
+                    seen.add(key);
+
+                    uniqueIds.push(
+                        personnelId
+                    );
+                }
+            );
+
+
+            // Keep any newly-created personnel that were
+            // not present in the modal at the bottom.
+            assignedIds.forEach(
+                personnelId => {
+
+                    const key =
+                        String(
+                            personnelId
+                        );
+
+
+                    if (!seen.has(key)) {
+
+                        seen.add(key);
+
+                        uniqueIds.push(
+                            personnelId
+                        );
+                    }
+                }
+            );
+
+
+            // Clear only this section's saved sequence.
+            const {
+                error: deleteError
+            } =
+                await supabaseAdmin
+                    .from(
+                        "personnel_sequence"
+                    )
+                    .delete()
+                    .eq(
+                        "team_id",
+                        team.id
+                    );
+
+
+            if (deleteError) {
+                throw deleteError;
+            }
+
+
+            const rows =
+                uniqueIds.map(
+                    (
+                        personnelId,
+                        index
+                    ) => ({
+
                         team_id:
                             team.id,
 
@@ -278,14 +508,12 @@ export default async function handler(req, res) {
                             personnelId,
 
                         display_order:
-                            nextOrder
-                    });
+                            index + 1
+                    })
+                );
 
-                    nextOrder += 1;
-                }
-            );
 
-            if (rowsToInsert.length) {
+            if (rows.length) {
 
                 const {
                     error: insertError
@@ -295,30 +523,32 @@ export default async function handler(req, res) {
                             "personnel_sequence"
                         )
                         .insert(
-                            rowsToInsert
+                            rows
                         );
+
 
                 if (insertError) {
                     throw insertError;
                 }
             }
 
+
             const finalOrder =
-                await getSavedOrder(
+                await getSavedSequence(
                     team.id
                 );
+
 
             return res
                 .status(200)
                 .json({
                     message:
-                        rowsToInsert.length
-                            ? "New responsible persons appended to the bottom."
-                            : "Responsible person order unchanged.",
+                        "Personnel order saved successfully.",
 
                     order:
                         finalOrder
                 });
+
 
         } catch (error) {
 
@@ -326,6 +556,7 @@ export default async function handler(req, res) {
                 "PUT personnel sequence error:",
                 error
             );
+
 
             return res
                 .status(500)

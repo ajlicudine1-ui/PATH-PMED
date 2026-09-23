@@ -28,7 +28,7 @@ const viewerSearchInput =
 
 let viewerAssignments = [];
 
-let viewerResponsiblePersonOrder = new Map();
+let viewerPersonnelSequenceMap = new Map();
 
 
 // ============================================
@@ -284,7 +284,7 @@ async function loadViewerTeam() {
 
         updateViewerTeamHeading();
 
-        await loadViewerResponsiblePersonOrder();
+        await loadViewerPersonnelSequence();
 
         renderViewerTeamAssignments(
             viewerAssignments
@@ -468,14 +468,13 @@ function formatViewerActivityDisplay(value) {
 
 
 // ============================================
-// RESPONSIBLE PERSON STABLE DISPLAY ORDER
-// Viewer is read-only and follows the order
-// established by the admin.
+// PERSONNEL DISPLAY SEQUENCE
+// VIEWER IS READ-ONLY
 // ============================================
 
-async function loadViewerResponsiblePersonOrder() {
+async function loadViewerPersonnelSequence() {
 
-    viewerResponsiblePersonOrder =
+    viewerPersonnelSequenceMap =
         new Map();
 
     if (!viewerSelectedTeam) {
@@ -501,44 +500,36 @@ async function loadViewerResponsiblePersonOrder() {
 
             throw new Error(
                 result.error ||
-                "Unable to load responsible person order."
+                "Unable to load personnel sequence."
             );
         }
 
-        viewerResponsiblePersonOrder =
-            new Map(
-                (Array.isArray(result)
-                    ? result
-                    : []
-                ).map(item => [
-                    String(item.personnel_id),
-                    Number(item.display_order)
-                ])
+        const rows =
+            Array.isArray(result)
+                ? result
+                : [];
+
+        rows.forEach(row => {
+
+            viewerPersonnelSequenceMap.set(
+                String(row.personnel_id),
+                Number(row.display_order)
             );
+        });
 
     } catch (error) {
 
         console.error(
-            "Viewer responsible person order error:",
+            "Viewer personnel sequence error:",
             error
         );
-
-        viewerResponsiblePersonOrder =
-            new Map();
     }
 }
 
 
-function sortViewerAssignmentsByResponsiblePersonOrder(
+function sortViewerAssignmentsByPersonnelSequence(
     records
 ) {
-
-    if (!viewerResponsiblePersonOrder.size) {
-
-        // No saved order yet:
-        // preserve the existing arrangement exactly.
-        return [...records];
-    }
 
     const originalPersonPosition =
         new Map();
@@ -546,55 +537,61 @@ function sortViewerAssignmentsByResponsiblePersonOrder(
     records.forEach((record, index) => {
 
         const personnelId =
-            record.personnel?.id ||
-            record.personnel_id;
-
-        const key =
-            String(personnelId ?? "");
+            String(
+                record?.personnel?.id ||
+                record?.personnel_id ||
+                ""
+            );
 
         if (
-            key &&
-            !originalPersonPosition.has(key)
+            personnelId &&
+            !originalPersonPosition.has(
+                personnelId
+            )
         ) {
 
             originalPersonPosition.set(
-                key,
+                personnelId,
                 index
             );
         }
     });
+
 
     return [...records].sort(
         (a, b) => {
 
             const aId =
                 String(
-                    a.personnel?.id ||
-                    a.personnel_id ||
+                    a?.personnel?.id ||
+                    a?.personnel_id ||
                     ""
                 );
 
             const bId =
                 String(
-                    b.personnel?.id ||
-                    b.personnel_id ||
+                    b?.personnel?.id ||
+                    b?.personnel_id ||
                     ""
                 );
 
+
             const aOrder =
-                viewerResponsiblePersonOrder.has(aId)
-                    ? viewerResponsiblePersonOrder.get(aId)
+                viewerPersonnelSequenceMap.has(aId)
+                    ? viewerPersonnelSequenceMap.get(aId)
                     : Number.MAX_SAFE_INTEGER;
 
             const bOrder =
-                viewerResponsiblePersonOrder.has(bId)
-                    ? viewerResponsiblePersonOrder.get(bId)
+                viewerPersonnelSequenceMap.has(bId)
+                    ? viewerPersonnelSequenceMap.get(bId)
                     : Number.MAX_SAFE_INTEGER;
+
 
             if (aOrder !== bOrder) {
 
                 return aOrder - bOrder;
             }
+
 
             return (
                 (originalPersonPosition.get(aId) ?? 0) -
@@ -693,7 +690,7 @@ function renderViewerTeamAssignments(records) {
 
 
     const orderedRecords =
-        sortViewerAssignmentsByResponsiblePersonOrder(
+        sortViewerAssignmentsByPersonnelSequence(
             records
         );
 
