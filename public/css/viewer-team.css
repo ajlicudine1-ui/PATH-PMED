@@ -968,4 +968,69 @@ body {
         var(--path-green-900);
 }
 
+/* =========================================
+   VIEWER TEAM LOADING STATE
+   Prevent temporary wrong personnel order
+========================================= */
 
+.viewer-team-loading-row td,
+.viewer-team-loading-cell {
+    height: 170px;
+
+    padding: 0 !important;
+
+    background: #ffffff !important;
+
+    border-bottom: 0 !important;
+}
+
+
+.viewer-team-loading {
+    min-height: 170px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 11px;
+
+    color: #52685b;
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+
+.viewer-team-loading-spinner {
+    width: 19px;
+    height: 19px;
+
+    flex:
+        0
+        0
+        19px;
+
+    border:
+        2px solid #d8eadf;
+
+    border-top-color:
+        #1f7a45;
+
+    border-radius: 50%;
+
+    animation:
+        pathViewerTeamSpin
+        0.75s
+        linear
+        infinite;
+}
+
+
+@keyframes pathViewerTeamSpin {
+
+    to {
+        transform:
+            rotate(360deg);
+    }
+}

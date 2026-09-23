@@ -106,7 +106,7 @@ a {
 ========================================= */
 
 .sidebar-brand {
-    min-height: 105px;
+    min-height: 120px;
 
     display: flex;
     align-items: center;

@@ -148,10 +148,10 @@ function showCachedViewerTeamInformation() {
 // SHOW CACHED ASSIGNMENTS
 // ============================================
 
-function showCachedViewerAssignments() {
+function getCachedViewerAssignments() {
 
     if (!viewerSelectedTeam) {
-        return false;
+        return [];
     }
 
 
@@ -166,7 +166,7 @@ function showCachedViewerAssignments() {
 
 
         if (!cached) {
-            return false;
+            return [];
         }
 
 
@@ -174,19 +174,9 @@ function showCachedViewerAssignments() {
             JSON.parse(cached);
 
 
-        if (!Array.isArray(records)) {
-            return false;
-        }
-
-
-        viewerAssignments =
-            records;
-
-
-        applyViewerTeamFilters();
-
-
-        return true;
+        return Array.isArray(records)
+            ? records
+            : [];
 
 
     } catch (error) {
@@ -197,8 +187,45 @@ function showCachedViewerAssignments() {
         );
 
 
-        return false;
+        return [];
     }
+}
+
+
+// ============================================
+// LOADING STATE
+// ============================================
+
+function showViewerTeamLoading() {
+
+    if (!viewerAssignmentsTableBody) {
+        return;
+    }
+
+
+    viewerAssignmentsTableBody.innerHTML = `
+        <tr class="viewer-team-loading-row">
+
+            <td
+                colspan="3"
+                class="viewer-team-loading-cell"
+            >
+                <div class="viewer-team-loading">
+
+                    <span
+                        class="viewer-team-loading-spinner"
+                        aria-hidden="true"
+                    ></span>
+
+                    <span>
+                        Loading personnel assignments...
+                    </span>
+
+                </div>
+            </td>
+
+        </tr>
+    `;
 }
 
 
@@ -218,63 +245,74 @@ async function loadViewerTeam() {
     }
 
 
-    const hasCachedAssignments =
-        showCachedViewerAssignments();
+    /*
+       Important:
+       Do not render cached assignments first.
+
+       The previous behavior briefly showed the newly
+       added person in the API/cache order, then moved
+       them after personnel sequence loaded.
+
+       We now keep the table in a loading state until
+       both the assignments and saved display order are
+       ready, then render only once.
+    */
+    showViewerTeamLoading();
 
 
-    if (
-        !hasCachedAssignments &&
-        viewerAssignmentsTableBody
-    ) {
-
-        viewerAssignmentsTableBody.innerHTML = `
-            <tr>
-
-                <td
-                    colspan="3"
-                    class="empty-state"
-                >
-                    Loading assignments...
-                </td>
-
-            </tr>
-        `;
-    }
+    const cachedAssignments =
+        getCachedViewerAssignments();
 
 
     try {
 
-        const response =
-            await fetch(
+        const assignmentsPromise =
+            fetch(
                 `/api/assignments?team=${encodeURIComponent(
                     viewerSelectedTeam
                 )}`,
                 {
                     cache: "no-store"
                 }
-            );
+            )
+                .then(async response => {
+
+                    const data =
+                        await response.json();
 
 
-        const data =
-            await response.json();
+                    if (!response.ok) {
+
+                        throw new Error(
+                            data.error ||
+                            "Unable to load assignments."
+                        );
+                    }
 
 
-        if (!response.ok) {
+                    return Array.isArray(data)
+                        ? data
+                        : [];
+                });
 
-            throw new Error(
-                data.error ||
-                "Unable to load assignments."
-            );
-        }
+
+        /*
+           Fetch assignments and personnel order together.
+           Nothing is rendered until both finish.
+        */
+        const [
+            freshAssignments
+        ] =
+            await Promise.all([
+                assignmentsPromise,
+                loadViewerPersonnelSequence()
+            ]);
 
 
         viewerAssignments =
-            Array.isArray(data)
-                ? data
-                : [];
+            freshAssignments;
 
 
-        // Cache latest assignments
         localStorage.setItem(
             getViewerAssignmentsCacheKey(
                 viewerSelectedTeam
@@ -287,26 +325,14 @@ async function loadViewerTeam() {
 
         updateViewerTeamHeading();
 
+
         /*
-           Render immediately.
-           Personnel ordering is an enhancement and
-           must not block the table from loading.
+           Final render only.
+           sortViewerAssignmentsByPersonnelSequence()
+           is called inside the renderer, so the user
+           never sees the temporary wrong position.
         */
         applyViewerTeamFilters();
-
-
-        loadViewerPersonnelSequence()
-            .then(() => {
-
-                applyViewerTeamFilters();
-            })
-            .catch(error => {
-
-                console.error(
-                    "Viewer sequence refresh error:",
-                    error
-                );
-            });
 
 
     } catch (error) {
@@ -317,14 +343,31 @@ async function loadViewerTeam() {
         );
 
 
-        // If cached data is already visible,
-        // keep it visible.
-        if (!hasCachedAssignments) {
+        /*
+           If fresh loading fails, use the cache only
+           after the ordering request has already had
+           its chance to finish.
+        */
+        if (cachedAssignments.length) {
 
-            showViewerTeamError(
-                error.message
-            );
+            viewerAssignments =
+                cachedAssignments;
+
+
+            await loadViewerPersonnelSequence();
+
+
+            updateViewerTeamHeading();
+
+            applyViewerTeamFilters();
+
+            return;
         }
+
+
+        showViewerTeamError(
+            error.message
+        );
     }
 }
 
