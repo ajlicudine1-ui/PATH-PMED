@@ -170,9 +170,7 @@
     background: #f8faf9;
 }
 
-.calendar-day-today {
-    background: #f3faf5;
-}
+
 
 .calendar-day-number {
     display: flex;
