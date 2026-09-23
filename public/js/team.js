@@ -174,6 +174,8 @@ let modalMode = "add";
 
 let selectedAssignmentId = null;
 
+let responsiblePersonOrder = new Map();
+
 
 // ============================================
 // RESPONSIBLE PERSON NAME FORMAT
@@ -622,6 +624,8 @@ async function loadAssignments() {
                 ? result
                 : [];
 
+        await syncResponsiblePersonOrder();
+
         applyAssignmentFilters();
 
     } catch (error) {
@@ -660,6 +664,203 @@ function normalizeActivityDisplay(value) {
         .map(line => line.trimStart())
         .join("\n")
         .trim();
+}
+
+
+
+// ============================================
+// RESPONSIBLE PERSON STABLE DISPLAY ORDER
+// Existing order is preserved. New people are
+// appended to the bottom only.
+// ============================================
+
+function getUniquePersonnelIdsInCurrentOrder(records) {
+
+    const seen =
+        new Set();
+
+    const ids = [];
+
+    records.forEach(record => {
+
+        const personnelId =
+            record.personnel?.id ||
+            record.personnel_id;
+
+        if (
+            personnelId === null ||
+            personnelId === undefined
+        ) {
+            return;
+        }
+
+        const key =
+            String(personnelId);
+
+        if (seen.has(key)) {
+            return;
+        }
+
+        seen.add(key);
+
+        ids.push(personnelId);
+    });
+
+    return ids;
+}
+
+
+async function syncResponsiblePersonOrder() {
+
+    if (
+        !teamCode ||
+        !Array.isArray(assignments)
+    ) {
+        return;
+    }
+
+    const personnelIds =
+        getUniquePersonnelIdsInCurrentOrder(
+            assignments
+        );
+
+    if (!personnelIds.length) {
+
+        responsiblePersonOrder =
+            new Map();
+
+        return;
+    }
+
+    try {
+
+        const headers =
+            await getAdminAuthHeaders();
+
+        const response =
+            await fetch(
+                "/api/personnel-sequence",
+                {
+                    method: "PUT",
+                    headers,
+                    body:
+                        JSON.stringify({
+                            teamCode,
+                            personnelIds
+                        })
+                }
+            );
+
+        const result =
+            await response.json();
+
+        if (!response.ok) {
+
+            throw new Error(
+                result.error ||
+                "Unable to load responsible person order."
+            );
+        }
+
+        responsiblePersonOrder =
+            new Map(
+                (Array.isArray(result.order)
+                    ? result.order
+                    : []
+                ).map(item => [
+                    String(item.personnel_id),
+                    Number(item.display_order)
+                ])
+            );
+
+    } catch (error) {
+
+        console.error(
+            "Responsible person order error:",
+            error
+        );
+
+        // Keep the current display order if order sync fails.
+        responsiblePersonOrder =
+            new Map();
+    }
+}
+
+
+function sortAssignmentsByResponsiblePersonOrder(
+    records
+) {
+
+    if (!responsiblePersonOrder.size) {
+
+        // Important:
+        // Do not rearrange existing data if there
+        // is no saved order yet.
+        return [...records];
+    }
+
+    const originalPersonPosition =
+        new Map();
+
+    records.forEach((record, index) => {
+
+        const personnelId =
+            record.personnel?.id ||
+            record.personnel_id;
+
+        const key =
+            String(personnelId ?? "");
+
+        if (
+            key &&
+            !originalPersonPosition.has(key)
+        ) {
+
+            originalPersonPosition.set(
+                key,
+                index
+            );
+        }
+    });
+
+    return [...records].sort(
+        (a, b) => {
+
+            const aId =
+                String(
+                    a.personnel?.id ||
+                    a.personnel_id ||
+                    ""
+                );
+
+            const bId =
+                String(
+                    b.personnel?.id ||
+                    b.personnel_id ||
+                    ""
+                );
+
+            const aOrder =
+                responsiblePersonOrder.has(aId)
+                    ? responsiblePersonOrder.get(aId)
+                    : Number.MAX_SAFE_INTEGER;
+
+            const bOrder =
+                responsiblePersonOrder.has(bId)
+                    ? responsiblePersonOrder.get(bId)
+                    : Number.MAX_SAFE_INTEGER;
+
+            if (aOrder !== bOrder) {
+
+                return aOrder - bOrder;
+            }
+
+            return (
+                (originalPersonPosition.get(aId) ?? 0) -
+                (originalPersonPosition.get(bId) ?? 0)
+            );
+        }
+    );
 }
 
 
@@ -736,9 +937,14 @@ function renderAssignments(records) {
         return;
     }
 
+    const orderedRecords =
+        sortAssignmentsByResponsiblePersonOrder(
+            records
+        );
+
     const groupedRecords =
         groupAssignmentsByPerson(
-            records
+            orderedRecords
         );
 
     tableBody.innerHTML =

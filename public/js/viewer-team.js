@@ -28,6 +28,8 @@ const viewerSearchInput =
 
 let viewerAssignments = [];
 
+let viewerResponsiblePersonOrder = new Map();
+
 
 // ============================================
 // GET TEAM FROM URL
@@ -282,6 +284,7 @@ async function loadViewerTeam() {
 
         updateViewerTeamHeading();
 
+        await loadViewerResponsiblePersonOrder();
 
         renderViewerTeamAssignments(
             viewerAssignments
@@ -463,6 +466,145 @@ function formatViewerActivityDisplay(value) {
 }
 
 
+
+// ============================================
+// RESPONSIBLE PERSON STABLE DISPLAY ORDER
+// Viewer is read-only and follows the order
+// established by the admin.
+// ============================================
+
+async function loadViewerResponsiblePersonOrder() {
+
+    viewerResponsiblePersonOrder =
+        new Map();
+
+    if (!viewerSelectedTeam) {
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                `/api/personnel-sequence?team=${encodeURIComponent(
+                    viewerSelectedTeam
+                )}`,
+                {
+                    cache: "no-store"
+                }
+            );
+
+        const result =
+            await response.json();
+
+        if (!response.ok) {
+
+            throw new Error(
+                result.error ||
+                "Unable to load responsible person order."
+            );
+        }
+
+        viewerResponsiblePersonOrder =
+            new Map(
+                (Array.isArray(result)
+                    ? result
+                    : []
+                ).map(item => [
+                    String(item.personnel_id),
+                    Number(item.display_order)
+                ])
+            );
+
+    } catch (error) {
+
+        console.error(
+            "Viewer responsible person order error:",
+            error
+        );
+
+        viewerResponsiblePersonOrder =
+            new Map();
+    }
+}
+
+
+function sortViewerAssignmentsByResponsiblePersonOrder(
+    records
+) {
+
+    if (!viewerResponsiblePersonOrder.size) {
+
+        // No saved order yet:
+        // preserve the existing arrangement exactly.
+        return [...records];
+    }
+
+    const originalPersonPosition =
+        new Map();
+
+    records.forEach((record, index) => {
+
+        const personnelId =
+            record.personnel?.id ||
+            record.personnel_id;
+
+        const key =
+            String(personnelId ?? "");
+
+        if (
+            key &&
+            !originalPersonPosition.has(key)
+        ) {
+
+            originalPersonPosition.set(
+                key,
+                index
+            );
+        }
+    });
+
+    return [...records].sort(
+        (a, b) => {
+
+            const aId =
+                String(
+                    a.personnel?.id ||
+                    a.personnel_id ||
+                    ""
+                );
+
+            const bId =
+                String(
+                    b.personnel?.id ||
+                    b.personnel_id ||
+                    ""
+                );
+
+            const aOrder =
+                viewerResponsiblePersonOrder.has(aId)
+                    ? viewerResponsiblePersonOrder.get(aId)
+                    : Number.MAX_SAFE_INTEGER;
+
+            const bOrder =
+                viewerResponsiblePersonOrder.has(bId)
+                    ? viewerResponsiblePersonOrder.get(bId)
+                    : Number.MAX_SAFE_INTEGER;
+
+            if (aOrder !== bOrder) {
+
+                return aOrder - bOrder;
+            }
+
+            return (
+                (originalPersonPosition.get(aId) ?? 0) -
+                (originalPersonPosition.get(bId) ?? 0)
+            );
+        }
+    );
+}
+
+
 // ============================================
 // RENDER ASSIGNMENTS
 // ============================================
@@ -550,9 +692,14 @@ function renderViewerTeamAssignments(records) {
     }
 
 
+    const orderedRecords =
+        sortViewerAssignmentsByResponsiblePersonOrder(
+            records
+        );
+
     const groupedRecords =
         groupViewerAssignmentsByPerson(
-            records
+            orderedRecords
         );
 
 
