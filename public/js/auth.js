@@ -8,6 +8,7 @@ const PATH_SUPABASE_URL =
 const PATH_SUPABASE_PUBLISHABLE_KEY =
     "sb_publishable_sugs8pHalzzKSKu33TfgmA_5Tx_OM0-";
 
+
 const pathSupabase =
     window.supabase.createClient(
         PATH_SUPABASE_URL,
@@ -22,12 +23,14 @@ const pathSupabase =
     );
 
 
+
 // ============================================
 // ELEMENTS
 // ============================================
 
 const logoutBtn =
     document.getElementById("logoutBtn");
+
 
 
 // ============================================
@@ -62,21 +65,94 @@ async function getAdminSession() {
 }
 
 
+
+// ============================================
+// REFRESH ADMIN SESSION
+// ============================================
+
+async function refreshAdminSession() {
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await pathSupabase
+                .auth
+                .refreshSession();
+
+
+        if (
+            error ||
+            !data?.session
+        ) {
+
+            console.error(
+                "Session refresh error:",
+                error
+            );
+
+            return null;
+        }
+
+
+        return data.session;
+
+    } catch (error) {
+
+        console.error(
+            "Session refresh exception:",
+            error
+        );
+
+        return null;
+    }
+}
+
+
+
+// ============================================
+// REDIRECT TO LOGIN
+// ============================================
+
+async function redirectAdminToLogin() {
+
+    try {
+
+        await pathSupabase
+            .auth
+            .signOut();
+
+    } catch (error) {
+
+        console.error(
+            "Sign out error:",
+            error
+        );
+    }
+
+
+    window.location.replace(
+        "/login.html"
+    );
+}
+
+
+
 // ============================================
 // GET ADMIN ACCESS TOKEN
 // ============================================
 
 async function getAdminAccessToken() {
 
-    const session =
+    let session =
         await getAdminSession();
 
 
     if (!session) {
 
-        window.location.replace(
-            "/login.html"
-        );
+        await redirectAdminToLogin();
 
         throw new Error(
             "Admin session expired. Please sign in again."
@@ -84,8 +160,76 @@ async function getAdminAccessToken() {
     }
 
 
-    return session.access_token;
+    // Supabase expires_at is in Unix seconds.
+    const expiresAt =
+        Number(
+            session.expires_at || 0
+        );
+
+    const now =
+        Math.floor(
+            Date.now() / 1000
+        );
+
+
+    // ========================================
+    // REFRESH IF TOKEN IS CLOSE TO EXPIRING
+    // ========================================
+    //
+    // Refresh when:
+    // - expires_at is unavailable
+    // - token is already expired
+    // - token has 60 seconds or less remaining
+    //
+    // This helps prevent a stale token from
+    // reaching protected API routes.
+    // ========================================
+
+    if (
+        !expiresAt ||
+        expiresAt - now <= 60
+    ) {
+
+        const refreshedSession =
+            await refreshAdminSession();
+
+
+        if (!refreshedSession) {
+
+            await redirectAdminToLogin();
+
+            throw new Error(
+                "Admin session expired. Please sign in again."
+            );
+        }
+
+
+        session =
+            refreshedSession;
+    }
+
+
+    // ========================================
+    // FINAL TOKEN CHECK
+    // ========================================
+
+    const accessToken =
+        session?.access_token;
+
+
+    if (!accessToken) {
+
+        await redirectAdminToLogin();
+
+        throw new Error(
+            "Admin session expired. Please sign in again."
+        );
+    }
+
+
+    return accessToken;
 }
+
 
 
 // ============================================
@@ -101,8 +245,10 @@ async function getAdminAuthHeaders(
 
 
     const headers = {
+
         Authorization:
             `Bearer ${accessToken}`
+
     };
 
 
@@ -117,6 +263,7 @@ async function getAdminAuthHeaders(
 }
 
 
+
 // ============================================
 // CHECK ADMIN SESSION
 // ============================================
@@ -125,7 +272,7 @@ async function checkAdminSession() {
 
     try {
 
-        const session =
+        let session =
             await getAdminSession();
 
 
@@ -139,13 +286,49 @@ async function checkAdminSession() {
         }
 
 
+        // ====================================
+        // CHECK IF SESSION NEEDS REFRESH
+        // ====================================
+
+        const expiresAt =
+            Number(
+                session.expires_at || 0
+            );
+
+        const now =
+            Math.floor(
+                Date.now() / 1000
+            );
+
+
+        if (
+            !expiresAt ||
+            expiresAt - now <= 60
+        ) {
+
+            const refreshedSession =
+                await refreshAdminSession();
+
+
+            if (!refreshedSession) {
+
+                await redirectAdminToLogin();
+
+                return false;
+            }
+
+
+            session =
+                refreshedSession;
+        }
+
+
         document.body.classList.add(
             "auth-ready"
         );
 
 
         return true;
-
 
     } catch (error) {
 
@@ -155,14 +338,13 @@ async function checkAdminSession() {
         );
 
 
-        window.location.replace(
-            "/login.html"
-        );
+        await redirectAdminToLogin();
 
 
         return false;
     }
 }
+
 
 
 // ============================================
@@ -192,6 +374,7 @@ async function logoutAdmin() {
 
 
         if (error) {
+
             throw error;
         }
 
@@ -226,12 +409,18 @@ async function logoutAdmin() {
 }
 
 
+
 // ============================================
 // AUTH STATE CHANGES
 // ============================================
 
 pathSupabase.auth.onAuthStateChange(
+
     (event, session) => {
+
+        // Supabase may emit TOKEN_REFRESHED during
+        // normal use. That is expected and should
+        // not redirect the admin.
 
         if (
             event === "SIGNED_OUT" ||
@@ -251,6 +440,7 @@ pathSupabase.auth.onAuthStateChange(
 );
 
 
+
 // ============================================
 // LOGOUT BUTTON
 // ============================================
@@ -259,6 +449,7 @@ logoutBtn?.addEventListener(
     "click",
     logoutAdmin
 );
+
 
 
 // ============================================
