@@ -1391,4 +1391,83 @@ td {
         var(--path-green-900);
 }
 
+/* =========================================
+   SECTION STATISTICS
+   Compact 78px cards used on admin team pages
+========================================= */
+
+.team-stats {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 14px;
+    margin: 0 0 22px;
+}
+
+.team-stat-card {
+    height: 78px;
+    min-width: 0;
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+
+    padding: 14px 16px;
+
+    background: #ffffff;
+    border: 1px solid var(--path-border, #d7e6dc);
+    border-left: 5px solid var(--path-green-700, #1f7a45);
+    border-radius: 12px;
+
+    box-shadow:
+        0 6px 18px rgba(20, 83, 45, 0.06);
+}
+
+.team-stat-label {
+    min-width: 0;
+
+    color: #5c6b63;
+
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.15;
+}
+
+.team-stat-value {
+    flex-shrink: 0;
+
+    color: var(--path-green-900, #14532d);
+
+    font-size: 34px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.5px;
+}
+
+@media (max-width: 1200px) {
+    .team-stats {
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+    .team-stats {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .team-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .team-stat-card {
+        height: 72px;
+    }
+}
 

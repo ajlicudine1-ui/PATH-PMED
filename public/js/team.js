@@ -40,6 +40,22 @@ const employmentStatusFilter =
     );
 
 
+const teamPermanentCount =
+    document.getElementById("teamPermanentCount");
+
+const teamContractualCount =
+    document.getElementById("teamContractualCount");
+
+const teamJobOrderCount =
+    document.getElementById("teamJobOrderCount");
+
+const teamPersonnelCount =
+    document.getElementById("teamPersonnelCount");
+
+const teamAssignmentCount =
+    document.getElementById("teamAssignmentCount");
+
+
 // ============================================
 // SHOW TEAM INFO IMMEDIATELY FROM CACHE
 // ============================================
@@ -648,6 +664,110 @@ async function loadTeam() {
 
 
 // ============================================
+// SECTION STATISTICS
+// Unique personnel are counted once per section,
+// while Total Assignments counts every assignment row.
+// ============================================
+
+function updateTeamStatistics(records = assignments) {
+
+    const uniquePersonnel =
+        new Map();
+
+    (Array.isArray(records) ? records : [])
+        .forEach(record => {
+
+            const personnel =
+                record?.personnel || {};
+
+            const personnelId =
+                personnel.id ??
+                record?.personnel_id ??
+                "";
+
+            const fullName =
+                String(
+                    personnel.full_name || ""
+                )
+                    .trim()
+                    .toLowerCase()
+                    .replace(/[.,]/g, "")
+                    .replace(/\s+/g, " ");
+
+            const key =
+                personnelId
+                    ? `id:${personnelId}`
+                    : fullName
+                        ? `name:${fullName}`
+                        : "";
+
+            if (!key || uniquePersonnel.has(key)) {
+                return;
+            }
+
+            uniquePersonnel.set(
+                key,
+                String(
+                    personnel.employment_status || ""
+                )
+                    .trim()
+                    .toLowerCase()
+            );
+        });
+
+
+    let permanent = 0;
+    let contractual = 0;
+    let jobOrder = 0;
+
+    uniquePersonnel.forEach(status => {
+
+        if (status === "permanent") {
+            permanent += 1;
+        } else if (status === "contractual") {
+            contractual += 1;
+        } else if (
+            status === "job order" ||
+            status === "job-order" ||
+            status === "joborder"
+        ) {
+            jobOrder += 1;
+        }
+    });
+
+
+    if (teamPermanentCount) {
+        teamPermanentCount.textContent =
+            String(permanent);
+    }
+
+    if (teamContractualCount) {
+        teamContractualCount.textContent =
+            String(contractual);
+    }
+
+    if (teamJobOrderCount) {
+        teamJobOrderCount.textContent =
+            String(jobOrder);
+    }
+
+    if (teamPersonnelCount) {
+        teamPersonnelCount.textContent =
+            String(uniquePersonnel.size);
+    }
+
+    if (teamAssignmentCount) {
+        teamAssignmentCount.textContent =
+            String(
+                Array.isArray(records)
+                    ? records.length
+                    : 0
+            );
+    }
+}
+
+
+// ============================================
 // LOAD ASSIGNMENTS
 // ============================================
 
@@ -695,6 +815,8 @@ async function loadAssignments() {
             Array.isArray(result)
                 ? result
                 : [];
+
+        updateTeamStatistics(assignments);
 
         await loadPersonnelSequence();
 
