@@ -590,13 +590,8 @@
 }
 
 
-/* Activity title takes full width like admin Activity Title */
-
-#viewerActivityModal
-.viewer-activity-detail:first-child {
-    grid-column:
-        1 / -1;
-}
+/* Activity and Section share the first row.
+   Start Date and End Date share the second row. */
 
 
 /* Description takes full width like admin Description */

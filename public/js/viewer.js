@@ -84,9 +84,9 @@ const viewerActivityDate =
         "viewerActivityDate"
     );
 
-const viewerActivityTime =
+const viewerActivityEndDate =
     document.getElementById(
-        "viewerActivityTime"
+        "viewerActivityEndDate"
     );
 
 const viewerActivitySection =
@@ -474,41 +474,6 @@ function formatViewerCalendarDate(date) {
 }
 
 
-function formatViewerActivityTime(value) {
-
-    if (!value) {
-        return "";
-    }
-
-
-    const parts =
-        String(value)
-            .split(":");
-
-
-    if (parts.length < 2) {
-        return value;
-    }
-
-
-    const hour =
-        Number(parts[0]);
-
-    const minute =
-        parts[1];
-
-    const suffix =
-        hour >= 12
-            ? "PM"
-            : "AM";
-
-    const displayHour =
-        hour % 12 || 12;
-
-
-    return `${displayHour}:${minute} ${suffix}`;
-}
-
 
 function getViewerCalendarMonthRange() {
 
@@ -710,20 +675,25 @@ function renderViewerCalendar() {
 
         const dayActivities =
             viewerCalendarActivities.filter(
-                activity =>
-                    activity.activity_date ===
-                    dateString
+                activity => {
+                    const startDate =
+                        activity.activity_date;
+
+                    const endDate =
+                        activity.end_date ||
+                        activity.activity_date;
+
+                    return (
+                        startDate <= dateString &&
+                        endDate >= dateString
+                    );
+                }
             );
 
 
         const activityHTML =
             dayActivities
                 .map(activity => {
-
-                    const time =
-                        formatViewerActivityTime(
-                            activity.start_time
-                        );
 
                     const teamCode =
                         activity.teams?.code ||
@@ -738,12 +708,6 @@ function renderViewerCalendar() {
                                 activity.id
                             )}"
                         >
-                            ${
-                                time
-                                    ? `<span class="calendar-activity-time">${escapeViewerHTML(time)}</span>`
-                                    : ""
-                            }
-
                             <span class="calendar-activity-title">
                                 ${escapeViewerHTML(
                                     activity.title
@@ -870,23 +834,10 @@ function openViewerActivityModal(activity) {
         "-";
 
 
-    const startTime =
-        formatViewerActivityTime(
-            activity.start_time
-        );
-
-    const endTime =
-        formatViewerActivityTime(
-            activity.end_time
-        );
-
-
-    viewerActivityTime.textContent =
-        startTime && endTime
-            ? `${startTime} - ${endTime}`
-            : startTime ||
-              endTime ||
-              "No time specified";
+    viewerActivityEndDate.textContent =
+        activity.end_date ||
+        activity.activity_date ||
+        "-";
 
 
     viewerActivitySection.textContent =
@@ -1082,3 +1033,4 @@ document.addEventListener(
         }
     }
 );
+    

@@ -53,8 +53,7 @@ export default async function handler(req, res) {
                         id,
                         title,
                         activity_date,
-                        start_time,
-                        end_time,
+                        end_date,
                         description,
                         team_id,
                         created_at,
@@ -126,9 +125,8 @@ export default async function handler(req, res) {
             const {
                 title,
                 activityDate,
+                endDate,
                 teamId,
-                startTime,
-                endTime,
                 description
             } = req.body;
 
@@ -137,39 +135,57 @@ export default async function handler(req, res) {
                 String(title || "")
                     .trim();
 
+
             const cleanDate =
                 String(activityDate || "")
                     .trim();
 
 
+            const cleanEndDate =
+                String(endDate || "")
+                    .trim();
+
+
+            // ==========================================
+            // REQUIRED FIELDS
+            // ==========================================
+
             if (
                 !cleanTitle ||
-                !cleanDate
+                !cleanDate ||
+                !cleanEndDate
             ) {
 
                 return res
                     .status(400)
                     .json({
                         error:
-                            "Activity title and date are required."
+                            "Activity title, start date, and end date are required."
                     });
             }
 
+
+            // ==========================================
+            // VALIDATE DATE RANGE
+            // ==========================================
 
             if (
-                startTime &&
-                endTime &&
-                endTime < startTime
+                cleanEndDate <
+                cleanDate
             ) {
 
                 return res
                     .status(400)
                     .json({
                         error:
-                            "End time cannot be earlier than start time."
+                            "End date cannot be earlier than start date."
                     });
             }
 
+
+            // ==========================================
+            // UPDATE ACTIVITY
+            // ==========================================
 
             const {
                 data,
@@ -178,25 +194,19 @@ export default async function handler(req, res) {
                 await supabaseAdmin
                     .from("calendar_activities")
                     .update({
+
                         title:
                             cleanTitle,
 
                         activity_date:
                             cleanDate,
 
+                        end_date:
+                            cleanEndDate,
+
                         team_id:
                             cleanNullableValue(
                                 teamId
-                            ),
-
-                        start_time:
-                            cleanNullableValue(
-                                startTime
-                            ),
-
-                        end_time:
-                            cleanNullableValue(
-                                endTime
                             ),
 
                         description:
@@ -207,6 +217,7 @@ export default async function handler(req, res) {
                         updated_at:
                             new Date()
                                 .toISOString()
+
                     })
                     .eq(
                         "id",
@@ -216,8 +227,7 @@ export default async function handler(req, res) {
                         id,
                         title,
                         activity_date,
-                        start_time,
-                        end_time,
+                        end_date,
                         description,
                         team_id,
                         created_at,
@@ -324,6 +334,10 @@ export default async function handler(req, res) {
         }
     }
 
+
+    // ==========================================
+    // METHOD NOT ALLOWED
+    // ==========================================
 
     return res
         .status(405)

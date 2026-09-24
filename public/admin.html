@@ -465,40 +465,7 @@
 
             <form id="activityForm">
 
-                <div class="form-group">
-
-                    <label for="activityTitle">
-                        Activity Title
-                    </label>
-
-                    <input
-                        type="text"
-                        id="activityTitle"
-                        maxlength="200"
-                        placeholder="Enter activity title"
-                        autocomplete="off"
-                        required
-                    >
-
-                </div>
-
-
                 <div class="calendar-form-grid">
-
-                    <div class="form-group">
-
-                        <label for="activityDate">
-                            Date
-                        </label>
-
-                        <input
-                            type="date"
-                            id="activityDate"
-                            required
-                        >
-
-                    </div>
-
 
                     <div class="form-group">
 
@@ -515,15 +482,19 @@
                     </div>
 
 
-                    <div class="form-group">
+                     <div class="form-group">
 
-                        <label for="activityStartTime">
-                            Start Time
+                        <label for="activityTitle">
+                            Activity Title
                         </label>
 
                         <input
-                            type="time"
-                            id="activityStartTime"
+                            type="text"
+                            id="activityTitle"
+                            maxlength="200"
+                            placeholder="Enter activity title"
+                            autocomplete="off"
+                            required
                         >
 
                     </div>
@@ -531,13 +502,29 @@
 
                     <div class="form-group">
 
-                        <label for="activityEndTime">
-                            End Time
+                        <label for="activityDate">
+                            Start Date
                         </label>
 
                         <input
-                            type="time"
-                            id="activityEndTime"
+                            type="date"
+                            id="activityDate"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="activityEndDate">
+                            End Date
+                        </label>
+
+                        <input
+                            type="date"
+                            id="activityEndDate"
+                            required
                         >
 
                     </div>

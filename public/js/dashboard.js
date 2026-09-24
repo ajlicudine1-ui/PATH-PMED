@@ -153,14 +153,9 @@ const activityTeamInput =
         "activityTeam"
     );
 
-const activityStartTimeInput =
+const activityEndDateInput =
     document.getElementById(
-        "activityStartTime"
-    );
-
-const activityEndTimeInput =
-    document.getElementById(
-        "activityEndTime"
+        "activityEndDate"
     );
 
 const activityDescriptionInput =
@@ -1781,20 +1776,25 @@ function renderCalendar() {
 
         const dayActivities =
             calendarActivities.filter(
-                activity =>
-                    activity.activity_date ===
-                    dateString
+                activity => {
+                    const startDate =
+                        activity.activity_date;
+
+                    const endDate =
+                        activity.end_date ||
+                        activity.activity_date;
+
+                    return (
+                        dateString >= startDate &&
+                        dateString <= endDate
+                    );
+                }
             );
 
 
         const activityHTML =
             dayActivities
                 .map(activity => {
-
-                    const time =
-                        formatActivityTime(
-                            activity.start_time
-                        );
 
                     const teamCode =
                         activity.teams?.code ||
@@ -1812,12 +1812,6 @@ function renderCalendar() {
                                 activity.title
                             )}"
                         >
-                            ${
-                                time
-                                    ? `<span class="calendar-activity-time">${escapeDashboardHTML(time)}</span>`
-                                    : ""
-                            }
-
                             <span class="calendar-activity-title">
                                 ${escapeDashboardHTML(
                                     activity.title
@@ -2062,6 +2056,9 @@ function openActivityModalForAdd(
 
         activityDateInput.value =
             date;
+
+        activityEndDateInput.value =
+            date;
     }
 
 
@@ -2101,19 +2098,10 @@ function openActivityModalForEdit(
     activityTeamInput.value =
         activity.team_id || "";
 
-    activityStartTimeInput.value =
-        activity.start_time
-            ? String(
-                activity.start_time
-            ).slice(0, 5)
-            : "";
-
-    activityEndTimeInput.value =
-        activity.end_time
-            ? String(
-                activity.end_time
-            ).slice(0, 5)
-            : "";
+    activityEndDateInput.value =
+        activity.end_date ||
+        activity.activity_date ||
+        "";
 
     activityDescriptionInput.value =
         activity.description || "";
@@ -2422,13 +2410,9 @@ activityForm?.addEventListener(
             activityTeamInput
                 .value || null;
 
-        const startTime =
-            activityStartTimeInput
-                .value || null;
-
-        const endTime =
-            activityEndTimeInput
-                .value || null;
+        const endDate =
+            activityEndDateInput
+                .value;
 
         const description =
             activityDescriptionInput
@@ -2438,11 +2422,12 @@ activityForm?.addEventListener(
 
         if (
             !title ||
-            !activityDate
+            !activityDate ||
+            !endDate
         ) {
 
             alert(
-                "Activity title and date are required."
+                "Activity title, start date, and end date are required."
             );
 
             return;
@@ -2450,13 +2435,11 @@ activityForm?.addEventListener(
 
 
         if (
-            startTime &&
-            endTime &&
-            endTime < startTime
+            endDate < activityDate
         ) {
 
             alert(
-                "End time cannot be earlier than start time."
+                "End date cannot be earlier than start date."
             );
 
             return;
@@ -2500,9 +2483,8 @@ activityForm?.addEventListener(
                             JSON.stringify({
                                 title,
                                 activityDate,
+                                endDate,
                                 teamId,
-                                startTime,
-                                endTime,
                                 description
                             })
                     }
