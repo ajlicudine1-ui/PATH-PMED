@@ -2,41 +2,18 @@ import {
     supabaseAdmin
 } from "../lib/supabase.js";
 
-
 export default async function handler(req, res) {
-
     if (req.method !== "GET") {
-
-        return res
-            .status(405)
-            .json({
-                error: "Method not allowed"
-            });
+        return res.status(405).json({ error: "Method not allowed" });
     }
 
-
     try {
-
-        // ==========================================
-        // PERSONNEL BY EMPLOYMENT STATUS
-        // Count personnel directly from the personnel
-        // table so staff with zero assignments are
-        // still included in the dashboard totals.
-        // ==========================================
-
-        const {
-            data: personnel,
-            error: personnelError
-        } =
+        const { data: personnel, error: personnelError } =
             await supabaseAdmin
                 .from("personnel")
                 .select("id, employment_status");
 
-
-        if (personnelError) {
-            throw personnelError;
-        }
-
+        if (personnelError) throw personnelError;
 
         const personnelCounts = {
             permanent: 0,
@@ -44,16 +21,10 @@ export default async function handler(req, res) {
             jobOrder: 0
         };
 
-
         (personnel || []).forEach(person => {
-
-            const status =
-                String(
-                    person.employment_status || ""
-                )
-                    .trim()
-                    .toLowerCase();
-
+            const status = String(person.employment_status || "")
+                .trim()
+                .toLowerCase();
 
             if (status === "permanent") {
                 personnelCounts.permanent += 1;
@@ -68,34 +39,15 @@ export default async function handler(req, res) {
             }
         });
 
-
-        // ==========================================
-        // TOTAL TEAMS
-        // ==========================================
-
-        const {
-            count: teamsCount,
-            error: teamsError
-        } =
+        const { count: teamsCount, error: teamsError } =
             await supabaseAdmin
                 .from("teams")
-                .select(
-                    "*",
-                    {
-                        count: "exact",
-                        head: true
-                    }
-                );
+                .select("*", {
+                    count: "exact",
+                    head: true
+                });
 
-
-        if (teamsError) {
-            throw teamsError;
-        }
-
-
-        // ==========================================
-        // TOTAL ASSIGNMENTS
-        // ==========================================
+        if (teamsError) throw teamsError;
 
         const {
             count: assignmentsCount,
@@ -103,23 +55,14 @@ export default async function handler(req, res) {
         } =
             await supabaseAdmin
                 .from("assignments")
-                .select(
-                    "*",
-                    {
-                        count: "exact",
-                        head: true
-                    }
-                );
-
+                .select("*", {
+                    count: "exact",
+                    head: true
+                });
 
         if (assignmentsCountError) {
             throw assignmentsCountError;
         }
-
-
-        // ==========================================
-        // RECENT ASSIGNMENTS
-        // ==========================================
 
         const {
             data: assignments,
@@ -146,58 +89,57 @@ export default async function handler(req, res) {
                         name
                     )
                 `)
-                .order(
-                    "created_at",
-                    {
-                        ascending: false
-                    }
-                )
+                .order("created_at", {
+                    ascending: false
+                })
                 .limit(10);
-
 
         if (assignmentsError) {
             throw assignmentsError;
         }
 
+        return res.status(200).json({
+            permanentPersonnel:
+                personnelCounts.permanent,
 
-        // ==========================================
-        // RESPONSE
-        // ==========================================
+            contractualPersonnel:
+                personnelCounts.contractual,
 
-        return res
-            .status(200)
-            .json({
-                permanentPersonnel:
-                    personnelCounts.permanent,
-                contractualPersonnel:
-                    personnelCounts.contractual,
-                jobOrderPersonnel:
-                    personnelCounts.jobOrder,
-                totalPersonnel:
-                    personnelCounts.permanent +
-                    personnelCounts.contractual +
-                    personnelCounts.jobOrder,
-                totalTeams:
-                    teamsCount || 0,
-                totalAssignments:
-                    assignmentsCount || 0,
-                assignments:
-                    assignments || []
-            });
+            jobOrderPersonnel:
+                personnelCounts.jobOrder,
 
+            totalPermanent:
+                personnelCounts.permanent,
+
+            totalContractual:
+                personnelCounts.contractual,
+
+            totalJobOrder:
+                personnelCounts.jobOrder,
+
+            totalPersonnel:
+                personnelCounts.permanent +
+                personnelCounts.contractual +
+                personnelCounts.jobOrder,
+
+            totalTeams:
+                teamsCount || 0,
+
+            totalAssignments:
+                assignmentsCount || 0,
+
+            assignments:
+                assignments || []
+        });
 
     } catch (error) {
-
         console.error(
             "Dashboard API error:",
             error
         );
 
-
-        return res
-            .status(500)
-            .json({
-                error: error.message
-            });
+        return res.status(500).json({
+            error: error.message
+        });
     }
 }

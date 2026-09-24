@@ -29,7 +29,8 @@ function normalizePersonName(value) {
 // ==========================================
 // VALIDATE AND FORMAT RESPONSIBLE PERSON
 // Format: Given Name(s) + Middle Initial + Last Name
-// Example: Juan D. La Cruz
+// Optional suffix: Jr., Sr., II, III, IV, V
+// Example: Juan D. La Cruz Jr.
 // ==========================================
 
 function titleCasePersonNamePart(value) {
@@ -41,6 +42,29 @@ function titleCasePersonNamePart(value) {
             (match, separator, letter) =>
                 separator + letter.toUpperCase()
         );
+}
+
+
+function normalizePersonSuffix(value) {
+
+    const cleanSuffix =
+        String(value || "")
+            .trim()
+            .replace(/[.,]/g, "")
+            .toUpperCase();
+
+
+    const suffixMap = {
+        JR: "Jr.",
+        SR: "Sr.",
+        II: "II",
+        III: "III",
+        IV: "IV",
+        V: "V"
+    };
+
+
+    return suffixMap[cleanSuffix] || "";
 }
 
 
@@ -56,6 +80,36 @@ function parseResponsiblePersonName(value) {
         cleanValue.split(" ");
 
 
+    if (parts.length < 3) {
+
+        return {
+            valid: false,
+            formatted: cleanValue
+        };
+    }
+
+
+    // ========================================
+    // OPTIONAL SUFFIX / NAME EXTENSION
+    // ========================================
+
+    let suffix = "";
+
+    const possibleSuffix =
+        normalizePersonSuffix(
+            parts[parts.length - 1]
+        );
+
+
+    if (possibleSuffix) {
+
+        suffix = possibleSuffix;
+        parts.pop();
+    }
+
+
+    // Must still contain:
+    // Given Name + Middle Initial + Last Name
     if (parts.length < 3) {
 
         return {
@@ -116,6 +170,8 @@ function parseResponsiblePersonName(value) {
 
 
     const namesAreValid =
+        givenNames.length > 0 &&
+        surnames.length > 0 &&
         givenNames.every(
             part =>
                 validNamePart.test(part)
@@ -142,21 +198,32 @@ function parseResponsiblePersonName(value) {
         ".";
 
 
-    const formatted =
+    const formattedParts =
         [
             ...givenNames.map(
                 titleCasePersonNamePart
             ),
+
             middleInitial,
+
             ...surnames.map(
                 titleCasePersonNamePart
             )
-        ].join(" ");
+        ];
+
+
+    if (suffix) {
+
+        formattedParts.push(
+            suffix
+        );
+    }
 
 
     return {
         valid: true,
-        formatted
+        formatted:
+            formattedParts.join(" ")
     };
 }
 
@@ -329,7 +396,7 @@ export default async function handler(req, res) {
                     .status(400)
                     .json({
                         error:
-                            "Responsible Person must use the format: First Name Middle Initial. Last Name (example: Juan D. La Cruz)."
+                            "Responsible Person must use the format: First Name Middle Initial. Last Name, with an optional suffix (example: Juan D. La Cruz Jr.)."
                     });
             }
 
