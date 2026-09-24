@@ -7,8 +7,14 @@
 // DASHBOARD ELEMENTS
 // ============================================
 
-const totalPersonnelElement =
-    document.getElementById("totalPersonnel");
+const permanentPersonnelElement =
+    document.getElementById("permanentPersonnel");
+
+const contractualPersonnelElement =
+    document.getElementById("contractualPersonnel");
+
+const jobOrderPersonnelElement =
+    document.getElementById("jobOrderPersonnel");
 
 const totalTeamsElement =
     document.getElementById("totalTeams");
@@ -236,10 +242,24 @@ async function loadDashboard() {
         }
 
 
-        if (totalPersonnelElement) {
+        if (permanentPersonnelElement) {
 
-            totalPersonnelElement.textContent =
-                data.totalPersonnel ?? 0;
+            permanentPersonnelElement.textContent =
+                data.permanentPersonnel ?? 0;
+        }
+
+
+        if (contractualPersonnelElement) {
+
+            contractualPersonnelElement.textContent =
+                data.contractualPersonnel ?? 0;
+        }
+
+
+        if (jobOrderPersonnelElement) {
+
+            jobOrderPersonnelElement.textContent =
+                data.jobOrderPersonnel ?? 0;
         }
 
 

@@ -7,9 +7,19 @@
 // ELEMENTS
 // ============================================
 
-const viewerTotalPersonnel =
+const viewerTotalPermanent =
     document.getElementById(
-        "totalPersonnel"
+        "totalPermanent"
+    );
+
+const viewerTotalContractual =
+    document.getElementById(
+        "totalContractual"
+    );
+
+const viewerTotalJobOrder =
+    document.getElementById(
+        "totalJobOrder"
     );
 
 const viewerTotalTeams =
@@ -142,10 +152,24 @@ async function loadViewerDashboard() {
         }
 
 
-        if (viewerTotalPersonnel) {
+        if (viewerTotalPermanent) {
 
-            viewerTotalPersonnel.textContent =
-                data.totalPersonnel ?? 0;
+            viewerTotalPermanent.textContent =
+                data.totalPermanent ?? 0;
+        }
+
+
+        if (viewerTotalContractual) {
+
+            viewerTotalContractual.textContent =
+                data.totalContractual ?? 0;
+        }
+
+
+        if (viewerTotalJobOrder) {
+
+            viewerTotalJobOrder.textContent =
+                data.totalJobOrder ?? 0;
         }
 
 

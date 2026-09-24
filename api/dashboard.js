@@ -10,8 +10,7 @@ export default async function handler(req, res) {
         return res
             .status(405)
             .json({
-                error:
-                    "Method not allowed"
+                error: "Method not allowed"
             });
     }
 
@@ -19,38 +18,55 @@ export default async function handler(req, res) {
     try {
 
         // ==========================================
-        // TOTAL PERSONNEL
-        // Count unique personnel currently linked
-        // to at least one assignment.
+        // PERSONNEL BY EMPLOYMENT STATUS
+        // Count personnel directly from the personnel
+        // table so staff with zero assignments are
+        // still included in the dashboard totals.
         // ==========================================
 
         const {
-            data: assignmentPersonnel,
+            data: personnel,
             error: personnelError
         } =
             await supabaseAdmin
-                .from("assignments")
-                .select("personnel_id");
+                .from("personnel")
+                .select("id, employment_status");
 
 
         if (personnelError) {
-
             throw personnelError;
         }
 
 
-        const uniquePersonnel =
-            new Set(
-                (assignmentPersonnel || [])
-                    .map(item =>
-                        item.personnel_id
-                    )
-                    .filter(Boolean)
-            );
+        const personnelCounts = {
+            permanent: 0,
+            contractual: 0,
+            jobOrder: 0
+        };
 
 
-        const personnelCount =
-            uniquePersonnel.size;
+        (personnel || []).forEach(person => {
+
+            const status =
+                String(
+                    person.employment_status || ""
+                )
+                    .trim()
+                    .toLowerCase();
+
+
+            if (status === "permanent") {
+                personnelCounts.permanent += 1;
+            }
+
+            if (status === "contractual") {
+                personnelCounts.contractual += 1;
+            }
+
+            if (status === "job order") {
+                personnelCounts.jobOrder += 1;
+            }
+        });
 
 
         // ==========================================
@@ -73,7 +89,6 @@ export default async function handler(req, res) {
 
 
         if (teamsError) {
-
             throw teamsError;
         }
 
@@ -98,7 +113,6 @@ export default async function handler(req, res) {
 
 
         if (assignmentsCountError) {
-
             throw assignmentsCountError;
         }
 
@@ -142,7 +156,6 @@ export default async function handler(req, res) {
 
 
         if (assignmentsError) {
-
             throw assignmentsError;
         }
 
@@ -154,16 +167,20 @@ export default async function handler(req, res) {
         return res
             .status(200)
             .json({
-
+                permanentPersonnel:
+                    personnelCounts.permanent,
+                contractualPersonnel:
+                    personnelCounts.contractual,
+                jobOrderPersonnel:
+                    personnelCounts.jobOrder,
                 totalPersonnel:
-                    personnelCount || 0,
-
+                    personnelCounts.permanent +
+                    personnelCounts.contractual +
+                    personnelCounts.jobOrder,
                 totalTeams:
                     teamsCount || 0,
-
                 totalAssignments:
                     assignmentsCount || 0,
-
                 assignments:
                     assignments || []
             });
@@ -180,8 +197,7 @@ export default async function handler(req, res) {
         return res
             .status(500)
             .json({
-                error:
-                    error.message
+                error: error.message
             });
     }
 }
