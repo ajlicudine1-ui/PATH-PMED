@@ -170,6 +170,18 @@ function getAdminCachedTeams() {
 
         return Array.isArray(teams)
             ? teams
+                .slice()
+                .sort(
+                    (a, b) =>
+                        (
+                            Number(a.display_order) ||
+                            999
+                        ) -
+                        (
+                            Number(b.display_order) ||
+                            999
+                        )
+                )
             : [];
 
 
@@ -217,9 +229,23 @@ async function refreshAdminTeams() {
 
 
         const teams =
-            Array.isArray(result)
-                ? result
-                : [];
+            (
+                Array.isArray(result)
+                    ? result
+                    : []
+            )
+                .slice()
+                .sort(
+                    (a, b) =>
+                        (
+                            Number(a.display_order) ||
+                            999
+                        ) -
+                        (
+                            Number(b.display_order) ||
+                            999
+                        )
+                );
 
 
         localStorage.setItem(

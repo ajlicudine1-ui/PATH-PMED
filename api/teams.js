@@ -25,6 +25,13 @@ export default async function handler(req, res) {
                 .from("teams")
                 .select("*")
                 .order(
+                    "display_order",
+                    {
+                        ascending: true,
+                        nullsFirst: false
+                    }
+                )
+                .order(
                     "id",
                     {
                         ascending: true
@@ -39,7 +46,9 @@ export default async function handler(req, res) {
 
             return res
                 .status(200)
-                .json(data);
+                .json(
+                    data || []
+                );
 
 
         } catch (error) {
@@ -101,14 +110,33 @@ export default async function handler(req, res) {
 
 
             const normalizedCode =
-                code
+                String(code)
                     .trim()
                     .toUpperCase();
 
 
             const normalizedName =
-                name.trim();
+                String(name)
+                    .trim();
 
+
+            if (
+                !normalizedCode ||
+                !normalizedName
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        error:
+                            "Section code and section name are required."
+                    });
+            }
+
+
+            // ==========================================
+            // CHECK FOR DUPLICATE SECTION CODE
+            // ==========================================
 
             const {
                 data: existingTeam,
@@ -141,17 +169,66 @@ export default async function handler(req, res) {
             }
 
 
+            // ==========================================
+            // GET NEXT DISPLAY ORDER
+            // ==========================================
+            // New sections will automatically appear
+            // after the existing sections.
+
+            const {
+                data: lastTeam,
+                error: orderError
+            } = await supabaseAdmin
+                .from("teams")
+                .select(
+                    "display_order"
+                )
+                .not(
+                    "display_order",
+                    "is",
+                    null
+                )
+                .order(
+                    "display_order",
+                    {
+                        ascending: false
+                    }
+                )
+                .limit(1)
+                .maybeSingle();
+
+
+            if (orderError) {
+                throw orderError;
+            }
+
+
+            const nextDisplayOrder =
+                Number(
+                    lastTeam?.display_order || 0
+                ) + 1;
+
+
+            // ==========================================
+            // CREATE SECTION
+            // ==========================================
+
             const {
                 data,
                 error
             } = await supabaseAdmin
                 .from("teams")
                 .insert({
+
                     code:
                         normalizedCode,
 
                     name:
-                        normalizedName
+                        normalizedName,
+
+                    display_order:
+                        nextDisplayOrder
+
                 })
                 .select()
                 .single();
@@ -165,11 +242,13 @@ export default async function handler(req, res) {
             return res
                 .status(201)
                 .json({
+
                     message:
                         "Section added successfully.",
 
                     team:
                         data
+
                 });
 
 
@@ -190,6 +269,10 @@ export default async function handler(req, res) {
         }
     }
 
+
+    // ==========================================
+    // METHOD NOT ALLOWED
+    // ==========================================
 
     return res
         .status(405)
