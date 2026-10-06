@@ -3,7 +3,6 @@
 
 <head>
     <meta charset="UTF-8">
-
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
@@ -24,7 +23,7 @@
 
     <link
         rel="stylesheet"
-        href="/css/viewer-team.css"
+        href="/css/viewer-team.css?v=section-stats-1"
     >
 
     <style>
@@ -41,40 +40,29 @@
             height: 38px !important;
             min-height: 38px !important;
             max-height: 38px !important;
-
             box-sizing: border-box !important;
-
             padding-top: 0 !important;
             padding-bottom: 0 !important;
-
             border: 1px solid #d8dee7;
             border-radius: 8px;
-
             background: #ffffff;
-
             color: #344054;
-
             font-family: inherit;
             font-size: 14px;
-
             outline: none;
-
             transition: 0.2s ease;
         }
 
         .viewer-team-toolbar-controls .employment-status-filter {
             min-width: 210px;
-
             padding-left: 12px !important;
             padding-right: 36px !important;
-
             cursor: pointer;
         }
 
         .viewer-team-toolbar-controls #searchInput {
             width: 280px;
             min-width: 280px;
-
             padding-left: 12px !important;
             padding-right: 12px !important;
         }
@@ -82,18 +70,14 @@
         .viewer-team-toolbar-controls .employment-status-filter:focus,
         .viewer-team-toolbar-controls #searchInput:focus {
             border-color: #2f7d3f;
-
             box-shadow:
                 0 0 0 3px rgba(47, 125, 63, 0.08);
         }
 
         @media (max-width: 800px) {
-
             .viewer-team-toolbar-controls {
                 width: 100%;
-
                 justify-content: flex-start;
-
                 align-items: stretch;
             }
 
@@ -107,75 +91,79 @@
 </head>
 
 <body>
-
     <div class="app-layout">
 
         <!-- SIDEBAR -->
         <div id="sidebarContainer"></div>
-
 
         <!-- MAIN CONTENT -->
         <main class="main-content">
 
             <!-- TOP BAR -->
             <header class="topbar viewer-topbar">
-
                 <div class="viewer-topbar-brand">
-
-                    <h2>
-                        P.A.T.H.
-
-                    <p>
-                        PMED Assignment and Team Hub
-                    </p>
-
+                    <h2>P.A.T.H.</h2>
+                    <p>PMED Assignment and Team Hub</p>
                 </div>
-
             </header>
-
 
             <!-- PAGE CONTENT -->
             <section class="page-content">
 
                 <!-- TEAM HEADER -->
                 <div class="viewer-team-header">
-
                     <div>
-
-                        <h1 id="teamCode">
-                        </h1>
-
-                        <p id="teamName">
-                        </p>
-
+                        <h1 id="teamCode"></h1>
+                        <p id="teamName"></p>
                     </div>
-
                 </div>
 
+                <!-- SECTION STATISTICS -->
+                <section
+                    class="viewer-team-stats"
+                    aria-label="Section statistics"
+                >
+                    <div class="viewer-team-stat-card">
+                        <span>Permanent</span>
+                        <strong id="viewerTeamPermanentCount">0</strong>
+                    </div>
+
+                    <div class="viewer-team-stat-card">
+                        <span>Contractual</span>
+                        <strong id="viewerTeamContractualCount">0</strong>
+                    </div>
+
+                    <div class="viewer-team-stat-card">
+                        <span>Job Order</span>
+                        <strong id="viewerTeamJobOrderCount">0</strong>
+                    </div>
+
+                    <div class="viewer-team-stat-card">
+                        <span>Total Personnel</span>
+                        <strong id="viewerTeamPersonnelCount">0</strong>
+                    </div>
+
+                    <div class="viewer-team-stat-card">
+                        <span>Total Assignments</span>
+                        <strong id="viewerTeamAssignmentCount">0</strong>
+                    </div>
+                </section>
 
                 <!-- ASSIGNMENTS CARD -->
                 <div class="viewer-team-card">
 
                     <!-- TOOLBAR -->
                     <div class="viewer-team-toolbar">
-
                         <div class="viewer-team-toolbar-text">
-
-                            <h2>
-                                Personnel Assignments
-                            </h2>
-
+                            <h2>Personnel Assignments</h2>
                             <p>
                                 View personnel functions and activities
                                 assigned to this section.
                             </p>
-
                         </div>
-
 
                         <!-- FILTER + SEARCH -->
                         <div class="viewer-team-toolbar-controls">
-
                             <select
                                 id="employmentStatusFilter"
                                 class="employment-status-filter"
@@ -184,20 +172,16 @@
                                 <option value="">
                                     All Employment Status
                                 </option>
-
                                 <option value="Permanent">
                                     Permanent
                                 </option>
-
                                 <option value="Contractual">
                                     Contractual
                                 </option>
-
                                 <option value="Job Order">
                                     Job Order
                                 </option>
                             </select>
-
 
                             <input
                                 type="search"
@@ -206,72 +190,42 @@
                                 placeholder="Search personnel, designation, or activity..."
                                 autocomplete="off"
                             >
-
                         </div>
-
                     </div>
-
 
                     <!-- TABLE -->
                     <div class="viewer-table-wrapper">
-
                         <table class="viewer-table">
-
                             <thead>
-
                                 <tr>
-
-                                    <th>
-                                        Responsible Person
-                                    </th>
-
-                                    <th>
-                                        Designation
-                                    </th>
-
-                                    <th>
-                                        Functions / Activities
-                                    </th>
-
+                                    <th>Responsible Person</th>
+                                    <th>Designation</th>
+                                    <th>Functions / Activities</th>
                                 </tr>
-
                             </thead>
 
-
                             <tbody id="assignmentsTableBody">
-
                                 <tr>
-
                                     <td
                                         colspan="3"
                                         class="empty-state"
                                     >
                                         Loading assignments...
                                     </td>
-
                                 </tr>
-
                             </tbody>
-
                         </table>
-
                     </div>
-
                 </div>
-
             </section>
-
         </main>
-
     </div>
-
 
     <!-- VIEWER SIDEBAR -->
     <script src="/js/viewer-sidebar.js"></script>
 
     <!-- VIEWER TEAM PAGE -->
-    <script src="/js/viewer-team.js?v=4"></script>
-
+    <script src="/js/viewer-team.js?v=section-stats-1"></script>
 </body>
 
 </html>

@@ -27,6 +27,32 @@ const viewerEmploymentStatusFilter =
     );
 
 
+const viewerTeamPermanentCount =
+    document.getElementById(
+        "viewerTeamPermanentCount"
+    );
+
+const viewerTeamContractualCount =
+    document.getElementById(
+        "viewerTeamContractualCount"
+    );
+
+const viewerTeamJobOrderCount =
+    document.getElementById(
+        "viewerTeamJobOrderCount"
+    );
+
+const viewerTeamPersonnelCount =
+    document.getElementById(
+        "viewerTeamPersonnelCount"
+    );
+
+const viewerTeamAssignmentCount =
+    document.getElementById(
+        "viewerTeamAssignmentCount"
+    );
+
+
 // ============================================
 // STATE
 // ============================================
@@ -230,6 +256,138 @@ function showViewerTeamLoading() {
 
 
 // ============================================
+// SECTION STATISTICS
+// Unique personnel are counted once per section.
+// Total Assignments counts every assignment row.
+// ============================================
+
+function updateViewerTeamStatistics(
+    records = viewerAssignments
+) {
+
+    const uniquePersonnel =
+        new Map();
+
+
+    (Array.isArray(records) ? records : [])
+        .forEach(record => {
+
+            const personnel =
+                record?.personnel || {};
+
+
+            const personnelId =
+                personnel.id ??
+                record?.personnel_id ??
+                "";
+
+
+            const fullName =
+                String(
+                    personnel.full_name || ""
+                )
+                    .trim()
+                    .toLowerCase()
+                    .replace(/[.,]/g, "")
+                    .replace(/\s+/g, " ");
+
+
+            const key =
+                personnelId
+                    ? `id:${personnelId}`
+                    : fullName
+                        ? `name:${fullName}`
+                        : "";
+
+
+            if (
+                !key ||
+                uniquePersonnel.has(key)
+            ) {
+                return;
+            }
+
+
+            uniquePersonnel.set(
+                key,
+                String(
+                    personnel.employment_status || ""
+                )
+                    .trim()
+                    .toLowerCase()
+            );
+        });
+
+
+    let permanent = 0;
+    let contractual = 0;
+    let jobOrder = 0;
+
+
+    uniquePersonnel.forEach(status => {
+
+        if (status === "permanent") {
+
+            permanent += 1;
+
+        } else if (
+            status === "contractual"
+        ) {
+
+            contractual += 1;
+
+        } else if (
+            status === "job order" ||
+            status === "job-order" ||
+            status === "joborder"
+        ) {
+
+            jobOrder += 1;
+        }
+    });
+
+
+    if (viewerTeamPermanentCount) {
+
+        viewerTeamPermanentCount.textContent =
+            String(permanent);
+    }
+
+
+    if (viewerTeamContractualCount) {
+
+        viewerTeamContractualCount.textContent =
+            String(contractual);
+    }
+
+
+    if (viewerTeamJobOrderCount) {
+
+        viewerTeamJobOrderCount.textContent =
+            String(jobOrder);
+    }
+
+
+    if (viewerTeamPersonnelCount) {
+
+        viewerTeamPersonnelCount.textContent =
+            String(uniquePersonnel.size);
+    }
+
+
+    if (viewerTeamAssignmentCount) {
+
+        viewerTeamAssignmentCount.textContent =
+            String(
+                Array.isArray(records)
+                    ? records.length
+                    : 0
+            );
+    }
+}
+
+
+// ============================================
 // LOAD TEAM
 // ============================================
 
@@ -313,6 +471,11 @@ async function loadViewerTeam() {
             freshAssignments;
 
 
+        updateViewerTeamStatistics(
+            viewerAssignments
+        );
+
+
         localStorage.setItem(
             getViewerAssignmentsCacheKey(
                 viewerSelectedTeam
@@ -352,6 +515,11 @@ async function loadViewerTeam() {
 
             viewerAssignments =
                 cachedAssignments;
+
+
+            updateViewerTeamStatistics(
+                viewerAssignments
+            );
 
 
             await loadViewerPersonnelSequence();
@@ -1033,7 +1201,7 @@ function escapeViewerTeamHTML(value) {
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
-}
+}   
 
 
 // ============================================
